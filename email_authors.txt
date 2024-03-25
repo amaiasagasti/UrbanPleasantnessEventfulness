@@ -1,0 +1,36 @@
+I am Amaia Sagasti, a Music and Sound Computing student in Pompeu Fabra University (Barcelona). I am developping my Master 
+thesis on the assessment of urban sound environments, supervised by Frederic Font and Martin Rocamora (both on copy). I am adressing to you due to
+some doubts I have regarding the feature generation of ARAUS dataset.
+
+My project consists on training ML/DL models, for which I am using ARAUS dataset, and then testing its performance on our
+own recordings. However, for this last part, I need to be able to replicate the way you generate the psychoacoustic annotations.
+It is mentioned in your publication "ARAUS: A Large-Scale Dataset and Baseline Models of Affective Responses to Augmented Urban Soundscapes"
+that you used Artemis Suite from Head Acoustics, however, you suggest to use Mosqito, the python library, as an open source approach (which is mine).
+
+Even though it is mentioned in both the paper and the README file of the ARAUS-baseline-code, I am struggling to get some of the features. I am trying to find or 
+create the needed functions that generate the features, testing them on the ARAUS augmented soundscapes, so that I have ground truth values to check if my functions
+are correct. In the following points I am exposing the different difficulties I am encountering:
+
+- Firstly, I in order to correctly load the audios and do the calculations, I need the wav calibration gain from digital signal to Pascals. The file results.csv does not provide
+such information. However, it does provide Leq, so my approach has been to calculate Leq on the signal without calibration, then calculate the difference between the obtained value and the
+Leq provided, and the result (in linear) is the gain I am applying. I have tested these calculated gains on some audios calculating some features, and results seem to be okay (not perfect,
+but I can't tell if the error is found on the calculated gain or on the functions I am using to calculate the features). Were the Leq values included for this purpose? Or what
+other approach is there to get this gain?
+
+- Mosqito library provides functions to calculate loudness, sharpness and tonality according to the standards stablished in ISO12913. I have managed to make them work and result in
+similar values to those of the dataset (again, similar values, not perfect but I don't know if it is because I am using the incorrect, or not very accurate, gain). 
+    ##SHOW GRAPHS THAT SHOW THE PERFORMANCE!!!!
+
+- Regarding the calculation of features, the problem comes with the M####_# features. I have taken the following steps in order to calculate them and I have not obtained
+good results (SHOW GRAPHS, the shape looks similar on mid-high frequencies but values are far from good).
+    1) For each audio of 30 seconds, I load the right channel with calculated wav calibration gain.
+    2) I apply the analysis using hanning window of 8192 points, with an overlap of 4096 samples
+    3) To each temporal window of 8192:
+            1) I apply an FFT and multiply by 1/8192 to normalize the magnitude spectrum
+            2) I obtain an spectrum of 8192 poitns, but I remove the first half, keeping only the positive frequencies part (4096 points)
+            3) Of course, I have two vectors of 4096 points (one containing the magnitude spectrum values and another one containing the frequency axis values)
+            4) I calculate the frequency limits for each third-octave band as indicated
+            5) Using the 4096 frequencies vector, for each band I select which samples are contained in the band, and sum their magnitude values ^2 (power). 
+            6) I end up with a vector of size = number of bands, containing the sum of the powers
+
+
