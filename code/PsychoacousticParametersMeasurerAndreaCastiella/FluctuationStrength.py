@@ -2,7 +2,7 @@
 # Andrea Castiella Aguirrezabala
 # Fluctuation Strength Zwicker y Fastl "Psychoacoustics: Facts and Models"
 
-from loudness_ISO532 import sone2phon
+from .loudness_ISO532 import sone2phon
 import numpy as np
 from scipy import signal
 
@@ -53,9 +53,9 @@ def fmoddetection(specificLoudness, fmin=.2, fmax=64):
     if not NP <= np.maximum(8192, 2*specificLoudness.shape[0]):
         print('Error')
         return None
-    fmin = np.int(np.floor(NP*fmin/FSpec))    # Frecuncia de detección mínima
-    fmax = np.int(np.ceil(NP*fmax/FSpec))    # Frecuencia de detección máxima
-    X = np.sum(np.abs(np.fft.fft(phonBf,np.int(NP), axis=0)), 1)
+    fmin = int(np.floor(NP*fmin/FSpec))    # Frecuncia de detección mínima
+    fmax = int(np.ceil(NP*fmax/FSpec))    # Frecuencia de detección máxima
+    X = np.sum(np.abs(np.fft.fft(phonBf,int(NP), axis=0)), 1)
     if not X.shape[0] <= NP:
         print('Error')
         return None

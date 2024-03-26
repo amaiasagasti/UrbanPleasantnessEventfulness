@@ -31,7 +31,7 @@ def calc_sharpness(loudness, specificLoudness):
     # Aures method
     gz_A = np.ones(n)
     for z in range(0, n):
-        zi = np.float((np.float(z+1))/np.float(10))
+        zi = float((float(z+1))/float(10))
         gz_A[z] = (0.078*np.e**(0.171*(zi))/(zi))*(loudness/np.log(0.05*loudness+1))
     suma = 0
     for i, z in enumerate(np.arange(0.1, n / 10 + 0.1, 0.1)):

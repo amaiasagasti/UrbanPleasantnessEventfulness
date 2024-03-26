@@ -207,7 +207,7 @@ constantes = {
 
 
 # Filtrado en bandas de tercio de octava sonidos estacionarios
-def ThirdOctaveBandFilter(frame, CHUNK=4800):
+def ThirdOctaveBandFilter(frame, CHUNK):
     # Filtrado
     Coeficientes = np.zeros(constantes['N_FILTER_COEFS'])
     ThirdOctaveBands = np.zeros((CHUNK, constantes['N_LEVEL_BANDS']))
@@ -233,7 +233,7 @@ def ThirdOctaveBandFilter(frame, CHUNK=4800):
 
 
 # Cálculo nivel SPL en bandas de tercio de octava
-def ThirdOctaveSPL(ThirdOctaveBands, CHUNK=4800, RATE=48000, TimeSkip=0, TimeVarying=False):
+def ThirdOctaveSPL(ThirdOctaveBands, CHUNK, RATE, TimeSkip=0, TimeVarying=False):
     # Valor pequeño para evitar que haya un 0 si no se capta señal
     ThirdOctaveLevel = np.zeros(np.shape(ThirdOctaveBands)[1])
 
@@ -254,7 +254,7 @@ def ThirdOctaveSPL(ThirdOctaveBands, CHUNK=4800, RATE=48000, TimeSkip=0, TimeVar
 
 
 # Filtrado en bandas de tercio de octava sonidos variantes en el tiempo y cálculo niveles
-def ThirdOctaveLevelTime(frame, RATE=48000, CHUNK=4800):
+def ThirdOctaveLevelTime(frame, RATE, CHUNK):
     constantes['DEC_FACTOR'] = int(RATE / constantes['SR_LEVEL']) # para calculo mas rapido
     Coeficientes = np.zeros(constantes['N_FILTER_COEFS'])
 
@@ -279,14 +279,13 @@ def ThirdOctaveLevelTime(frame, RATE=48000, CHUNK=4800):
         centerFreq = np.power(10, (idxFB - 16) / 10, dtype=float) * 1000
         # Elevar al cuadrado y suavizar
         filtrada = f_square_and_smooth(SignalOut, centerFreq, RATE, CHUNK)
-        
         # Calculo SPL y decimacion
         ThirdOctaveLevel[idxFB][:] = 10 * np.log10((np.array((filtrada[::constantes['DEC_FACTOR']])).flatten() + constantes['TINY_VALUE']) / constantes['I_REF'])
     return ThirdOctaveLevel, Frecuencias, time_axis
 
 
 # Elevar al cuadrado y suavizar
-def f_square_and_smooth(frame, centerFreq, RATE=48000, CHUNK=4800):
+def f_square_and_smooth(frame, centerFreq, RATE, CHUNK):
     Input = frame.copy()
     # Constante de tiempo dependiente de la frecuencia
     if centerFreq <= 1000:
@@ -307,7 +306,7 @@ def f_square_and_smooth(frame, centerFreq, RATE=48000, CHUNK=4800):
 
 
 # Filtro paso bajo primer orden
-def filter_lowpass_1stOrder(frame, Tau, RATE=48000, CHUNK=4800):
+def filter_lowpass_1stOrder(frame, Tau, RATE, CHUNK):
     Y = 0
     Input = frame.copy()
     Output = np.zeros(CHUNK)
@@ -322,7 +321,7 @@ def filter_lowpass_1stOrder(frame, Tau, RATE=48000, CHUNK=4800):
 
 
 # Filtrado segundo orden
-def filter_2ndOrder(frame, Coef, CHUNK=4800, Gain=1):
+def filter_2ndOrder(frame, Coef, CHUNK, Gain=1):
     Input = frame.copy()
     Output = np.zeros(CHUNK)
     Wn1 = 0

@@ -115,7 +115,7 @@ def f_calc_core_loudness(ThirdOctaveSPL, LCB, SoundFieldDiffuse=constantes['SOUN
 
 # Corrección del loudness específico de la banda más baja por silencio en esta banda
 def f_corr_loudness(coreLoudness):
-    CorrCL = 0.4 + 0.32 * np.float(np.power(coreLoudness[0], 0.2))
+    CorrCL = 0.4 + 0.32 * float(np.power(coreLoudness[0], 0.2))
     if CorrCL < 1:
         coreLoudness[0] *= CorrCL
     return coreLoudness
@@ -437,7 +437,7 @@ def loudness_ISO532(ThirdOctaveLevels, SoundFieldDiffuse):
 
 
 # Función principal sonidos variantes en el tiempo
-def loudness_ISO532_time(ThirdOctaveLevels, SoundFieldDiffuse, RATE=48000, CHUNK=4800):
+def loudness_ISO532_time(ThirdOctaveLevels, SoundFieldDiffuse, RATE, CHUNK):
     numSampleLevel = np.shape(ThirdOctaveLevels)[1]
     coreLoudness = np.zeros((21, numSampleLevel))
     for idxTime in range(numSampleLevel):

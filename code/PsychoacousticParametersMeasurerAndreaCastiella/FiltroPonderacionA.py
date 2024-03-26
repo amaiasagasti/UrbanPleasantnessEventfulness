@@ -8,7 +8,7 @@ from scipy import signal
 from scipy.signal import lfilter
 
 # Obtener coeficientes filtro ponderación A
-def coeficientesPonderacionA(RATE=48000):
+def coeficientesPonderacionA(RATE):
     f1 = 20.598997
     f2 = 107.65265
     f3 = 737.86223
@@ -26,7 +26,7 @@ def coeficientesPonderacionA(RATE=48000):
 
 
 # Filtrar señal para ponderación A.
-def filtroPonderacionA(data, RATE=48000):
+def filtroPonderacionA(data, RATE):
     b, a = coeficientesPonderacionA(RATE)
     pond_A = lfilter(b, a, data)
     return pond_A
