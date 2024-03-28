@@ -101,7 +101,6 @@ def mainVarianteTiempo(data, rate, chunk):
     PA = []
 
     for i in range(len(loudness)):
-        print(i, specLoudness[:, i].shape)
         # Fluctuation strength
         FS.append(acousticFluctuation(specLoudness[:, i], fmodFS))
         # Roughness
