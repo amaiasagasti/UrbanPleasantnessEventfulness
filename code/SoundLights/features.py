@@ -7,9 +7,146 @@ from maad.spl import pressure2leq
 from maad.util import mean_dB
 from mosqito.sq_metrics import loudness_zwtv
 from Mosqito.Sharpness import sharpness_din
+from PsychoacousticParametersMeasurerAndreaCastiella.Roughness import acousticRoughness
+from PsychoacousticParametersMeasurerAndreaCastiella.FluctuationStrength import (
+    acousticFluctuation,
+    fmoddetection,
+)
+from PsychoacousticParametersMeasurerAndreaCastiella.loudness_ISO532 import (
+    loudness_ISO532_time,
+)
+from PsychoacousticParametersMeasurerAndreaCastiella.ThirdOctaveFilters import (
+    ThirdOctaveLevelTime,
+)
 
 
 sys.path.append("..")
+
+
+def calculate_roughness(specLoudness):
+    fmodR = fmoddetection(specLoudness, fmin=40, fmax=150)
+    R = []
+    for i in range(specLoudness.shape[1]):
+        R.append(acousticRoughness(specLoudness[:, i], fmodR))
+    R = [round(num, 4) for num in R]
+    return R
+
+
+def calculate_fluctuation(specLoudness):
+    fmodFS = fmoddetection(specLoudness, fmin=0.2, fmax=64)
+    FS = []
+    for i in range(specLoudness.shape[1]):
+        FS.append(acousticFluctuation(specLoudness[:, i], fmodFS))
+    FS = [round(num, 4) for num in FS]
+    return FS
+
+
+def calculate_M(signal, fs):
+    time_step = 1 / fs
+    time_vector = np.arange(0, len(signal) * time_step, time_step)
+    M = fft_hann(time_vector, signal)
+    return M
+
+
+center_freq = [
+    5.0,
+    6.3,
+    8.0,
+    10.0,
+    12.5,
+    16.0,
+    20.0,
+    25.0,
+    31.5,
+    40.0,
+    50.0,
+    63.0,
+    80.0,
+    100.0,
+    125.0,
+    160.0,
+    200.0,
+    250.0,
+    315.0,
+    400.0,
+    500.0,
+    630.0,
+    800.0,
+    1000.0,
+    1250.0,
+    1600.0,
+    2000.0,
+    2500.0,
+    3150.0,
+    4000.0,
+    5000.0,
+    6300.0,
+    8000.0,
+    10000.0,
+    12500.0,
+    16000.0,
+    20000.0,
+]
+
+
+def freq_limits(f_c):
+    f_l = f_c / 2 ** (1 / 6)
+    f_h = f_c * 2 ** (1 / 6)
+
+    return (f_l, f_h)
+
+
+def filter_band(magnitude_spectrum, frequency_axis, f_low, f_high):
+    # Find indices where frequency is greater than f_low and less than f_high
+    indices = np.where((frequency_axis > f_low) & (frequency_axis < f_high))[0]
+
+    # Cut the band from both arrays using the indices
+    magnitude_spectrum_cut = magnitude_spectrum[indices]
+    frequency_axis_cut = frequency_axis[indices]
+
+    return magnitude_spectrum_cut, frequency_axis_cut
+
+
+def fft_hann(t, pt):
+    # Signal length
+    N = len(pt)
+    # Window length (amount of data pts/win)
+    n = 8192
+    # Overlap
+    overlap_ratio = 0.5
+    overlap = n * overlap_ratio
+    num_windows = int((N / n) / (1 - overlap_ratio)) + 1
+
+    # prepare array where each row represents each window and each column the sum of power per band
+    results = np.zeros((num_windows, len(center_freq)))
+    # Frequencies
+    freq = np.fft.fftfreq(n, t[1] - t[0])[0 : int(n / 2)]
+    # Loop over windows
+    for i in range(0, num_windows):
+        # Select window of complete audio
+        begin = int(i * overlap)
+        end = int(begin + n)
+        signal_cut = pt[begin:end]
+        # Fill in with zeros last window if needed
+        if signal_cut.size < n:
+            add = n - signal_cut.size
+            signal_cut = np.pad(signal_cut, (0, add), mode="constant")
+        # Obtain fft
+        spectra = np.abs(np.fft.fft(np.hanning(n) * signal_cut))
+        spectra = (1 / n) * spectra
+        spectra = spectra[0:4096]  # only positive half
+        # Filter band and obtain the power for each band
+        for index, f_c in enumerate(center_freq):
+            # Calculate frequency band limits
+            (f_l, f_h) = freq_limits(f_c)
+            # Filter the band
+            spectra_cut, freq_cut = filter_band(spectra, freq, f_l, f_h)
+            # Save in results the sum of all the power of the band
+            if spectra_cut.shape[0] == 0:
+                results[i, index] = 0.00002  # 0dB
+            else:
+                results[i, index] = np.sum(spectra_cut)
+    return 20 * np.log10(np.mean(results, axis=0) / 0.00002)
 
 
 def A_weighting(Fs):
@@ -123,147 +260,153 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
 
     # Prepare output
     output = {
-        "Savg": 0,  # Sharpness
-        "Smax": 0,
-        "S05": 0,
-        "S10": 0,
-        "S20": 0,
-        "S30": 0,
-        "S40": 0,
-        "S50": 0,
-        "S60": 0,
-        "S70": 0,
-        "S80": 0,
-        "S90": 0,
-        "S95": 0,
-        "Navg": 0,  # Loudness
-        "Nrmc": 0,
-        "Nmax": 0,
-        "N05": 0,
-        "N10": 0,
-        "N20": 0,
-        "N30": 0,
-        "N40": 0,
-        "N50": 0,
-        "N60": 0,
-        "N70": 0,
-        "N80": 0,
-        "N90": 0,
-        "N95": 0,
-        "Favg": 0,  # Fluctuation Strength
-        "Fmax": 0,
-        "F05": 0,
-        "F10": 0,
-        "F20": 0,
-        "F30": 0,
-        "F40": 0,
-        "F50": 0,
-        "F60": 0,
-        "F70": 0,
-        "F80": 0,
-        "F90": 0,
-        "F95": 0,
-        "LAavg": 0,  # LA
-        "LAmin": 0,
-        "LAmax": 0,
-        "LA05": 0,
-        "LA10": 0,
-        "LA20": 0,
-        "LA30": 0,
-        "LA40": 0,
-        "LA50": 0,
-        "LA60": 0,
-        "LA70": 0,
-        "LA80": 0,
-        "LA90": 0,
-        "LA95": 0,
-        "LCavg": 0,  # LC
-        "LCmin": 0,
-        "LCmax": 0,
-        "LC05": 0,
-        "LC10": 0,
-        "LC20": 0,
-        "LC30": 0,
-        "LC40": 0,
-        "LC50": 0,
-        "LC60": 0,
-        "LC70": 0,
-        "LC80": 0,
-        "LC90": 0,
-        "LC95": 0,
-        "Ravg": 0,  # Roughness
-        "Rmax": 0,
-        "R05": 0,
-        "R10": 0,
-        "R20": 0,
-        "R30": 0,
-        "R40": 0,
-        "R50": 0,
-        "R60": 0,
-        "R70": 0,
-        "R80": 0,
-        "R90": 0,
-        "R95": 0,
-        "Tgavg": 0,  # Tonality
-        "Tavg": 0,
-        "Tmax": 0,
-        "T05": 0,
-        "T10": 0,
-        "T20": 0,
-        "T30": 0,
-        "T40": 0,
-        "T50": 0,
-        "T60": 0,
-        "T70": 0,
-        "T80": 0,
-        "T90": 0,
-        "T95": 0,
-        "M00005_0": 0,  # Frequency
-        "M00006_3": 0,
-        "M00008_0": 0,
-        "M00010_0": 0,
-        "M00012_5": 0,
-        "M00016_0": 0,
-        "M00020_0": 0,
-        "M00025_0": 0,
-        "M00031_5": 0,
-        "M00040_0": 0,
-        "M00050_0": 0,
-        "M00063_0": 0,
-        "M00080_0": 0,
-        "M00100_0": 0,
-        "M00125_0": 0,
-        "M00160_0": 0,
-        "M00200_0": 0,
-        "M00250_0": 0,
-        "M00315_0": 0,
-        "M00400_0": 0,
-        "M00500_0": 0,
-        "M00630_0": 0,
-        "M00800_0": 0,
-        "M01000_0": 0,
-        "M01250_0": 0,
-        "M01600_0": 0,
-        "M02000_0": 0,
-        "M02500_0": 0,
-        "M03150_0": 0,
-        "M04000_0": 0,
-        "M05000_0": 0,
-        "M06300_0": 0,
-        "M08000_0": 0,
-        "M10000_0": 0,
-        "M12500_0": 0,
-        "M16000_0": 0,
-        "M20000_0": 0,
+        "Savg_r": 0,  # Sharpness
+        "Smax_r": 0,
+        "S05_r": 0,
+        "S10_r": 0,
+        "S20_r": 0,
+        "S30_r": 0,
+        "S40_r": 0,
+        "S50_r": 0,
+        "S60_r": 0,
+        "S70_r": 0,
+        "S80_r": 0,
+        "S90_r": 0,
+        "S95_r": 0,
+        "Navg_r": 0,  # Loudness
+        "Nrmc_r": 0,
+        "Nmax_r": 0,
+        "N05_r": 0,
+        "N10_r": 0,
+        "N20_r": 0,
+        "N30_r": 0,
+        "N40_r": 0,
+        "N50_r": 0,
+        "N60_r": 0,
+        "N70_r": 0,
+        "N80_r": 0,
+        "N90_r": 0,
+        "N95_r": 0,
+        "Favg_r": 0,  # Fluctuation Strength
+        "Fmax_r": 0,
+        "F05_r": 0,
+        "F10_r": 0,
+        "F20_r": 0,
+        "F30_r": 0,
+        "F40_r": 0,
+        "F50_r": 0,
+        "F60_r": 0,
+        "F70_r": 0,
+        "F80_r": 0,
+        "F90_r": 0,
+        "F95_r": 0,
+        "LAavg_r": 0,  # LA
+        "LAmin_r": 0,
+        "LAmax_r": 0,
+        "LA05_r": 0,
+        "LA10_r": 0,
+        "LA20_r": 0,
+        "LA30_r": 0,
+        "LA40_r": 0,
+        "LA50_r": 0,
+        "LA60_r": 0,
+        "LA70_r": 0,
+        "LA80_r": 0,
+        "LA90_r": 0,
+        "LA95_r": 0,
+        "LCavg_r": 0,  # LC
+        "LCmin_r": 0,
+        "LCmax_r": 0,
+        "LC05_r": 0,
+        "LC10_r": 0,
+        "LC20_r": 0,
+        "LC30_r": 0,
+        "LC40_r": 0,
+        "LC50_r": 0,
+        "LC60_r": 0,
+        "LC70_r": 0,
+        "LC80_r": 0,
+        "LC90_r": 0,
+        "LC95_r": 0,
+        "Ravg_r": 0,  # Roughness
+        "Rmax_r": 0,
+        "R05_r": 0,
+        "R10_r": 0,
+        "R20_r": 0,
+        "R30_r": 0,
+        "R40_r": 0,
+        "R50_r": 0,
+        "R60_r": 0,
+        "R70_r": 0,
+        "R80_r": 0,
+        "R90_r": 0,
+        "R95_r": 0,
+        "Tgavg_r": 0,  # Tonality
+        "Tavg_r": 0,
+        "Tmax_r": 0,
+        "T05_r": 0,
+        "T10_r": 0,
+        "T20_r": 0,
+        "T30_r": 0,
+        "T40_r": 0,
+        "T50_r": 0,
+        "T60_r": 0,
+        "T70_r": 0,
+        "T80_r": 0,
+        "T90_r": 0,
+        "T95_r": 0,
+        "M00005_0_r": 0,  # Frequency
+        "M00006_3_r": 0,
+        "M00008_0_r": 0,
+        "M00010_0_r": 0,
+        "M00012_5_r": 0,
+        "M00016_0_r": 0,
+        "M00020_0_r": 0,
+        "M00025_0_r": 0,
+        "M00031_5_r": 0,
+        "M00040_0_r": 0,
+        "M00050_0_r": 0,
+        "M00063_0_r": 0,
+        "M00080_0_r": 0,
+        "M00100_0_r": 0,
+        "M00125_0_r": 0,
+        "M00160_0_r": 0,
+        "M00200_0_r": 0,
+        "M00250_0_r": 0,
+        "M00315_0_r": 0,
+        "M00400_0_r": 0,
+        "M00500_0_r": 0,
+        "M00630_0_r": 0,
+        "M00800_0_r": 0,
+        "M01000_0_r": 0,
+        "M01250_0_r": 0,
+        "M01600_0_r": 0,
+        "M02000_0_r": 0,
+        "M02500_0_r": 0,
+        "M03150_0_r": 0,
+        "M04000_0_r": 0,
+        "M05000_0_r": 0,
+        "M06300_0_r": 0,
+        "M08000_0_r": 0,
+        "M10000_0_r": 0,
+        "M12500_0_r": 0,
+        "M16000_0_r": 0,
+        "M20000_0_r": 0,
     }
 
-    # Loudness values have to be computed for any other feature
-    N, N_spec, bark_axis, time_axis = loudness_zwtv(signal, fs, field_type="free")
+    # Initialize to zero data(loudnes value, and A-weigth filter) that is
+    #  re-used in several feature calculations
+    N = None
+    A_A = None
+    B_A = None
 
     # Go over list of desired features
     for i, feature in enumerate(feature_list):
-
         if feature == "loudness":
+            print("Calculating loudness")
+            N, N_spec, bark_axis, time_axis = loudness_zwtv(
+                signal, fs, field_type="free"
+            )
             stats_loudness = [
                 "avg",
                 "rmc",
@@ -297,6 +440,11 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
             output["N95_r"] = loudness_data["p95"]
 
         if feature == "sharpness":
+            print("Calculating sharpness")
+            if N is None:
+                N, N_spec, bark_axis, time_axis = loudness_zwtv(
+                    signal, fs, field_type="free"
+                )
             stats_sharpness = [
                 "avg",
                 "max",
@@ -329,6 +477,7 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
             output["S95_r"] = sharpness_data["p95"]
 
         if feature == "LA":
+            print("Calculating LA")
             stats_LA = [
                 "avgdB",
                 "max",
@@ -365,6 +514,7 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
             output["LA95_r"] = LA_data["p95"]
 
         if feature == "LC":
+            print("Calculating LC")
             stats_LC = [
                 "avgdB",
                 "max",
@@ -399,5 +549,123 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
             output["LC80_r"] = LC_data["p80"]
             output["LC90_r"] = LC_data["p90"]
             output["LC95_r"] = LC_data["p95"]
+
+        if feature == "frequency":
+            print("Calculating frequency features")
+            if B_A is None:
+                [B_A, A_A] = A_weighting(fs)
+                signal_A = lfilter(B_A, A_A, signal)
+            M_values = calculate_M(signal_A, fs)
+            output["M00005_0_r"] = M_values[0]
+            output["M00006_3_r"] = M_values[1]
+            output["M00008_0_r"] = M_values[2]
+            output["M00010_0_r"] = M_values[3]
+            output["M00012_5_r"] = M_values[4]
+            output["M00016_0_r"] = M_values[5]
+            output["M00020_0_r"] = M_values[6]
+            output["M00025_0_r"] = M_values[7]
+            output["M00031_5_r"] = M_values[8]
+            output["M00040_0_r"] = M_values[9]
+            output["M00050_0_r"] = M_values[10]
+            output["M00063_0_r"] = M_values[11]
+            output["M00080_0_r"] = M_values[12]
+            output["M00100_0_r"] = M_values[13]
+            output["M00125_0_r"] = M_values[14]
+            output["M00160_0_r"] = M_values[15]
+            output["M00200_0_r"] = M_values[16]
+            output["M00250_0_r"] = M_values[17]
+            output["M00315_0_r"] = M_values[18]
+            output["M00400_0_r"] = M_values[19]
+            output["M00500_0_r"] = M_values[20]
+            output["M00630_0_r"] = M_values[21]
+            output["M00800_0_r"] = M_values[22]
+            output["M01000_0_r"] = M_values[23]
+            output["M01250_0_r"] = M_values[24]
+            output["M01600_0_r"] = M_values[25]
+            output["M02000_0_r"] = M_values[26]
+            output["M02500_0_r"] = M_values[27]
+            output["M03150_0_r"] = M_values[28]
+            output["M04000_0_r"] = M_values[29]
+            output["M05000_0_r"] = M_values[30]
+            output["M06300_0_r"] = M_values[31]
+            output["M08000_0_r"] = M_values[32]
+            output["M10000_0_r"] = M_values[33]
+            output["M12500_0_r"] = M_values[34]
+            output["M16000_0_r"] = M_values[35]
+            output["M20000_0_r"] = M_values[36]
+
+        if feature == "roughness":
+            print("Calculating roughness")
+            if N is None:
+                N, N_spec, bark_axis, time_axis = loudness_zwtv(
+                    signal, fs, field_type="free"
+                )
+            R = calculate_roughness(N_spec)
+            stats_roughness = [
+                "avg",
+                "max",
+                "p05",
+                "p10",
+                "p20",
+                "p30",
+                "p40",
+                "p50",
+                "p60",
+                "p70",
+                "p80",
+                "p90",
+                "p95",
+            ]
+            roughness_data = calculate_stats(R, stats_roughness)
+            output["Ravg_r"] = roughness_data["avg"]
+            output["Rmax_r"] = roughness_data["max"]
+            output["R05_r"] = roughness_data["p05"]
+            output["R10_r"] = roughness_data["p10"]
+            output["R20_r"] = roughness_data["p20"]
+            output["R30_r"] = roughness_data["p30"]
+            output["R40_r"] = roughness_data["p40"]
+            output["R50_r"] = roughness_data["p50"]
+            output["R60_r"] = roughness_data["p60"]
+            output["R70_r"] = roughness_data["p70"]
+            output["R80_r"] = roughness_data["p80"]
+            output["R90_r"] = roughness_data["p90"]
+            output["R95_r"] = roughness_data["p95"]
+
+        if feature == "fluctuation":
+            print("Calculating fluctuation strength")
+            if N is None:
+                N, N_spec, bark_axis, time_axis = loudness_zwtv(
+                    signal, fs, field_type="free"
+                )
+            FS = calculate_fluctuation(N_spec)
+            stats_fluctuation = [
+                "avg",
+                "max",
+                "p05",
+                "p10",
+                "p20",
+                "p30",
+                "p40",
+                "p50",
+                "p60",
+                "p70",
+                "p80",
+                "p90",
+                "p95",
+            ]
+            fluctuation_data = calculate_stats(FS, stats_fluctuation)
+            output["Favg_r"] = fluctuation_data["avg"]
+            output["Fmax_r"] = fluctuation_data["max"]
+            output["F05_r"] = fluctuation_data["p05"]
+            output["F10_r"] = fluctuation_data["p10"]
+            output["F20_r"] = fluctuation_data["p20"]
+            output["F30_r"] = fluctuation_data["p30"]
+            output["F40_r"] = fluctuation_data["p40"]
+            output["F50_r"] = fluctuation_data["p50"]
+            output["F60_r"] = fluctuation_data["p60"]
+            output["F70_r"] = fluctuation_data["p70"]
+            output["F80_r"] = fluctuation_data["p80"]
+            output["F90_r"] = fluctuation_data["p90"]
+            output["F95_r"] = fluctuation_data["p95"]
 
     return output
