@@ -5,7 +5,7 @@ from scipy.signal.filter_design import bilinear
 from essentia.standard import FreesoundExtractor
 from numpy import pi, convolve
 from maad.spl import pressure2leq
-from maad.util import mean_dB
+from maad.util import mean_dB, dB2power, power2dB
 from mosqito.sq_metrics import loudness_zwtv
 from Mosqito.Sharpness import sharpness_din
 from PsychoacousticParametersMeasurerAndreaCastiella.Roughness import acousticRoughness
@@ -215,17 +215,31 @@ def C_weighting(fs):
     return bilinear(NUMs, DENs, fs)
 
 
+def var_dB(vector, axis):
+
+    # dB to energy as sum has to be done with energy
+    e = dB2power(vector)
+    e_var = np.var(e, axis)
+
+    # energy (power) => dB
+    e_var = power2dB(e_var)
+
+    return e_var
+
+
 def calculate_stats(vector: np.array, stats: list, descriptor_name):
     output = {}
     for i, stat in enumerate(stats):
         if stat == "avg":
             output[descriptor_name + "_avg"] = np.round(np.mean(vector, axis=0), 4)
+        if stat == "avgdB":
+            output[descriptor_name + "_avg"] = np.round(mean_dB(vector), 4)
         if stat == "median":
             output[descriptor_name + "_median"] = np.round(np.median(vector, axis=0), 4)
         if stat == "var":
             output[descriptor_name + "_var"] = np.round(np.var(vector, axis=0), 4)
-        if stat == "avgdB":
-            output[descriptor_name + "_avg"] = np.round(mean_dB(vector), 4)
+        if stat == "vardB":
+            output[descriptor_name + "_var"] = np.round(var_dB(vector, axis=0), 4)
         if stat == "max":
             output[descriptor_name + "_max"] = np.round(np.max(vector, axis=0), 4)
         if stat == "min":
@@ -447,6 +461,7 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
     ]
     stats_dB = [
         "avgdB",
+        "vardB",
         "min",
         "max",
         "median",
