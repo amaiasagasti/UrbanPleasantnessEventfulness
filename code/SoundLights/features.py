@@ -19,36 +19,37 @@ from PsychoacousticParametersMeasurerAndreaCastiella.loudness_ISO532 import (
 from PsychoacousticParametersMeasurerAndreaCastiella.ThirdOctaveFilters import (
     ThirdOctaveLevelTime,
 )
+from SoundLights.freesound_auxiliary_info import (
+    barkbands,
+    erbbands,
+    gfcc,
+    melbands,
+    melbands96,
+    mfcc,
+    spectral_contrast_coeffs,
+    spectral_contrast_valleys,
+    beats_loudness_band_ratio,
+    tristimulus,
+    hpcp,
+)
 
 
 sys.path.append("..")
 
 
-def calculate_roughness(specLoudness):
-    fmodR = fmoddetection(specLoudness, fmin=40, fmax=150)
-    R = []
-    for i in range(specLoudness.shape[1]):
-        R.append(acousticRoughness(specLoudness[:, i], fmodR))
-    R = [round(num, 4) for num in R]
-    return R
-
-
-def calculate_fluctuation(specLoudness):
-    fmodFS = fmoddetection(specLoudness, fmin=0.2, fmax=64)
-    FS = []
-    for i in range(specLoudness.shape[1]):
-        FS.append(acousticFluctuation(specLoudness[:, i], fmodFS))
-    FS = [round(num, 4) for num in FS]
-    return FS
-
-
-def calculate_M(signal, fs):
-    time_step = 1 / fs
-    time_vector = np.arange(0, len(signal) * time_step, time_step)
-    M = fft_hann(time_vector, signal)
-    return M
-
-
+auxiliars = {
+    "barkbands": barkbands,
+    "erbbands": erbbands,
+    "gfcc": gfcc,
+    "melbands": melbands,
+    "melbands96": melbands96,
+    "mfcc": mfcc,
+    "spectral_contrast_coeffs": spectral_contrast_coeffs,
+    "spectral_contrast_valleys": spectral_contrast_valleys,
+    "beats_loudness_band_ratio": beats_loudness_band_ratio,
+    "tristimulus": tristimulus,
+    "hpcp": hpcp,
+}
 center_freq = [
     5.0,
     6.3,
@@ -88,6 +89,31 @@ center_freq = [
     16000.0,
     20000.0,
 ]
+
+
+def calculate_roughness(specLoudness):
+    fmodR = fmoddetection(specLoudness, fmin=40, fmax=150)
+    R = []
+    for i in range(specLoudness.shape[1]):
+        R.append(acousticRoughness(specLoudness[:, i], fmodR))
+    R = [round(num, 4) for num in R]
+    return R
+
+
+def calculate_fluctuation(specLoudness):
+    fmodFS = fmoddetection(specLoudness, fmin=0.2, fmax=64)
+    FS = []
+    for i in range(specLoudness.shape[1]):
+        FS.append(acousticFluctuation(specLoudness[:, i], fmodFS))
+    FS = [round(num, 4) for num in FS]
+    return FS
+
+
+def calculate_M(signal, fs):
+    time_step = 1 / fs
+    time_vector = np.arange(0, len(signal) * time_step, time_step)
+    M = fft_hann(time_vector, signal)
+    return M
 
 
 def freq_limits(f_c):
@@ -227,213 +253,172 @@ def var_dB(vector, axis):
     return e_var
 
 
-def calculate_stats(vector: np.array, stats: list, descriptor_name):
+def calculate_stats(vector: np.array, stats: list, descriptor=None):
     output = {}
     for i, stat in enumerate(stats):
         if stat == "avg":
-            output[descriptor_name + "_avg"] = np.round(np.mean(vector, axis=0), 4)
+            # Calculate statistic (axis 0 corresponds to time)
+            avg = np.round(np.mean(vector, axis=0), 4)
+            if type(avg) == np.ndarray:
+                # We have bands/frequencies/coefficients --> save in separate keys
+                output["avg"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], avg)
+                }
+            else:
+                # Just a value
+                output["avg"] = float(avg)
         if stat == "avgdB":
-            output[descriptor_name + "_avg"] = np.round(mean_dB(vector), 4)
+            output["avg"] = float(np.round(mean_dB(vector), 4))
         if stat == "median":
-            output[descriptor_name + "_median"] = np.round(np.median(vector, axis=0), 4)
+            median = np.round(np.median(vector, axis=0), 4)
+            if type(median) == np.ndarray:
+                output["median"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], median)
+                }
+            else:
+                output["median"] = float(median)
         if stat == "var":
-            output[descriptor_name + "_var"] = np.round(np.var(vector, axis=0), 4)
+            var = np.round(np.var(vector, axis=0), 4)
+            if type(var) == np.ndarray:
+                output["var"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], var)
+                }
+            else:
+                output["var"] = float(var)
         if stat == "vardB":
-            output[descriptor_name + "_var"] = np.round(var_dB(vector, axis=0), 4)
+            output["var"] = float(np.round(var_dB(vector, axis=0), 4))
         if stat == "max":
-            output[descriptor_name + "_max"] = np.round(np.max(vector, axis=0), 4)
+            max = np.round(np.max(vector, axis=0), 4)
+            if type(max) == np.ndarray:
+                output["max"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], max)
+                }
+            else:
+                output["max"] = float(max)
         if stat == "min":
-            output[descriptor_name + "_min"] = np.round(np.min(vector, axis=0), 4)
+            min = np.round(np.min(vector, axis=0), 4)
+            if type(min) == np.ndarray:
+                output["min"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], min)
+                }
+            else:
+                output["min"] = float(min)
         if stat == "p05":
-            output[descriptor_name + "_p05"] = np.round(
-                np.percentile(vector, 95, axis=0), 4
-            )
+            p05 = np.round(np.percentile(vector, 95, axis=0), 4)
+            if type(p05) == np.ndarray:
+                output["p05"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p05)
+                }
+            else:
+                output["p05"] = float(p05)
         if stat == "p10":
-            output[descriptor_name + "_p10"] = np.round(
-                np.percentile(vector, 90, axis=0), 4
-            )
+            p10 = np.round(np.percentile(vector, 90, axis=0), 4)
+            if type(p10) == np.ndarray:
+                output["p10"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p10)
+                }
+            else:
+                output["p10"] = float(p10)
         if stat == "p20":
-            output[descriptor_name + "_p20"] = np.round(
-                np.percentile(vector, 80, axis=0), 4
-            )
+            p20 = np.round(np.percentile(vector, 80, axis=0), 4)
+            if type(p20) == np.ndarray:
+                output["p20"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p20)
+                }
+            else:
+                output["p20"] = float(p20)
         if stat == "p30":
-            output[descriptor_name + "_p30"] = np.round(
-                np.percentile(vector, 70, axis=0), 4
-            )
+            p30 = np.round(np.percentile(vector, 70, axis=0), 4)
+            if type(p30) == np.ndarray:
+                output["p30"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p30)
+                }
+            else:
+                output["p30"] = float(p30)
         if stat == "p40":
-            output[descriptor_name + "_p40"] = np.round(
-                np.percentile(vector, 60, axis=0), 4
-            )
+            p40 = np.round(np.percentile(vector, 60, axis=0), 4)
+            if type(p40) == np.ndarray:
+                output["p40"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p40)
+                }
+            else:
+                output["p40"] = float(p40)
         if stat == "p50":
-            output[descriptor_name + "_p50"] = np.round(
-                np.percentile(vector, 50, axis=0), 4
-            )
+            p50 = np.round(np.percentile(vector, 50, axis=0), 4)
+            if type(p50) == np.ndarray:
+                output["p50"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p50)
+                }
+            else:
+                output["p50"] = float(p50)
         if stat == "p60":
-            output[descriptor_name + "_p60"] = np.round(
-                np.percentile(vector, 40, axis=0), 4
-            )
+            p60 = np.round(np.percentile(vector, 40, axis=0), 4)
+            if type(p60) == np.ndarray:
+                output["p60"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p60)
+                }
+            else:
+                output["p60"] = float(p60)
         if stat == "p70":
-            output[descriptor_name + "_p70"] = np.round(
-                np.percentile(vector, 30, axis=0), 4
-            )
+            p70 = np.round(np.percentile(vector, 30, axis=0), 4)
+            if type(p70) == np.ndarray:
+                output["p70"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p70)
+                }
+            else:
+                output["p70"] = float(p70)
         if stat == "p80":
-            output[descriptor_name + "_p80"] = np.round(
-                np.percentile(vector, 20, axis=0), 4
-            )
+            p80 = np.round(np.percentile(vector, 20, axis=0), 4)
+            if type(p80) == np.ndarray:
+                output["p80"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p80)
+                }
+            else:
+                output["p80"] = float(p80)
         if stat == "p90":
-            output[descriptor_name + "_p90"] = np.round(
-                np.percentile(vector, 10, axis=0), 4
-            )
+            p90 = np.round(np.percentile(vector, 10, axis=0), 4)
+            if type(p90) == np.ndarray:
+                output["p90"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p90)
+                }
+            else:
+                output["p90"] = float(p90)
         if stat == "p95":
-            output[descriptor_name + "_p95"] = np.round(
-                np.percentile(vector, 5, axis=0), 4
-            )
+            p95 = np.round(np.percentile(vector, 5, axis=0), 4)
+            if type(p95) == np.ndarray:
+                output["p95"] = {
+                    str(key): float(value)
+                    for key, value in zip(auxiliars[descriptor], p95)
+                }
+            else:
+                output["p95"] = float(p95)
     return output
 
 
-def extract_features(signal: np.array, fs: float, feature_list: list):
+def extract_ARAUS_features(signal: np.array, fs: float, feature_list: list):
 
     # Check if feature list is empty
     if len(feature_list) == 0:
         raise ValueError("List of features is empty, please provide.")
 
     # Prepare output
-    """ output = {
-        "Savg": 0,  # Sharpness
-        "Smax": 0,
-        "S05": 0,
-        "S10": 0,
-        "S20": 0,
-        "S30": 0,
-        "S40": 0,
-        "S50": 0,
-        "S60": 0,
-        "S70": 0,
-        "S80": 0,
-        "S90": 0,
-        "S95": 0,
-        "Navg": 0,  # Loudness
-        "Nrmc": 0,
-        "Nmax": 0,
-        "N05": 0,
-        "N10": 0,
-        "N20": 0,
-        "N30": 0,
-        "N40": 0,
-        "N50": 0,
-        "N60": 0,
-        "N70": 0,
-        "N80": 0,
-        "N90": 0,
-        "N95": 0,
-        "Favg": 0,  # Fluctuation Strength
-        "Fmax": 0,
-        "F05": 0,
-        "F10": 0,
-        "F20": 0,
-        "F30": 0,
-        "F40": 0,
-        "F50": 0,
-        "F60": 0,
-        "F70": 0,
-        "F80": 0,
-        "F90": 0,
-        "F95": 0,
-        "LAavg": 0,  # LA
-        "LAmin": 0,
-        "LAmax": 0,
-        "LA05": 0,
-        "LA10": 0,
-        "LA20": 0,
-        "LA30": 0,
-        "LA40": 0,
-        "LA50": 0,
-        "LA60": 0,
-        "LA70": 0,
-        "LA80": 0,
-        "LA90": 0,
-        "LA95": 0,
-        "LCavg": 0,  # LC
-        "LCmin": 0,
-        "LCmax": 0,
-        "LC05": 0,
-        "LC10": 0,
-        "LC20": 0,
-        "LC30": 0,
-        "LC40": 0,
-        "LC50": 0,
-        "LC60": 0,
-        "LC70": 0,
-        "LC80": 0,
-        "LC90": 0,
-        "LC95": 0,
-        "Ravg": 0,  # Roughness
-        "Rmax": 0,
-        "R05": 0,
-        "R10": 0,
-        "R20": 0,
-        "R30": 0,
-        "R40": 0,
-        "R50": 0,
-        "R60": 0,
-        "R70": 0,
-        "R80": 0,
-        "R90": 0,
-        "R95": 0,
-        "Tgavg": 0,  # Tonality
-        "Tavg": 0,
-        "Tmax": 0,
-        "T05": 0,
-        "T10": 0,
-        "T20": 0,
-        "T30": 0,
-        "T40": 0,
-        "T50": 0,
-        "T60": 0,
-        "T70": 0,
-        "T80": 0,
-        "T90": 0,
-        "T95": 0,
-        "M00005_0": 0,  # Frequency
-        "M00006_3": 0,
-        "M00008_0": 0,
-        "M00010_0": 0,
-        "M00012_5": 0,
-        "M00016_0": 0,
-        "M00020_0": 0,
-        "M00025_0": 0,
-        "M00031_5": 0,
-        "M00040_0": 0,
-        "M00050_0": 0,
-        "M00063_0": 0,
-        "M00080_0": 0,
-        "M00100_0": 0,
-        "M00125_0": 0,
-        "M00160_0": 0,
-        "M00200_0": 0,
-        "M00250_0": 0,
-        "M00315_0": 0,
-        "M00400_0": 0,
-        "M00500_0": 0,
-        "M00630_0": 0,
-        "M00800_0": 0,
-        "M01000_0": 0,
-        "M01250_0": 0,
-        "M01600_0": 0,
-        "M02000_0": 0,
-        "M02500_0": 0,
-        "M03150_0": 0,
-        "M04000_0": 0,
-        "M05000_0": 0,
-        "M06300_0": 0,
-        "M08000_0": 0,
-        "M10000_0": 0,
-        "M12500_0": 0,
-        "M16000_0": 0,
-        "M20000_0": 0,
-    }
-     """
     output = {}
+
     # Initialize to zero data(loudnes value, and A-weigth filter) that is
     #  re-used in several feature calculations
     N = None
@@ -485,8 +470,8 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
             N, N_spec, bark_axis, time_axis = loudness_zwtv(
                 signal, fs, field_type="free"
             )
-            loudness_data = calculate_stats(N, stats, "N")
-            output = {**output, **loudness_data}
+            loudness_data = calculate_stats(N, stats)
+            output["loudness"] = loudness_data
 
         if feature == "sharpness":
             print("Calculating sharpness")
@@ -495,24 +480,24 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
                     signal, fs, field_type="free"
                 )
             S, S_time_axis = sharpness_din(N, N_spec, time_axis, 0.5)
-            sharpness_data = calculate_stats(S, stats, "S")
-            output = {**output, **sharpness_data}
+            sharpness_data = calculate_stats(S, stats)
+            output["sharpness"] = sharpness_data
 
         if feature == "LA":
             print("Calculating LA")
             [B_A, A_A] = A_weighting(fs)
             signal_A = lfilter(B_A, A_A, signal)
             LAeq = pressure2leq(signal_A, fs, 0.125)
-            LA_data = calculate_stats(LAeq, stats_dB, "LA")
-            output = {**output, **LA_data}
+            LA_data = calculate_stats(LAeq, stats)
+            output["LA"] = LA_data
 
         if feature == "LC":
             print("Calculating LC")
             [B_C, A_C] = C_weighting(fs)
             signal_C = lfilter(B_C, A_C, signal)
             LCeq = pressure2leq(signal_C, fs, 0.125)
-            LC_data = calculate_stats(LCeq, stats_dB, "LC")
-            output = {**output, **LC_data}
+            LC_data = calculate_stats(LCeq, stats)
+            output["LC"] = LC_data
 
         if feature == "roughness":
             print("Calculating roughness")
@@ -521,8 +506,8 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
                     signal, fs, field_type="free"
                 )
             R = calculate_roughness(N_spec)
-            roughness_data = calculate_stats(R, stats, "R")
-            output = {**output, **roughness_data}
+            roughness_data = calculate_stats(R, stats)
+            output["roughness"] = roughness_data
 
         if feature == "fluctuation":
             print("Calculating fluctuation strength")
@@ -531,8 +516,8 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
                     signal, fs, field_type="free"
                 )
             FS = calculate_fluctuation(N_spec)
-            fluctuation_data = calculate_stats(FS, stats, "F")
-            output = {**output, **fluctuation_data}
+            fluctuation_data = calculate_stats(FS, stats)
+            output["fluctuation"] = fluctuation_data
 
         if feature == "frequency":
             print("Calculating frequency features")
@@ -540,80 +525,78 @@ def extract_features(signal: np.array, fs: float, feature_list: list):
                 [B_A, A_A] = A_weighting(fs)
                 signal_A = lfilter(B_A, A_A, signal)
             M_values = calculate_M(signal_A, fs)
-            output["M"] = [
-                np.round(M_values[0], 4),
-                np.round(M_values[1], 4),
-                np.round(M_values[2], 4),
-                np.round(M_values[3], 4),
-                np.round(M_values[4], 4),
-                np.round(M_values[5], 4),
-                np.round(M_values[6], 4),
-                np.round(M_values[7], 4),
-                np.round(M_values[8], 4),
-                np.round(M_values[9], 4),
-                np.round(M_values[10], 4),
-                np.round(M_values[11], 4),
-                np.round(M_values[12], 4),
-                np.round(M_values[13], 4),
-                np.round(M_values[14], 4),
-                np.round(M_values[15], 4),
-                np.round(M_values[16], 4),
-                np.round(M_values[17], 4),
-                np.round(M_values[18], 4),
-                np.round(M_values[19], 4),
-                np.round(M_values[20], 4),
-                np.round(M_values[21], 4),
-                np.round(M_values[22], 4),
-                np.round(M_values[23], 4),
-                np.round(M_values[24], 4),
-                np.round(M_values[25], 4),
-                np.round(M_values[26], 4),
-                np.round(M_values[27], 4),
-                np.round(M_values[28], 4),
-                np.round(M_values[29], 4),
-                np.round(M_values[30], 4),
-                np.round(M_values[31], 4),
-                np.round(M_values[32], 4),
-                np.round(M_values[33], 4),
-                np.round(M_values[34], 4),
-                np.round(M_values[35], 4),
-                np.round(M_values[36], 4),
-            ]
+            output["energy_frequency"] = {
+                "00005_0": np.round(M_values[0], 4),
+                "00006_3": np.round(M_values[1], 4),
+                "00008_0": np.round(M_values[2], 4),
+                "00010_0": np.round(M_values[3], 4),
+                "00012_5": np.round(M_values[4], 4),
+                "00016_0": np.round(M_values[5], 4),
+                "00020_0": np.round(M_values[6], 4),
+                "00025_0": np.round(M_values[7], 4),
+                "00031_5": np.round(M_values[8], 4),
+                "00040_0": np.round(M_values[9], 4),
+                "00050_0": np.round(M_values[10], 4),
+                "00063_0": np.round(M_values[11], 4),
+                "00080_0": np.round(M_values[12], 4),
+                "00100_0": np.round(M_values[13], 4),
+                "00125_0": np.round(M_values[14], 4),
+                "00160_0": np.round(M_values[15], 4),
+                "00200_0": np.round(M_values[16], 4),
+                "00250_0": np.round(M_values[17], 4),
+                "00315_0": np.round(M_values[18], 4),
+                "00400_0": np.round(M_values[19], 4),
+                "00500_0": np.round(M_values[20], 4),
+                "00630_0": np.round(M_values[21], 4),
+                "00800_0": np.round(M_values[22], 4),
+                "01000_0": np.round(M_values[23], 4),
+                "01250_0": np.round(M_values[24], 4),
+                "01600_0": np.round(M_values[25], 4),
+                "02000_0": np.round(M_values[26], 4),
+                "02500_0": np.round(M_values[27], 4),
+                "03150_0": np.round(M_values[28], 4),
+                "04000_0": np.round(M_values[29], 4),
+                "05000_0": np.round(M_values[30], 4),
+                "06300_0": np.round(M_values[31], 4),
+                "08000_0": np.round(M_values[32], 4),
+                "10000_0": np.round(M_values[33], 4),
+                "12500_0": np.round(M_values[34], 4),
+                "16000_0": np.round(M_values[35], 4),
+                "20000_0": np.round(M_values[36], 4),
+            }
 
     return output
 
 
-parameters = {
-    "analysisSampleRate": 48000,
-    "startTime": 0,
-    "endTime": 30,
-    "lowlevelFrameSize": 2048,
-    "lowlevelHopSize": 1024,
-    "lowlevelSilentFrames": "noise",
-    "lowlevelStats": ["mean"],  # "max", "dmean", "dmean2", "dvar", "dvar2"
-    "lowlevelWindowType": "blackmanharris62",
-    "lowlevelZeroPadding": 0,
-    "mfccStats": ["mean"],
-    "gfccStats": ["mean"],
-    "rhythmMaxTempo": 208,
-    "rhythmMethod": "degara",
-    "rhythmMinTempo": 40,
-    "rhythmStats": [
-        "mean"
-    ],  # "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"
-    "tonalFrameSize": 4096,
-    "tonalHopSize": 1024,
-    "tonalSilentFrames": "noise",
-    "tonalStats": ["mean"],
-    "tonalWindowType": "blackmanharris62",
-    "tonalZeroPadding": 0,
-}
-
-
 def run_freesound_extractor(audiofile):
     """Runs Essentia standard FreesoundExtractor
-    :audiofile: absolute path to the audio file to analyze
+    audiofile: absolute path to the audio file to analyze
     """
+
+    parameters = {
+        "analysisSampleRate": 48000,
+        "startTime": 0,
+        "endTime": 30,
+        "lowlevelFrameSize": 2048,
+        "lowlevelHopSize": 1024,
+        "lowlevelSilentFrames": "noise",
+        "lowlevelStats": ["mean"],
+        "lowlevelWindowType": "blackmanharris62",
+        "lowlevelZeroPadding": 0,
+        "mfccStats": ["mean"],
+        "gfccStats": ["mean"],
+        "rhythmMaxTempo": 208,
+        "rhythmMethod": "degara",
+        "rhythmMinTempo": 40,
+        "rhythmStats": ["mean"],
+        "tonalFrameSize": 4096,
+        "tonalHopSize": 1024,
+        "tonalSilentFrames": "noise",
+        "tonalStats": ["mean"],
+        "tonalWindowType": "blackmanharris62",
+        "tonalZeroPadding": 0,
+    }
+
     try:
         result, resultFrames = FreesoundExtractor(**parameters)(audiofile)
     except RuntimeError as e:
@@ -621,12 +604,15 @@ def run_freesound_extractor(audiofile):
     return result, resultFrames
 
 
-def analyze(input):
+def extract_Freesound_features(input):
     # Run the essentia standard FreesoundExtractor
-    result, frames = run_freesound_extractor(input)
+    _, frames = run_freesound_extractor(input)
+
     # Calculate statistics and save all available features in a dictionary
-    features = dict()
+    features = {}
     for descriptor in frames.descriptorNames():
+        d = descriptor.split(".")
+        # Calculate stats for arrays
         if type(frames[descriptor]) == np.ndarray:
             stats = [
                 "avg",
@@ -646,9 +632,20 @@ def analyze(input):
                 "p90",
                 "p95",
             ]
-            stats_result = calculate_stats(frames[descriptor], stats, descriptor)
-            features = {**features, **stats_result}
+            stats_result = calculate_stats(frames[descriptor], stats, d[1])
+            # Check if d[0] key exists
+            if d[0] not in features:
+                features[d[0]] = {}
+            # Now you can safely assign value to nested dictionary
+            features[str(d[0])][str(d[1])] = stats_result
+        # Otherwise just save in dictionary
         else:
-            features[descriptor] = frames[descriptor]
+            # Check if d[0] key exists
+            if d[0] not in features:
+                features[d[0]] = {}
+            features[str(d[0])][str(d[1])] = frames[descriptor]
+
+    # Metadata is returned, unwanted
+    del features["metadata"]
 
     return features
