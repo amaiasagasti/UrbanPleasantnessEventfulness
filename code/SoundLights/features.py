@@ -6,7 +6,7 @@ from essentia.standard import FreesoundExtractor
 from numpy import pi, convolve
 from maad.spl import pressure2leq
 from maad.util import mean_dB, dB2power, power2dB
-from mosqito.sq_metrics import loudness_zwtv
+from mosqito.sq_metrics import loudness_zwtv, roughness_dw
 from Mosqito.Sharpness import sharpness_din
 from PsychoacousticParametersMeasurerAndreaCastiella.Roughness import acousticRoughness
 from PsychoacousticParametersMeasurerAndreaCastiella.FluctuationStrength import (
@@ -498,12 +498,13 @@ def extract_ARAUS_features(signal: np.array, fs: float, feature_list: list):
         if feature == "roughness":
             print("Calculating roughness")
             if N is None:
-                N, N_spec, bark_axis, time_axis = loudness_zwtv(
-                    signal, fs, field_type="free"
-                )
+                N, N_spec, _, time_axis = loudness_zwtv(signal, fs, field_type="free")
             R = calculate_roughness(N_spec)
             roughness_data = calculate_stats(R, stats)
             output["roughness"] = roughness_data
+            R_dw, _, _, _ = roughness_dw(signal, fs)
+            roughness_data_dw = calculate_stats(R_dw, stats)
+            output["roughness_dw"] = roughness_data_dw
 
         if feature == "fluctuation":
             print("Calculating fluctuation strength")
