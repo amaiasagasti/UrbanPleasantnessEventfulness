@@ -577,7 +577,7 @@ def run_freesound_extractor(audiofile):
         "lowlevelHopSize": 1024,
         "lowlevelSilentFrames": "noise",
         "lowlevelStats": ["mean"],
-        "lowlevelWindowType": "blackmanharris62",
+        "lowlevelWindowType": "hann",
         "lowlevelZeroPadding": 0,
         "mfccStats": ["mean"],
         "gfccStats": ["mean"],
@@ -585,11 +585,11 @@ def run_freesound_extractor(audiofile):
         "rhythmMethod": "degara",
         "rhythmMinTempo": 40,
         "rhythmStats": ["mean"],
-        "tonalFrameSize": 4096,
+        "tonalFrameSize": 2048,
         "tonalHopSize": 1024,
         "tonalSilentFrames": "noise",
         "tonalStats": ["mean"],
-        "tonalWindowType": "blackmanharris62",
+        "tonalWindowType": "hann",
         "tonalZeroPadding": 0,
     }
 
