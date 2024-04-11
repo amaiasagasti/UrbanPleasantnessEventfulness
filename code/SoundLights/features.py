@@ -268,8 +268,6 @@ def calculate_stats(vector: np.array, stats: list, descriptor=None):
             else:
                 # Just a value
                 output["avg"] = float(avg)
-        if stat == "avgdB":
-            output["avg"] = float(np.round(mean_dB(vector), 4))
         if stat == "median":
             median = np.round(np.median(vector, axis=0), 4)
             if type(median) == np.ndarray:
@@ -288,8 +286,6 @@ def calculate_stats(vector: np.array, stats: list, descriptor=None):
                 }
             else:
                 output["var"] = float(var)
-        if stat == "vardB":
-            output["var"] = float(np.round(var_dB(vector, axis=0), 4))
         if stat == "max":
             max = np.round(np.max(vector, axis=0), 4)
             if type(max) == np.ndarray:
