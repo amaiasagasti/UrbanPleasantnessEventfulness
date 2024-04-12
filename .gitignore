@@ -2,3 +2,4 @@ data/soundscapes_augmented/
 __pycache__/
 *.csv
 .m
+*.json
