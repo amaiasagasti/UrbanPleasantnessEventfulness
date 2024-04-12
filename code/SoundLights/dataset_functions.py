@@ -122,6 +122,12 @@ def generate_features(audioFolderPath, csvPath, savingPath):
             # Add this audio's dict to general dictionary
             output[int(files_count)] = audio_info
 
+            # Save info in JSON
+            csv_base_name = file.split(".")[0]
+            json_name = str(savingPath + str(csv_base_name) + ".json")
+            with open(json_name, "w") as json_file:
+                json.dump(audio_info, json_file, indent=4)
+
             print("Done audio ", files_count)
             files_count = files_count + 1
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
