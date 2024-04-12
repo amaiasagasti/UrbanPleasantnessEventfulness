@@ -1,6 +1,6 @@
 import sys
 from Mosqito.loadFiles import load
-from SoundLights.features import extract_features
+from SoundLights.features import extract_ARAUS_features
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -244,7 +244,7 @@ for file in sorted(os.listdir(audios_path)):
             "roughness",
             "fluctuation",
         ]
-        audio_acoustic_features = extract_features(signalR, fs, list)
+        audio_acoustic_features = extract_ARAUS_features(signalR, fs, list)
 
         # Add acoustic features to output row
         output_row.update(audio_acoustic_features)
