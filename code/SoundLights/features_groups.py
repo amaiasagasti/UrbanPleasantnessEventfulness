@@ -260,10 +260,7 @@ Freesound_features = [
     "freesound.sfx.inharmonicity.var",
     "freesound.sfx.inharmonicity.p20",
     "freesound.sfx.inharmonicity.p80",
-    "freesound.rhythm.bpm.avg",
-    "freesound.rhythm.bpm.var",
-    "freesound.rhythm.bpm.p20",
-    "freesound.rhythm.bpm.p80",
+    "freesound.rhythm.bpm",
 ]
 
 
@@ -358,6 +355,5 @@ mix_features = [
     "freesound.sfx.logattacktime.var",
     "freesound.sfx.inharmonicity.avg",
     "freesound.sfx.inharmonicity.var",
-    "freesound.rhythm.bpm.avg",
-    "freesound.rhythm.bpm.var",
+    "freesound.rhythm.bpm",
 ]
