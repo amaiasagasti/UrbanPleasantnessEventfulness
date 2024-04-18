@@ -178,3 +178,23 @@ def import_json_to_dataframe(json_path: str):
         df = pd.concat([df, df_row])
 
     return df
+
+
+def import_jsons_to_dataframe(jsons_path: list):
+    jsons = sorted(os.listdir(jsons_path))
+    dfs = []
+
+    for json_file in jsons:
+        if json_file.endswith(".json"):
+            json_path = jsons_path + json_file
+            print(json_path)
+            # Load the JSON data
+            with open(json_path, "r") as file:
+                data = json.load(file)
+            for file in data:
+                # Add each entry in JSON to row of dataframe
+                df_row = pd.json_normalize(data[file])
+                dfs.append(df_row)
+    # Concatenate all dataframes
+    df = pd.concat(dfs, ignore_index=True)
+    return df
