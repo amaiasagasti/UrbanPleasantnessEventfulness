@@ -1,4 +1,35 @@
 # Provisional
+general_info = [
+    "info.file",
+    "info.participant",
+    "info.fold",
+    "info.soundscape",
+    "info.masker",
+    "info.smr",
+    "info.stimulus_index",
+    "info.wav_gain",
+    "info.time_taken",
+    "info.is_attention",
+    "info.pleasant",
+    "info.eventful",
+    "info.chaotic",
+    "info.vibrant",
+    "info.uneventful",
+    "info.calm",
+    "info.annoying",
+    "info.monotonous",
+    "info.appropriate",
+    "info.P_ground_truth",
+    "info.E_ground_truth",
+    "info.Leq_R_r",
+    "info.masker_bird",
+    "info.masker_construction",
+    "info.masker_silence",
+    "info.masker_traffic",
+    "info.masker_water",
+    "info.masker_wind",
+]
+
 
 ARAUS_features = [
     "ARAUS.sharpness.avg",
