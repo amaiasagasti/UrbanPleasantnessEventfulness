@@ -20,7 +20,5 @@ print("hola")
 for csv_name in csv_names:
     complete_path = csvs_path + csv_name + ".csv"
     save_in = saving_path + csv_name + "/"
-    print(csv_name)
     # Call function
-    print(saving_path, "  --- epa")
     generate_features_internal(audios_path, complete_path, save_in, ["ARAUS"])
