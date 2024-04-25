@@ -5,11 +5,11 @@ from Mosqito.loadFiles import load
 from SoundLights.features import extract_ARAUS_features, extract_Freesound_features
 
 
-def generate_features(audioFolderPath, csvPath, savingPath):
+def generate_features(audioFolderPath: str, csvPath: str, savingPath: str, type: list):
     """
-    Function to generate most acoustic and psychoacoustic features
-    found in ARAUS dataset and the signal processing features extracted
-    with Freesound Feature Extractor.
+    Function to generate ARAUS-extended from ARAUS dataset (original column names)
+    most acoustic and psychoacoustic features found in ARAUS dataset and the signal
+    processing features extracted with Freesound Feature Extractor.
 
     Input:
     audioFolderPath: relative path to the folder that contains the
@@ -17,11 +17,13 @@ def generate_features(audioFolderPath, csvPath, savingPath):
     csvPath: absolute path to ARAUS csv file that contains wav_gains
         generated with code found in Adequate_responses_csv
     savingPath: save where output JSON is desired to be saved
+    type: type of features to generate ["ARAUS", "Freesound"]
 
     Returns:
-        output: JSON file containing all features to the corresponding
-            audio files. It can be imported as a Pandas dataframe
-            using import_json_to_dataframe() from dataset_functions.py
+        output: ARAUS-extended JSON file containing all features to the
+            corresponding audio files. It is stored in /data folder directly.
+            It can be imported as a Pandas dataframe using
+            import_json_to_dataframe() from dataset_functions.py.
     """
     output = {}
     files_count = 0
@@ -67,7 +69,7 @@ def generate_features(audioFolderPath, csvPath, savingPath):
                 "masker": audio_info_aug["masker"].values[0],
                 "smr": int(audio_info_aug["smr"].values[0]),
                 "stimulus_index": int(audio_info_aug["stimulus_index"].values[0]),
-                "wav_gain": audio_info_aug["wav_gain"].values[0],
+                "wav_gain": float(audio_info_aug["wav_gain"].values[0]),
                 "time_taken": audio_info_aug["time_taken"].values[0],
                 "is_attention": int(audio_info_aug["is_attention"].values[0]),
                 "pleasant": int(audio_info_aug["pleasant"].values[0]),
@@ -93,30 +95,32 @@ def generate_features(audioFolderPath, csvPath, savingPath):
             }
 
             ## PSYCHOACOUSTIC FEATURES EXTRACTION ########################################################
-            # Get signal
-            signalR, fs = load(
-                audio_path, wav_calib=gain, ch=1
-            )  # R - SINGLE CHANNEL SIGNAL
-            # Extract psychoacoustic features for signal
-            list = [
-                "loudness",
-                "sharpness",
-                "LA",
-                "LC",
-                "frequency",
-                "roughness",
-                "fluctuation",
-            ]
-            audio_acoustic_features = extract_ARAUS_features(signalR, fs, list)
-            # Add to dictionary
-            audio_info["ARAUS"] = audio_acoustic_features
+            if "ARAUS" in type:
+                # Get signal
+                signalR, fs = load(
+                    audio_path, wav_calib=gain, ch=1
+                )  # R - SINGLE CHANNEL SIGNAL
+                # Extract psychoacoustic features for signal
+                list = [
+                    "loudness",
+                    "sharpness",
+                    "LA",
+                    "LC",
+                    "frequency",
+                    "roughness",
+                    "fluctuation",
+                ]
+                audio_acoustic_features = extract_ARAUS_features(signalR, fs, list)
+                # Add to dictionary
+                audio_info["ARAUS"] = audio_acoustic_features
             ################################################################################################
 
             ## NON-PSYCHOACOUSTIC FEATURES EXTRACTION ######################################################
-            # Extract features for signal
-            audio_freesound_features = extract_Freesound_features(audio_path)
-            # Add to dictionary
-            audio_info["freesound"] = audio_freesound_features
+            if "Freesound" in type:
+                # Extract features for signal
+                audio_freesound_features = extract_Freesound_features(audio_path)
+                # Add to dictionary
+                audio_info["freesound"] = audio_freesound_features
             ################################################################################################
 
             # Add this audio's dict to general dictionary
@@ -198,3 +202,163 @@ def import_jsons_to_dataframe(jsons_path: list):
     # Concatenate all dataframes
     df = pd.concat(dfs, ignore_index=True)
     return df
+
+
+def generate_features_internal(
+    audioFolderPath: str, csvPath: str, savingPath: str, type: list
+):
+    """
+    Function to generate dataset variations from ARAUS-extended dataset (ARAUS-extended
+    column names) the desired acoustic and psychoacoustic features found in ARAUS dataset
+    and the signal processing features extracted with Freesound Feature Extractor.
+
+    Input:
+    audioFolderPath: relative path to the folder that contains the
+        ARAUS augmented soundscapes (.wav files)
+    csvPath: absolute path to ARAUS-extended csv file
+    savingPath: save where output JSON is desired to be saved
+    type: type of features to generate ["ARAUS", "Freesound"]
+
+    Returns:
+        output: version/subset of ARAUS-extended JSON file containing selected features of
+            the corresponding audio files. It is directly saved in /data. It can be imported
+            as a Pandas dataframe using import_json_to_dataframe() from dataset_functions.py
+    """
+    output = {}
+    files_count = 0
+    ARAUScsv = pd.read_csv(csvPath)
+
+    # Find the first and last WAV files for json name
+    first_wav = None
+    last_wav = None
+
+    # Go over each audio file
+    files = sorted(os.listdir(audioFolderPath))
+    for file in files:
+        if file.endswith(".mp3") or file.endswith(".wav"):
+            print("File ", file)
+
+            # Find the first and last WAV files for json name
+            if first_wav is None:
+                first_wav = file
+            last_wav = file
+
+            # Find the row in ARAUS dataset that the audio filename matches to get wav gain
+            audio_path = audioFolderPath + file
+            file_split = file.split("_")
+            file_fold = int(file_split[1])
+            file_participant = "ARAUS_" + file_split[3]
+            file_stimulus = int(file_split[5].split(".")[0])
+            audio_info_aug = ARAUScsv[ARAUScsv["info.fold"] == file_fold]
+            audio_info_aug = audio_info_aug[
+                audio_info_aug["info.stimulus_index"] == file_stimulus
+            ]
+            audio_info_aug = audio_info_aug[
+                audio_info_aug["info.participant"] == file_participant
+            ]
+            gain = audio_info_aug["info.wav_gain"].values[0]
+
+            # Add basic info about audio to dictionary
+            audio_info = {}
+            audio_info["info"] = {
+                "file": file,
+                "participant": file_participant,
+                "fold": int(audio_info_aug["info.fold"].values[0]),
+                "soundscape": audio_info_aug["info.soundscape"].values[0],
+                "masker": audio_info_aug["info.masker"].values[0],
+                "smr": int(audio_info_aug["info.smr"].values[0]),
+                "stimulus_index": int(audio_info_aug["info.stimulus_index"].values[0]),
+                "wav_gain": float(audio_info_aug["info.wav_gain"].values[0]),
+                "time_taken": audio_info_aug["info.time_taken"].values[0],
+                "is_attention": int(audio_info_aug["info.is_attention"].values[0]),
+                "pleasant": int(audio_info_aug["info.pleasant"].values[0]),
+                "eventful": int(audio_info_aug["info.eventful"].values[0]),
+                "chaotic": int(audio_info_aug["info.chaotic"].values[0]),
+                "vibrant": int(audio_info_aug["info.vibrant"].values[0]),
+                "uneventful": int(audio_info_aug["info.uneventful"].values[0]),
+                "calm": int(audio_info_aug["info.calm"].values[0]),
+                "annoying": int(audio_info_aug["info.annoying"].values[0]),
+                "monotonous": int(audio_info_aug["info.monotonous"].values[0]),
+                "appropriate": int(audio_info_aug["info.appropriate"].values[0]),
+                "P_ground_truth": audio_info_aug["info.P_ground_truth"].values[0],
+                "E_ground_truth": audio_info_aug["info.E_ground_truth"].values[0],
+                "Leq_R_r": audio_info_aug["info.Leq_R_r"].values[0],
+                "masker_bird": int(audio_info_aug["info.masker_bird"].values[0]),
+                "masker_construction": int(
+                    audio_info_aug["info.masker_construction"].values[0]
+                ),
+                "masker_silence": int(audio_info_aug["info.masker_silence"].values[0]),
+                "masker_traffic": int(audio_info_aug["info.masker_traffic"].values[0]),
+                "masker_water": int(audio_info_aug["info.masker_water"].values[0]),
+                "masker_wind": int(audio_info_aug["info.masker_wind"].values[0]),
+            }
+
+            ## PSYCHOACOUSTIC FEATURES EXTRACTION ########################################################
+            if "ARAUS" in type:
+                # Get signal
+                signalR, fs = load(
+                    audio_path, wav_calib=gain, ch=1
+                )  # R - SINGLE CHANNEL SIGNAL
+                # Extract psychoacoustic features for signal
+                list = [
+                    "loudness",
+                    "sharpness",
+                    "LA",
+                    "LC",
+                    "frequency",
+                    "roughness",
+                    "fluctuation",
+                ]
+                audio_acoustic_features = extract_ARAUS_features(signalR, fs, list)
+                # Add to dictionary
+                audio_info["ARAUS"] = audio_acoustic_features
+            ################################################################################################
+
+            ## NON-PSYCHOACOUSTIC FEATURES EXTRACTION ######################################################
+            if "Freesound" in type:
+                # Extract features for signal
+                audio_freesound_features = extract_Freesound_features(audio_path)
+                # Add to dictionary
+                audio_info["freesound"] = audio_freesound_features
+            ################################################################################################
+
+            # Add this audio's dict to general dictionary
+            output[int(files_count)] = audio_info
+
+            # Save info in JSON
+            if not os.path.exists(savingPath):
+                os.makedirs(savingPath)
+            csv_base_name = file.split(".")[0]
+            json_name = str(savingPath + str(csv_base_name) + ".json")
+            with open(json_name, "w") as json_file:
+                json.dump(audio_info, json_file, indent=4)
+
+            print("Done audio ", files_count)
+            files_count = files_count + 1
+            print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+
+    # Save in json
+    first_wav = first_wav.split(".")[0].split("_")
+    last_wav = last_wav.split(".")[0].split("_")
+    csv_base_name = (
+        "f"
+        + first_wav[1]
+        + "p"
+        + first_wav[3]
+        + "s"
+        + first_wav[5]
+        + "_"
+        + "f"
+        + last_wav[1]
+        + "p"
+        + last_wav[3]
+        + "s"
+        + last_wav[5]
+    )
+    # Check if the saving directory exists, create it if it doesn't
+
+    json_name = savingPath + "SoundsDB_" + csv_base_name + ".json"
+    with open(json_name, "w") as json_file:
+        json.dump(output, json_file, indent=4)
+
+    return output
