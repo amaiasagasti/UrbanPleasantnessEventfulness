@@ -388,3 +388,12 @@ mix_features = [
     "freesound.sfx.inharmonicity.var",
     "freesound.rhythm.bpm",
 ]
+
+
+masker_features = [
+    "info.masker_bird",
+    "info.masker_construction",
+    "info.masker_traffic",
+    "info.masker_water",
+    "info.masker_wind",
+]
