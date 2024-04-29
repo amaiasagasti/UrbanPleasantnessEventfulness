@@ -7,7 +7,7 @@ from SoundLights.features import extract_ARAUS_features, extract_Freesound_featu
 
 def generate_features(audioFolderPath: str, csvPath: str, savingPath: str, type: list):
     """
-    Function to generate ARAUS-extended from ARAUS dataset (original column names)
+    Function to generate ARAUS-extended from ARAUS dataset csv (original column names)
     most acoustic and psychoacoustic features found in ARAUS dataset and the signal
     processing features extracted with Freesound Feature Extractor.
 
@@ -208,7 +208,7 @@ def generate_features_internal(
     audioFolderPath: str, csvPath: str, savingPath: str, type: list
 ):
     """
-    Function to generate dataset variations from ARAUS-extended dataset (ARAUS-extended
+    Function to generate dataset variations from ARAUS-extended dataset csv (ARAUS-extended
     column names) the desired acoustic and psychoacoustic features found in ARAUS dataset
     and the signal processing features extracted with Freesound Feature Extractor.
 
