@@ -2,6 +2,7 @@ from scipy.signal import resample
 from scipy.io import wavfile
 import numpy as np
 
+
 def load(file, wav_calib=None, mat_signal="", mat_fs="", ch=None):
     """Extract the signal and its time axis from .wav or .uff file,
     resample the signal to 48 kHz, and affects its sampling frequency
@@ -34,7 +35,9 @@ def load(file, wav_calib=None, mat_signal="", mat_fs="", ch=None):
 
         # manage multichannel files
         if signal.ndim > 1:
-            signal = signal[:, ch] # signal[:, 0] for first channel, signal[:, 1] for second ch
+            signal = signal[
+                :, ch
+            ]  # signal[:, 0] for first channel, signal[:, 1] for second ch
 
         # calibration factor for the signal to be in Pa
         if wav_calib is None:
@@ -56,4 +59,3 @@ def load(file, wav_calib=None, mat_signal="", mat_fs="", ch=None):
         fs = 48000
 
     return signal, fs
-
