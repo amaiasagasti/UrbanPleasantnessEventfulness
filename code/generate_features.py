@@ -5,7 +5,7 @@ sys.path.append("..")
 
 
 # Inputs
-audios_path = "data/soundscapes_augmented/"
+audios_path = "data/ARAUS-extended_soundscapes/"
 ARAUScsv_path = "data/csv_files/responses_SoundLights.csv"
 saving_path = "data/"
 
