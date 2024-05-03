@@ -238,6 +238,13 @@ def generate_features_internal(
         if file.endswith(".mp3") or file.endswith(".wav"):
             print("File ", file)
 
+            # Check if this audio had already been processed by checking if json exists
+            individual_json_path = savingPath + "individual_jsons/"
+            csv_base_name = file.split(".")[0]
+            json_name = str(individual_json_path + str(csv_base_name) + ".json")
+            if os.path.exists(json_name):
+                continue
+
             # Find the first and last WAV files for json name
             if first_wav is None:
                 first_wav = file
@@ -326,10 +333,8 @@ def generate_features_internal(
             output[int(files_count)] = audio_info
 
             # Save info in JSON
-            if not os.path.exists(savingPath):
-                os.makedirs(savingPath)
-            csv_base_name = file.split(".")[0]
-            json_name = str(savingPath + str(csv_base_name) + ".json")
+            if not os.path.exists(individual_json_path):
+                os.makedirs(individual_json_path)
             with open(json_name, "w") as json_file:
                 json.dump(audio_info, json_file, indent=4)
 
@@ -338,27 +343,27 @@ def generate_features_internal(
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 
     # Save in json
-    first_wav = first_wav.split(".")[0].split("_")
-    last_wav = last_wav.split(".")[0].split("_")
-    csv_base_name = (
-        "f"
-        + first_wav[1]
-        + "p"
-        + first_wav[3]
-        + "s"
-        + first_wav[5]
-        + "_"
-        + "f"
-        + last_wav[1]
-        + "p"
-        + last_wav[3]
-        + "s"
-        + last_wav[5]
-    )
-    # Check if the saving directory exists, create it if it doesn't
-
-    json_name = savingPath + "SoundsDB_" + csv_base_name + ".json"
-    with open(json_name, "w") as json_file:
-        json.dump(output, json_file, indent=4)
+    if first_wav == None:
+        first_wav = first_wav.split(".")[0].split("_")
+        last_wav = last_wav.split(".")[0].split("_")
+        csv_base_name = (
+            "f"
+            + first_wav[1]
+            + "p"
+            + first_wav[3]
+            + "s"
+            + first_wav[5]
+            + "_"
+            + "f"
+            + last_wav[1]
+            + "p"
+            + last_wav[3]
+            + "s"
+            + last_wav[5]
+        )
+        # Check if the saving directory exists, create it if it doesn't
+        json_name = savingPath + "SoundsDB_" + csv_base_name + ".json"
+        with open(json_name, "w") as json_file:
+            json.dump(output, json_file, indent=4)
 
     return output
