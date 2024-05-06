@@ -1,7 +1,11 @@
 import sys
-from SoundLights.dataset_functions import generate_features, generate_features_internal
+import os
 
-sys.path.append("..")
+sys.path.append(os.getcwd())
+from src.SoundLights.dataset.dataset_functions import (
+    generate_features,
+    generate_features_internal,
+)
 
 
 # Inputs
