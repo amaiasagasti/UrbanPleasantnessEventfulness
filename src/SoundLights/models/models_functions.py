@@ -108,13 +108,6 @@ def train_elastic_net(
     # Define your ElasticNet model with specific hyperparameters
     model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, selection="random")
 
-    MSEs_train = []
-    MSEs_val = []
-    MSEs_test = []
-    MAEs_train = []
-    MAEs_val = []
-    MAEs_test = []
-
     # Extract dataframes
     df_train = dataframe[
         (dataframe["info.fold"] != val_fold) & (dataframe["info.fold"] > 0)
@@ -157,18 +150,29 @@ def train_elastic_net(
     MAE_val = np.mean(np.abs(clip(X_LR.predict(X_val)) - Y_val))
     MAE_test = np.mean(np.abs(clip(X_LR.predict(X_test)) - Y_test))
 
-    # Add metrics
-    MSEs_train.append(MSE_train)
-    MSEs_val.append(MSE_val)
-    MSEs_test.append(MSE_test)
-    MAEs_train.append(MAE_train)
-    MAEs_val.append(MAE_val)
-    MAEs_test.append(MAE_test)
-
     print("     |    Mean squared error    |        Mean  error       |")
     print("Fold |--------+--------+--------|--------+--------+--------|")
     print("     | Train  |   Val  |  Test  | Train  |   Val  |  Test  | ")
     print("-----+--------+--------+--------+--------+--------+---------")
     print(
-        f"Result| {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MAEs_train):.4f} | {np.mean(MAEs_val):.4f} | {np.mean(MAEs_test):.4f} |"
+        f"Result| {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MAE_train):.4f} | {(MAE_val):.4f} | {(MAE_test):.4f} |"
     )
+
+
+def test_model(model, dataframe, features, prediction):
+
+    X_test = dataframe[features].values
+    if prediction == "P":
+        Y_test = dataframe["info.P_ground_truth"].values
+    elif prediction == "E":
+        Y_test = dataframe["info.E_ground_truth"].values
+
+    # Get MSEs
+    MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
+    MAE_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
+
+    # Print metrics
+    print("|   MSE   |   MAE     |")
+    print("|---------+-----------|")
+    print(f"|  {MSE_test:.4f} |   {MAE_test:.4f}  |")
+    print()

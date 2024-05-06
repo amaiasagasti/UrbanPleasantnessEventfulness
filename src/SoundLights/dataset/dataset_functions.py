@@ -1,10 +1,18 @@
 import pandas as pd
 import json
 import os
-from Mosqito.loadFiles import load
-from SoundLights.dataset.features import (
+import warnings
+from src.Mosqito.loadFiles import load
+from src.SoundLights.dataset.features import (
     extract_ARAUS_features,
     extract_Freesound_features,
+)
+
+
+# Suppress FutureWarning related to DataFrame concatenation
+warnings.filterwarnings(
+    "ignore",
+    message="The behavior of DataFrame concatenation with empty or all-NA entries is deprecated.*",
 )
 
 
@@ -370,3 +378,34 @@ def generate_features_internal(
             json.dump(output, json_file, indent=4)
 
     return output
+
+
+def prepare_data_models(dataframe):
+
+    # Drop string columns
+    """dataframe = dataframe.drop("info.file", axis=1)
+    dataframe = dataframe.drop("info.participant", axis=1)"""
+
+    # Maskers colum, increase values
+    dataframe["info.masker_bird"] = dataframe["info.masker_bird"] * 5
+    dataframe["info.masker_construction"] = dataframe["info.masker_construction"] * 5
+    dataframe["info.masker_traffic"] = dataframe["info.masker_traffic"] * 5
+    dataframe["info.masker_water"] = dataframe["info.masker_water"] * 5
+    dataframe["info.masker_wind"] = dataframe["info.masker_wind"] * 5
+
+    # For fold 0, group data
+    dataframe_fold0 = dataframe[dataframe["info.fold"] == 0]
+    # Drop string columns
+    dataframe_fold0 = dataframe_fold0.drop("info.file", axis=1)
+    dataframe_fold0 = dataframe_fold0.drop("info.participant", axis=1)
+    dataframe_fold0 = dataframe_fold0.groupby(
+        ["info.soundscape", "info.masker", "info.smr"]
+    ).mean()  # For the test set, the same 48 stimuli were shown to all participants so we take the mean of their ratings as the ground truth
+    dataframe_filtered = dataframe[
+        dataframe["info.fold"] != 0
+    ]  # Filter rows where 'fold' column is not equal to 0
+    dataframe = pd.concat(
+        [dataframe_fold0, dataframe_filtered], ignore_index=True
+    )  # Join together
+
+    return dataframe
