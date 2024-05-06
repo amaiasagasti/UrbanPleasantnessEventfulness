@@ -19,7 +19,7 @@ from PsychoacousticParametersMeasurerAndreaCastiella.loudness_ISO532 import (
 from PsychoacousticParametersMeasurerAndreaCastiella.ThirdOctaveFilters import (
     ThirdOctaveLevelTime,
 )
-from SoundLights.freesound_auxiliary_info import (
+from SoundLights.dataset.freesound_auxiliary_info import (
     barkbands,
     erbbands,
     gfcc,

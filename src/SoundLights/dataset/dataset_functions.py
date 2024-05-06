@@ -2,7 +2,10 @@ import pandas as pd
 import json
 import os
 from Mosqito.loadFiles import load
-from SoundLights.features import extract_ARAUS_features, extract_Freesound_features
+from SoundLights.dataset.features import (
+    extract_ARAUS_features,
+    extract_Freesound_features,
+)
 
 
 def generate_features(audioFolderPath: str, csvPath: str, savingPath: str, type: list):

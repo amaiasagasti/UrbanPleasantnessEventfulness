@@ -6,7 +6,7 @@ from sklearn.linear_model import ElasticNet
 from joblib import dump
 
 sys.path.append(os.getcwd())
-from src.SoundLights.features_groups import (
+from src.SoundLights.dataset.features_groups import (
     ARAUS_features,
     Freesound_features,
     mix_features,
