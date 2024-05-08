@@ -12,7 +12,7 @@ from src.SoundLights.dataset.dataset_functions import (
 audios_folders = "data/fold0_variations_freesound_audios/"
 saving_path = "data/fold0_variations_Freesound_data/"
 folders = [
-    "fold0_ARAUS_0_25",
+    # "fold0_ARAUS_0_25",
     "fold0_ARAUS_0_5",
     "fold0_ARAUS_2",
     "fold0_ARAUS_4",
