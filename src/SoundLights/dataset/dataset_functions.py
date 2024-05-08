@@ -3,12 +3,12 @@ import json
 import os
 import warnings
 import numpy as np
-from src.Mosqito.loadFiles import load
-from src.SoundLights.dataset.features import (
+from Mosqito.loadFiles import load
+from SoundLights.dataset.features import (
     extract_ARAUS_features,
     extract_Freesound_features,
 )
-from src.SoundLights.dataset.features_groups import ARAUS_features, Freesound_features
+from SoundLights.dataset.features_groups import ARAUS_features, Freesound_features
 
 
 # Suppress FutureWarning related to DataFrame concatenation
