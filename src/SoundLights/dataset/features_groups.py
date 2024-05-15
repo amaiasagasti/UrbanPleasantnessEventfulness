@@ -258,7 +258,7 @@ Freesound_features = [
     "freesound.lowlevel.mfcc.avg.c10",
     "freesound.lowlevel.mfcc.var.c10",
     "freesound.lowlevel.mfcc.p20.c10",
-    "freesound.lowlevel.mfcc.p40.c10",
+    "freesound.lowlevel.mfcc.p80.c10",
     "freesound.lowlevel.mfcc.avg.c11",
     "freesound.lowlevel.mfcc.var.c11",
     "freesound.lowlevel.mfcc.p20.c11",
