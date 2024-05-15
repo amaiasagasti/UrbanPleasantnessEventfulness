@@ -1,6 +1,8 @@
 from scipy.signal import resample
 from scipy.io import wavfile
+from scipy.io.wavfile import WavFileWarning
 import numpy as np
+import warnings
 
 
 def load(file, wav_calib=None, mat_signal="", mat_fs="", ch=None):
@@ -28,6 +30,9 @@ def load(file, wav_calib=None, mat_signal="", mat_fs="", ch=None):
     fs : integer
         sampling frequency
     """
+
+    # Suppress WavFileWarning
+    warnings.filterwarnings("ignore", category=WavFileWarning)
 
     # load the .wav file content
     if file[-3:] == "wav" or file[-3:] == "WAV":
