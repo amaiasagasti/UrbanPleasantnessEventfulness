@@ -1,13 +1,29 @@
 import sys
-from SoundLights.dataset_functions import generate_features
+import os
+from scipy.io.wavfile import WavFileWarning
+import warnings
+
+# Suppress WavFileWarning
+warnings.filterwarnings("ignore", category=WavFileWarning)
+
+from SoundLights.dataset.dataset_functions import (
+    generate_features,
+    generate_features_internal,
+    generate_features_new_audios,
+)
 
 sys.path.append("..")
 
 
 # Inputs
-audios_path = "data/ARAUS-extended_soundscapes/"
-ARAUScsv_path = "data/csv_files/responses_SoundLights.csv"
-saving_path = "data/"
+audios_path = "data/listening_test_audios/"
+csv_path = "data/csv_files/listening_test_data.csv"
+saving_path = "data/listening_test_data/"
 
 # Call function
-generate_features(audios_path, ARAUScsv_path, saving_path, ["ARAUS", "Freesound"])
+generate_features_new_audios(
+    audios_path,
+    csv_path,
+    saving_path,
+    ["ARAUS", "Freesound", "embedding"],
+)
