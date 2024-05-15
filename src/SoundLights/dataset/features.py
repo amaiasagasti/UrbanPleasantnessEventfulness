@@ -93,6 +93,46 @@ center_freq = [
 ]
 
 
+def calculate_P_E(data):
+    attributes = [
+        "info.pleasant",
+        "info.eventful",
+        "info.chaotic",
+        "info.vibrant",
+        "info.uneventful",
+        "info.calm",
+        "info.annoying",
+        "info.monotonous",
+    ]  # Define attributes to extract from dataframes
+    ISOPl_weights = [
+        1,
+        0,
+        -np.sqrt(2) / 2,
+        np.sqrt(2) / 2,
+        0,
+        np.sqrt(2) / 2,
+        -1,
+        -np.sqrt(2) / 2,
+    ]  # Define weights for each attribute in attributes in computation of ISO Pleasantness
+    ISOEv_weights = [
+        0,
+        1,
+        np.sqrt(2) / 2,
+        np.sqrt(2) / 2,
+        -1,
+        -np.sqrt(2) / 2,
+        0,
+        -np.sqrt(2) / 2,
+    ]  # Define weights for each attribute in attributes in computation of ISO Eventfulness
+    P = np.mean(
+        ((data[attributes] * ISOPl_weights).sum(axis=1) / (4 + np.sqrt(32))).values
+    )  # These are normalised ISO Pleasantness values (in [-1,1])
+    E = np.mean(
+        ((data[attributes] * ISOEv_weights).sum(axis=1) / (4 + np.sqrt(32))).values
+    )  # These are normalised ISO Eventfulness values (in [-1,1])
+    return P, E
+
+
 def calculate_roughness(specLoudness):
     fmodR = fmoddetection(specLoudness, fmin=40, fmax=150)
     R = []
@@ -648,3 +688,11 @@ def extract_Freesound_features(input):
     del features["metadata"]
 
     return features
+
+
+def extract_CLAP_embeddings(audio_path: str, model):
+
+    # Extract embedding
+    embedding = model.get_audio_embedding_from_filelist([audio_path], use_tensor=False)
+
+    return embedding[0].tolist()
