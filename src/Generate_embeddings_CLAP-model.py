@@ -1,10 +1,11 @@
 import os
+import sys
+
 import time
 import json
 import pandas as pd
 from CLAP.src.laion_clap import CLAP_Module
 
-import sys
 
 print("Active Python environment:", sys.prefix)
 

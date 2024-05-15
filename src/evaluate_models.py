@@ -5,15 +5,14 @@ import pandas as pd
 from sklearn.linear_model import ElasticNet
 from joblib import load
 
-sys.path.append(os.getcwd())
-from src.SoundLights.dataset.features_groups import (
+from SoundLights.dataset.features_groups import (
     ARAUS_features,
     Freesound_features,
     mix_features,
     masker_features,
 )
-from src.SoundLights.models.models_functions import test_model
-from src.SoundLights.dataset.dataset_functions import (
+from SoundLights.models.models_functions import test_model
+from SoundLights.dataset.dataset_functions import (
     import_json_to_dataframe,
     prepare_data_models,
 )
