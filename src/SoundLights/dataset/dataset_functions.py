@@ -779,7 +779,7 @@ def file_origin_info(file, participant, gain, audio_info, origin):
 
 def generate_features_general(
     audioFolderPath: str,
-    csvPath: str,
+    csv_file: pd.DataFrame,
     saving_path: str,
     type: list,
     origin: str,
@@ -805,8 +805,8 @@ def generate_features_general(
     """
     output = {}
     files_count = 0
-    # CHANGE READ OUTSIDE !!!!!!
-    csv_file = pd.read_csv(csvPath, delimiter=";")
+    """ # CHANGE READ OUTSIDE !!!!!!
+    csv_file = pd.read_csv(csvPath, delimiter=";") """
 
     # Find the first and last WAV files for json name
     first_wav = None

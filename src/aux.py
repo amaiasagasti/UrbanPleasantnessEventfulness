@@ -1,76 +1,170 @@
-import numpy as np
-from SoundLights.dataset_functions import import_json_to_dataframe
+""" import numpy as np
+import pandas as pd
+import sys
+import os
+
+sys.path.append(os.getcwd())
+from maad.util import mean_dB
+from maad.spl import pressure2leq
+from Mosqito.loadFiles import load
+from src.SoundLights.dataset.wav_files import save_wav
+
+# Path to folder containing original augmented soundscapes
+audioFolderPath = "data/soundscapes_augmented/ARAUS_fold0_01"
+# Path to original responeses.csv
+csvPath = "data/csv_files/responses.csv"
+ARAUScsv = pd.read_csv(csvPath)
+# Path to save
+savingPath = "data/fold0_variations_freesound_audios/fold0_ARAUS_6/"  # CHANGE NAME FOR DIFFERENT VARIATIONS !!!
+# Type of variation of fold0 audios
+type_variation = (
+    "x6"  # CHANGE VARIATIONS "normalization", "x0_25", "x0_5", "x2", "x4", "x6" !!!
+)
+count_clip = 0
+count_total = 0
+clipping = []
+
+files = sorted(os.listdir(audioFolderPath))
+for file in files:
+    print(file)
+
+    if file.endswith(".mp3") or file.endswith(".wav"):
+        audio_path = audioFolderPath + "/" + file
+        # Load the stereo audio file
+        audio_r, fs = load(audio_path, wav_calib=1.0, ch=1)
+        audio_l, fs = load(audio_path, wav_calib=1.0, ch=0)
+        print(np.max([audio_l, audio_r]))
+        if type_variation == "normalization":
+            max = np.max([np.abs(audio_l), np.abs(audio_r)])
+            # Normalize
+            audio_r = audio_r / max
+            audio_l = audio_l / max
+            adapted_signal = np.column_stack((audio_l, audio_r))
+        else:
+            # Find the row in responses.csv corresponding to current audio
+            file_split = file.split("_")
+            file_fold = int(file_split[1])
+            file_participant = "ARAUS_" + file_split[3]
+            file_stimulus = int(file_split[5].split(".")[0])
+            audio_info_aug = ARAUScsv[ARAUScsv["fold_r"] == file_fold]
+            audio_info_aug = audio_info_aug[
+                audio_info_aug["stimulus_index"] == file_stimulus
+            ]
+            audio_info_aug = audio_info_aug[
+                audio_info_aug["participant"] == file_participant
+            ]
+            # Get the original Leq of this audio
+            true_Leq = audio_info_aug["Leq_R_r"].values[0]
+            # Calculate gain from true Leq and "raw" Leq
+            rawR_Leq = mean_dB(pressure2leq(audio_r, fs, 0.125))
+            difference = true_Leq - rawR_Leq
+            gain = 10 ** (difference / 20)
+            # Normalisation gain to avoid a lot of clipping
+            norm_gain = 6.44
+            # Apply gain to audio
+            safe_gain = gain / norm_gain
+            if type_variation == "x0_25":
+                adapted_audio_r = audio_r * safe_gain * 0.25
+                adapted_audio_l = audio_l * safe_gain * 0.25
+            elif type_variation == "x0_5":
+                adapted_audio_r = audio_r * safe_gain * 0.5
+                adapted_audio_l = audio_l * safe_gain * 0.5
+            elif type_variation == "x2":
+                adapted_audio_r = audio_r * safe_gain * 2
+                adapted_audio_l = audio_l * safe_gain * 2
+            elif type_variation == "x4":
+                adapted_audio_r = audio_r * safe_gain * 4
+                adapted_audio_l = audio_l * safe_gain * 4
+            elif type_variation == "x6":
+                adapted_audio_r = audio_r * safe_gain * 6
+                adapted_audio_l = audio_l * safe_gain * 6
+            adapted_signal = np.column_stack((adapted_audio_l, adapted_audio_r))
+            max = np.max(adapted_audio_r)
+            min = np.min(adapted_audio_r)
+            # Clipping?
+            if max > 1 or min < -1:
+                count_clip = count_clip + 1
+                adapted_signal = np.clip(adapted_signal, -1, 1)
+        # Save audio
+        if not os.path.exists(savingPath):
+            os.makedirs(savingPath)
+        savingPathComplete = savingPath + file
+        save_wav(adapted_signal, fs, savingPathComplete)
+
+        count_total = count_total + 1
+        print("Done audio ", count_total, "/240") """
+
+""" from SoundLights.dataset.dataset_functions import (
+    import_jsons_to_json,
+    import_dataframe_to_json,
+)
+import pandas as pd
+
+csvPath = "data/csv_files/SoundLights_Freesound.csv"
+df = pd.read_csv(csvPath)
+import_dataframe_to_json(df, True, "SoundLights_Freesound") """
+
+""" import json
+
+# Open the JSON file
+with open("data/main_files/SoundLights_complete.json", "r") as f:
+    # Load the JSON data
+    data_complete = json.load(f)
+with open("data/main_files/SoundLights_CLAP.json", "r") as f:
+    # Load the JSON data
+    data_CLAP = json.load(f)
+
+for i in data_complete:
+    data_complete[i]["embeddings"] = data_CLAP[i]["embeddings"]
+
+json_path = str("data/main_files/SoundLights_complete2.json")
+with open(json_path, "w") as file:
+    json.dump(data_complete, file, indent=4) """
+
+""" import json
+from SoundLights.dataset.dataset_functions import import_json_to_dataframe
+
+# Open the JSON file
+
+df = import_json_to_dataframe("data/main_files/SoundLights_CLAP.json")
+df.to_csv("data/main_files/SoundLights_CLAP.csv", index=False) """
+
+""" import pandas as pd
+from SoundLights.dataset.dataset_functions import generate_features_general
+
+csvPath = "data/main_files/answers_listening_tests.csv"
+df = pd.read_csv(csvPath, delimiter=";")
+
+generate_features_general(
+    "data/prueba_audios_test/",
+    df,
+    "data/trying_test/",
+    ["ARAUS", "Freesound", "embedding"],
+    "new_data",
+    6.44,
+) """
 
 import pandas as pd
-import os
-import matplotlib.pyplot as plt
-
-responses_ARAUS = pd.read_csv(
-    os.path.join("data/csv_files", "SoundLights_ARAUS.csv"),
-    dtype={"info.participant": str},
-)  # , dtype = {'participant':str}
-
-data = responses_ARAUS["info.wav_gain"].values
-max = np.max(data)
-p96 = np.percentile(data, 96)
-p97 = np.percentile(data, 97)
-p98 = np.percentile(data, 98)
-p99 = np.percentile(data, 99)
-p100 = np.percentile(data, 100)
-print(p96, p97, p98, p99, p100)
-data_norm = np.sort(data / 10)
-print(data_norm[24400:].size)
-print(np.where(data > 30))
-""" hist_values, bin_edges, _ = plt.hist(
-    data_norm, bins=200
-)  # Adjust the number of bins as needed
-
-plt.xlabel("Values")
-plt.ylabel("Frequency")
-title = "Histogram"
-plt.title(title)
-# plt.show() """
-
-# Set the length of the arrays
-length = 1440000
-gain = 2
-# Generate random values between ±0.3
-array_1 = np.random.uniform(low=-0.3, high=0.3, size=length)
-array_1_2 = array_1 * gain
-# Generate random values between ±0.6
-array_2 = np.random.uniform(low=-0.6, high=0.6, size=length)
-array_2_2 = array_2 * gain
-fs = 48000
-
-from maad.spl import pressure2leq
-from maad.util import mean_dB
-
-raw_1 = mean_dB(pressure2leq(array_1, fs, 0.125))
-raw_2 = mean_dB(pressure2leq(array_2, fs, 0.125))
-raw_1_2 = mean_dB(pressure2leq(array_1_2, fs, 0.125))
-raw_2_2 = mean_dB(pressure2leq(array_2_2, fs, 0.125))
-print(raw_1, raw_2, raw_1_2, raw_2_2)
-
-mean = 0  # Mean of the distribution
-std_dev = 1  # Standard deviation of the distribution
-array_3 = np.random.normal(mean, std_dev, length)
-raw_3 = mean_dB(pressure2leq(array_3, fs, 0.125))
-raw_3_2 = mean_dB(pressure2leq(array_3 * gain, fs, 0.125))
-mean = 0.1  # Mean of the distribution
-std_dev = 0.5  # Standard deviation of the distribution
-array_4 = np.random.normal(mean, std_dev, length)
-raw_4 = mean_dB(pressure2leq(array_4, fs, 0.125))
-raw_4_2 = mean_dB(pressure2leq(array_4 * gain, fs, 0.125))
-print(raw_3, raw_4, raw_3_2, raw_4_2)
-
-from Mosqito.loadFiles import load
-
-audio_path_original = (
-    "data/soundscapes_augmented/ARAUS_fold0_01/fold_0_participant_10001_stimulus_02.wav"
+from SoundLights.dataset.dataset_functions import (
+    generate_features_general,
+    generate_features,
 )
-audio_original, fs = load(audio_path_original, wav_calib=1.0, ch=1)
-audio_path_6 = "data/ARAUS-extended_soundscapes/ARAUS_fold0_01/fold_0_participant_10001_stimulus_02.wav"
-audio_6, fs = load(audio_path_6, wav_calib=1.0, ch=1)
-raw_5 = mean_dB(pressure2leq(audio_original, fs, 0.125))
-raw6 = mean_dB(pressure2leq(audio_6, fs, 0.125))
-print(raw_5, raw6)
+
+csvPath = "data/main_files/responses_SoundLights2.csv"
+df = pd.read_csv(csvPath)
+
+generate_features_general(
+    "data/prueba_audios/",
+    df,
+    "data/trying_Original2/",
+    ["ARAUS", "Freesound", "embedding"],
+    "ARAUS_original",
+    6.44,
+)
+
+"""generate_features(
+    "data/prueba_audios_changed_gain/",
+    csvPath,
+    "data/trying_Original_functiongenerate/",
+    ["ARAUS", "Freesound", "embedding"],
+)"""
