@@ -13,7 +13,7 @@ from SoundLights.dataset.features import (
 from SoundLights.dataset.wav_files import save_wav, delete_wav
 
 
-def import_json_to_dataframe(json_path: str):
+def import_json_to_dataframe(json_path: str, save: bool, saving_path: str):
 
     # Load the JSON data
     with open(json_path, "r") as file:
@@ -32,10 +32,12 @@ def import_json_to_dataframe(json_path: str):
         df_row = pd.json_normalize(data[file])
         df = pd.concat([df, df_row])
 
+    if save:
+        df.to_csv(saving_path, index=False)
     return df
 
 
-def import_jsons_to_dataframe(jsons_path: list):
+def import_jsons_to_dataframe(jsons_path: list, save: bool, saving_path: str):
     jsons = sorted(os.listdir(jsons_path))
     dfs = []
 
@@ -52,10 +54,13 @@ def import_jsons_to_dataframe(jsons_path: list):
                 dfs.append(df_row)
     # Concatenate all dataframes
     df = pd.concat(dfs, ignore_index=True)
+
+    if save:
+        df.to_csv(saving_path, index=False)
     return df
 
 
-def import_dataframe_to_json(df, save: bool, json_name: str):
+def import_dataframe_to_json(df, save: bool, saving_path: str):
     print("Converting dataframe to json")
     json_file = {}
     columns = df.columns.tolist()
@@ -123,12 +128,11 @@ def import_dataframe_to_json(df, save: bool, json_name: str):
                 ]
         json_file[index] = row_json
     if save:
-        json_path = str("data/" + str(json_name) + ".json")
-        with open(json_path, "w") as file:
+        with open(saving_path, "w") as file:
             json.dump(json_file, file, indent=4)
 
 
-def import_jsons_to_json(jsons_path: list, save: bool, json_name: str):
+def import_jsons_to_json(jsons_path: list, save: bool, saving_path: str):
     jsons = sorted(os.listdir(jsons_path))
     single_json = {}
     count = 0
@@ -142,7 +146,7 @@ def import_jsons_to_json(jsons_path: list, save: bool, json_name: str):
                 single_json[count] = data
             count = count + 1
     if save:
-        with open(jsons_path + json_name, "w") as file:
+        with open(saving_path, "w") as file:
             json.dump(single_json, file, indent=4)
     return single_json
 
@@ -199,7 +203,7 @@ def file_origin_info(file, participant, gain, audio_info, origin):
         audio_info_json["info"] = {
             "file": file,
             "fold": int(6),
-            "wav_gain": gain,
+            "wav_gain": float(gain),
             "Leq_R_r": float(audio_info["info.Leq_R_r"].values[0].replace(",", ".")),
             "P_ground_truth": P,
             "E_ground_truth": E,
@@ -221,7 +225,7 @@ def file_origin_info(file, participant, gain, audio_info, origin):
             "masker": audio_info["masker"].values[0],
             "smr": int(audio_info["smr"].values[0]),
             "stimulus_index": int(audio_info["stimulus_index"].values[0]),
-            "wav_gain": float(audio_info["wav_gain"].values[0]),
+            "wav_gain": float(gain),
             "time_taken": audio_info["time_taken"].values[0],
             "is_attention": int(audio_info["is_attention"].values[0]),
             "pleasant": int(audio_info["pleasant"].values[0]),
@@ -253,7 +257,7 @@ def file_origin_info(file, participant, gain, audio_info, origin):
             "masker": audio_info["info.masker"].values[0],
             "smr": int(audio_info["info.smr"].values[0]),
             "stimulus_index": int(audio_info["info.stimulus_index"].values[0]),
-            "wav_gain": float(audio_info["info.wav_gain"].values[0]),
+            "wav_gain": float(gain),
             "time_taken": audio_info["info.time_taken"].values[0],
             "is_attention": int(audio_info["info.is_attention"].values[0]),
             "pleasant": int(audio_info["info.pleasant"].values[0]),
@@ -287,6 +291,7 @@ def generate_features(
     type: list,
     origin: str,
     norm_gain: float = 1,
+    variation_gain: float = 1,
 ):
     """
     IN PROCESS
@@ -308,8 +313,6 @@ def generate_features(
     """
     output = {}
     files_count = 0
-    """ # CHANGE READ OUTSIDE !!!!!!
-    csv_file = pd.read_csv(csvPath, delimiter=";") """
 
     # Find the first and last WAV files for json name
     first_wav = None
@@ -369,7 +372,9 @@ def generate_features(
                 audio_info = audio_info[audio_info["participant"] == participant]
                 gain = audio_info["wav_gain"].values[0]
 
-            audio_info = file_origin_info(file, participant, gain, audio_info, origin)
+            audio_info = file_origin_info(
+                file, participant, gain * variation_gain, audio_info, origin
+            )
             """ # Calculate mean Pleasantness and Eventfulness values
             P, E = calculate_P_E(audio_info)
 
@@ -394,8 +399,8 @@ def generate_features(
                 "masker_wind": int(audio_info["info.masker_wind"].values[0]),
             } """
 
-            audio_r, fs = load(audio_path, wav_calib=gain, ch=1)  # R
-            audio_l, fs = load(audio_path, wav_calib=gain, ch=0)  # L
+            audio_r, fs = load(audio_path, wav_calib=gain * variation_gain, ch=1)  # R
+            audio_l, fs = load(audio_path, wav_calib=gain * variation_gain, ch=0)  # L
 
             if "Freesound" or "embedding" in type:
                 # Normalisation gain to avoid a lot of clipping (because audio variables
