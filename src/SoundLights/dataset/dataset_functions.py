@@ -338,6 +338,10 @@ def generate_features(
                 first_wav = file
             last_wav = file
 
+            # if variation_gain code= 9999 means that variation gain should be a random number
+            if variation_gain == 9999:
+                variation_gain = np.random.uniform(1, 10)
+
             # Check if this audio had already been processed by checking if json exists
             individual_json_path = saving_path + "individual_jsons/"
             csv_base_name = file.split(".")[0]
@@ -375,29 +379,6 @@ def generate_features(
             audio_info = file_origin_info(
                 file, participant, gain * variation_gain, audio_info, origin
             )
-            """ # Calculate mean Pleasantness and Eventfulness values
-            P, E = calculate_P_E(audio_info)
-
-            # Add basic info about audio to dictionary
-            audio_info_json = {}
-            audio_info_json["info"] = {
-                "file": file,
-                "fold": int(6),
-                "wav_gain": gain,
-                "Leq_R_r": float(
-                    audio_info["info.Leq_R_r"].values[0].replace(",", ".")
-                ),
-                "P_ground_truth": P,
-                "E_ground_truth": E,
-                "masker_bird": int(audio_info["info.masker_bird"].values[0]),
-                "masker_construction": int(
-                    audio_info["info.masker_construction"].values[0]
-                ),
-                "masker_silence": int(audio_info["info.masker_silence"].values[0]),
-                "masker_traffic": int(audio_info["info.masker_traffic"].values[0]),
-                "masker_water": int(audio_info["info.masker_water"].values[0]),
-                "masker_wind": int(audio_info["info.masker_wind"].values[0]),
-            } """
 
             audio_r, fs = load(audio_path, wav_calib=gain * variation_gain, ch=1)  # R
             audio_l, fs = load(audio_path, wav_calib=gain * variation_gain, ch=0)  # L
