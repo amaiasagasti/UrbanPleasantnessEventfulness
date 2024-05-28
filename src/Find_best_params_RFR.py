@@ -20,7 +20,7 @@ from SoundLights.models.models_functions import (
 
 # INPUT #############################################################################
 df = pd.read_csv("data/main_files/SoundLights_complete.csv")
-saving_folder = "data/output_files/"
+saving_folder = "data/output_files_parallelized/"
 
 
 #####################################################################################
@@ -351,7 +351,9 @@ if not os.path.exists(saving_folder):
 #
 ############# RUN ###################################################################
 # ARAUS
-input_dict = {
+
+input_dicts = [
+{
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -360,9 +362,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_noM_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -371,9 +371,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_noM_stdMeanNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -382,9 +380,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_noM_minMaxnNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -393,9 +389,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_M1_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 5,
     "masker_transform": "None",
@@ -404,9 +398,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_M5_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -415,9 +407,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_M10_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 20,
     "masker_transform": "None",
@@ -426,9 +416,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_M20_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -437,9 +425,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_M10_stdMeanNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -448,10 +434,7 @@ input_dict = {
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
     "name": saving_folder + "RFR_ARAUS_M10_minMaxNorm.txt",
-}
-run_variations_model(input_dict)
-# Freesound
-input_dict = {
+},{  # Freesound
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -460,9 +443,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_noM_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -471,9 +452,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_noM_stdMeanNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -482,9 +461,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_noM_minMaxnNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -493,9 +470,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_M1_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 5,
     "masker_transform": "None",
@@ -504,9 +479,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_M5_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -515,9 +488,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_M10_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 20,
     "masker_transform": "None",
@@ -526,9 +497,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_M20_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -537,9 +506,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_M10_stdMeanNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -548,10 +515,7 @@ input_dict = {
     "dataframe": df_Freesound,
     "features": Freesound_features,
     "name": saving_folder + "RFR_Freesound_M10_minMaxNorm.txt",
-}
-run_variations_model(input_dict)
-# CLAP
-input_dict = {
+},{  # CLAP
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -560,9 +524,7 @@ input_dict = {
     "dataframe": df_clap,
     "features": clap_features,
     "name": saving_folder + "RFR_clap_noM_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -571,9 +533,7 @@ input_dict = {
     "dataframe": df_clap,
     "features": clap_features,
     "name": saving_folder + "RFR_clap_noM_stdMeanNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -582,9 +542,7 @@ input_dict = {
     "dataframe": df_clap,
     "features": clap_features,
     "name": saving_folder + "RFR_clap_noM_minMaxnNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -593,9 +551,7 @@ input_dict = {
     "dataframe": df_clap,
     "features": clap_features,
     "name": saving_folder + "RFR_clap_M1_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 5,
     "masker_transform": "None",
@@ -604,9 +560,7 @@ input_dict = {
     "dataframe": df_clap,
     "features": clap_features,
     "name": saving_folder + "RFR_clap_M5_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -615,9 +569,7 @@ input_dict = {
     "dataframe": df_clap,
     "features": clap_features,
     "name": saving_folder + "RFR_clap_M10_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 20,
     "masker_transform": "None",
@@ -626,9 +578,7 @@ input_dict = {
     "dataframe": df_clap,
     "features": clap_features,
     "name": saving_folder + "RFR_clap_M20_noNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -637,9 +587,7 @@ input_dict = {
     "dataframe": df_clap,
     "features": clap_features,
     "name": saving_folder + "RFR_clap_M10_stdMeanNorm.txt",
-}
-run_variations_model(input_dict)
-input_dict = {
+},{
     "maskers_active": True,
     "masker_gain": 10,
     "masker_transform": "None",
@@ -649,5 +597,20 @@ input_dict = {
     "features": clap_features,
     "name": saving_folder + "RFR_clap_M10_minMaxNorm.txt",
 }
-run_variations_model(input_dict)
-#####################################################################################
+]
+
+#for input_dict in input_dicts:
+#    run_variations_model(input_dict)
+
+
+# To use pymtg, you need to install the package like this:
+# pip install git+https://github.com/MTG/pymtg
+
+from pymtg.processing import WorkParallelizer
+wp = WorkParallelizer()
+for input_dict in input_dicts:
+    wp.add_task(run_variations_model, input_dict)
+
+wp.run(num_workers=14)
+if wp.num_tasks_failed > 0:
+    wp.show_errors()
