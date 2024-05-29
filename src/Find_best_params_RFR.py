@@ -123,6 +123,7 @@ def run_variations_model(input_dict):
         masker_transform,
         masker_gain,
     )
+    df_f6 = input_dict["df_fold6"]
     if input_dict["maskers_active"]:
         features_to_use = features_to_use + [
             "info.masker_bird",
@@ -136,33 +137,27 @@ def run_variations_model(input_dict):
     pd.options.mode.chained_assignment = None  # Ignore warning, default='warn'
     # Prepare data fold 6
     if masker_transform == "-1,1":
-        df_fold6["info.masker_bird"] = (
-            df_fold6["info.masker_bird"] * 2 - 1
+        df_f6["info.masker_bird"] = (df_f6["info.masker_bird"] * 2 - 1) * masker_gain
+        df_f6["info.masker_construction"] = (
+            df_f6["info.masker_construction"] * 2 - 1
         ) * masker_gain
-        df_fold6["info.masker_construction"] = (
-            df_fold6["info.masker_construction"] * 2 - 1
+        df_f6["info.masker_silence"] = (
+            df_f6["info.masker_silence"] * 2 - 1
         ) * masker_gain
-        df_fold6["info.masker_silence"] = (
-            df_fold6["info.masker_silence"] * 2 - 1
+        df_f6["info.masker_traffic"] = (
+            df_f6["info.masker_traffic"] * 2 - 1
         ) * masker_gain
-        df_fold6["info.masker_traffic"] = (
-            df_fold6["info.masker_traffic"] * 2 - 1
-        ) * masker_gain
-        df_fold6["info.masker_water"] = (
-            df_fold6["info.masker_water"] * 2 - 1
-        ) * masker_gain
-        df_fold6["info.masker_wind"] = (
-            df_fold6["info.masker_wind"] * 2 - 1
-        ) * masker_gain
+        df_f6["info.masker_water"] = (df_f6["info.masker_water"] * 2 - 1) * masker_gain
+        df_f6["info.masker_wind"] = (df_f6["info.masker_wind"] * 2 - 1) * masker_gain
     else:
-        df_fold6["info.masker_bird"] = df_fold6["info.masker_bird"] * masker_gain
-        df_fold6["info.masker_construction"] = (
-            df_fold6["info.masker_construction"] * masker_gain
+        df_f6["info.masker_bird"] = df_f6["info.masker_bird"] * masker_gain
+        df_f6["info.masker_construction"] = (
+            df_f6["info.masker_construction"] * masker_gain
         )
-        df_fold6["info.masker_silence"] = df_fold6["info.masker_silence"] * masker_gain
-        df_fold6["info.masker_traffic"] = df_fold6["info.masker_traffic"] * masker_gain
-        df_fold6["info.masker_water"] = df_fold6["info.masker_water"] * masker_gain
-        df_fold6["info.masker_wind"] = df_fold6["info.masker_wind"] * masker_gain
+        df_f6["info.masker_silence"] = df_f6["info.masker_silence"] * masker_gain
+        df_f6["info.masker_traffic"] = df_f6["info.masker_traffic"] * masker_gain
+        df_f6["info.masker_water"] = df_f6["info.masker_water"] * masker_gain
+        df_f6["info.masker_wind"] = df_f6["info.masker_wind"] * masker_gain
 
     # Suppress ConvergenceWarning
     warnings.filterwarnings("ignore", category=ConvergenceWarning)
@@ -217,13 +212,13 @@ def run_variations_model(input_dict):
                 Y_train = df_train["info.P_ground_truth"].values  # [0:10]
                 Y_val = df_val["info.P_ground_truth"].values
                 Y_test = df_test["info.P_ground_truth"].values
-                Y_fold6 = df_fold6["info.P_ground_truth"].values
+                Y_fold6 = df_f6["info.P_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
                 X_val = df_val[features_to_use].values  # [:,0:100]
                 X_test = df_test[features_to_use].values  # [:,0:100]
-                X_fold6 = df_fold6[features_to_use].values  # [:,0:100]
+                X_fold6 = df_f6[features_to_use].values  # [:,0:100]
 
                 # Get features normalized_data = (data - mean) / (std)
                 if input_dict["std_mean_norm"]:
@@ -239,17 +234,17 @@ def run_variations_model(input_dict):
                     X_fold6 = (X_fold6 - min) / (max - min)
 
                 # Fit model
-                X_LR = model.fit(X_train, Y_train)
+                model.fit(X_train, Y_train)
 
                 # Get MSEs
-                MSE_train = np.mean((clip(X_LR.predict(X_train)) - Y_train) ** 2)
-                MSE_val = np.mean((clip(X_LR.predict(X_val)) - Y_val) ** 2)
-                MSE_test = np.mean((clip(X_LR.predict(X_test)) - Y_test) ** 2)
-                MSE_fold6 = np.mean((clip(X_LR.predict(X_fold6)) - Y_fold6) ** 2)
-                ME_train = np.mean(np.abs(clip(X_LR.predict(X_train)) - Y_train))
-                ME_val = np.mean(np.abs(clip(X_LR.predict(X_val)) - Y_val))
-                ME_test = np.mean(np.abs(clip(X_LR.predict(X_test)) - Y_test))
-                ME_fold6 = np.mean(np.abs(clip(X_LR.predict(X_fold6)) - Y_fold6))
+                MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
+                MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
+                MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
+                MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+                ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
+                ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
+                ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
+                ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
 
                 # Add metrics
                 MSEs_train.append(MSE_train)
@@ -353,253 +348,308 @@ if not os.path.exists(saving_folder):
 # ARAUS
 
 input_dicts = [
-{
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_noM_noNorm.txt",
-},{
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": True,
-    "min_max_norm": False,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_noM_stdMeanNorm.txt",
-},{
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_noM_minMaxnNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_M1_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 5,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_M5_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_M10_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 20,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_M20_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": True,
-    "min_max_norm": False,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_M10_stdMeanNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "name": saving_folder + "RFR_ARAUS_M10_minMaxNorm.txt",
-},{  # Freesound
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_noM_noNorm.txt",
-},{
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": True,
-    "min_max_norm": False,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_noM_stdMeanNorm.txt",
-},{
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_noM_minMaxnNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_M1_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 5,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_M5_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_M10_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 20,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_M20_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": True,
-    "min_max_norm": False,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_M10_stdMeanNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "name": saving_folder + "RFR_Freesound_M10_minMaxNorm.txt",
-},{  # CLAP
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_noM_noNorm.txt",
-},{
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": True,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_noM_stdMeanNorm.txt",
-},{
-    "maskers_active": False,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_noM_minMaxnNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_M1_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 5,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_M5_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_M10_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 20,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_M20_noNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": True,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_M10_stdMeanNorm.txt",
-},{
-    "maskers_active": True,
-    "masker_gain": 10,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "name": saving_folder + "RFR_clap_M10_minMaxNorm.txt",
-}
+    # ARAUS
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_noM_noNorm.txt",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": True,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_noM_stdMeanNorm.txt",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": True,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_noM_minMaxnNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_M1_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 5,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_M5_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 10,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_M10_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_M20_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": True,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_M20_stdMeanNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": True,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_ARAUS_M20_minMaxNorm.txt",
+    },
+    {  # Freesound
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_Freesound_noM_noNorm.txt",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": True,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_Freesound_noM_stdMeanNorm.txt",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": True,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_Freesound_noM_minMaxnNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_Freesound_M1_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 5,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_Freesound_M5_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 10,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "df_fold6": df_fold6,
+        "features": Freesound_features,
+        "name": saving_folder + "P_RFR_Freesound_M10_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_Freesound_M20_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": True,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_Freesound_M20_stdMeanNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": True,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_Freesound_M20_minMaxNorm.txt",
+    },
+    {  # CLAP
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_noM_noNorm.txt",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": True,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_noM_stdMeanNorm.txt",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": True,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_noM_minMaxnNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_M1_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 5,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_M5_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 10,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_M10_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_M20_noNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": True,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_M20_stdMeanNorm.txt",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 20,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": True,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "name": saving_folder + "P_RFR_clap_M20_minMaxNorm.txt",
+    },
 ]
 
-#for input_dict in input_dicts:
+
+# for input_dict in input_dicts:
 #    run_variations_model(input_dict)
 
 
@@ -607,6 +657,7 @@ input_dicts = [
 # pip install git+https://github.com/MTG/pymtg
 
 from pymtg.processing import WorkParallelizer
+
 wp = WorkParallelizer()
 for input_dict in input_dicts:
     wp.add_task(run_variations_model, input_dict)
