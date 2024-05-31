@@ -427,10 +427,16 @@ def run_variations_EN(input_dict):
                 df_test = df_to_use[df_to_use["info.fold"] == 0]
 
                 # Get ground-truth labels
-                Y_train = df_train["info.P_ground_truth"].values  # [0:10]
-                Y_val = df_val["info.P_ground_truth"].values
-                Y_test = df_test["info.P_ground_truth"].values
-                Y_fold6 = df_f6["info.P_ground_truth"].values
+                if input_dict["predict"] == "P":
+                    Y_train = df_train["info.P_ground_truth"].values  # [0:10]
+                    Y_val = df_val["info.P_ground_truth"].values
+                    Y_test = df_test["info.P_ground_truth"].values
+                    Y_fold6 = df_f6["info.P_ground_truth"].values
+                elif input_dict["predict"] == "E":
+                    Y_train = df_train["info.E_ground_truth"].values  # [0:10]
+                    Y_val = df_val["info.E_ground_truth"].values
+                    Y_test = df_test["info.E_ground_truth"].values
+                    Y_fold6 = df_f6["info.E_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
@@ -524,10 +530,16 @@ def run_variations_EN(input_dict):
                 df_test = df_to_use[df_to_use["info.fold"] == 0]
 
                 # Get ground-truth labels
-                Y_train = df_train["info.P_ground_truth"].values  # [0:10]
-                Y_val = df_val["info.P_ground_truth"].values
-                Y_test = df_test["info.P_ground_truth"].values
-                Y_fold6 = df_f6["info.P_ground_truth"].values
+                if input_dict["predict"] == "P":
+                    Y_train = df_train["info.P_ground_truth"].values  # [0:10]
+                    Y_val = df_val["info.P_ground_truth"].values
+                    Y_test = df_test["info.P_ground_truth"].values
+                    Y_fold6 = df_f6["info.P_ground_truth"].values
+                elif input_dict["predict"] == "E":
+                    Y_train = df_train["info.E_ground_truth"].values  # [0:10]
+                    Y_val = df_val["info.E_ground_truth"].values
+                    Y_test = df_test["info.E_ground_truth"].values
+                    Y_fold6 = df_f6["info.E_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
@@ -688,10 +700,16 @@ def run_variations_RFR(input_dict):
                 df_test = df_to_use[df_to_use["info.fold"] == 0]
 
                 # Get ground-truth labels
-                Y_train = df_train["info.P_ground_truth"].values  # [0:10]
-                Y_val = df_val["info.P_ground_truth"].values
-                Y_test = df_test["info.P_ground_truth"].values
-                Y_fold6 = df_f6["info.P_ground_truth"].values
+                if input_dict["predict"] == "P":
+                    Y_train = df_train["info.P_ground_truth"].values  # [0:10]
+                    Y_val = df_val["info.P_ground_truth"].values
+                    Y_test = df_test["info.P_ground_truth"].values
+                    Y_fold6 = df_f6["info.P_ground_truth"].values
+                elif input_dict["predict"] == "E":
+                    Y_train = df_train["info.E_ground_truth"].values  # [0:10]
+                    Y_val = df_val["info.E_ground_truth"].values
+                    Y_test = df_test["info.E_ground_truth"].values
+                    Y_fold6 = df_f6["info.E_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
@@ -850,10 +868,16 @@ def run_variations_KNN(input_dict):
                 df_test = df_to_use[df_to_use["info.fold"] == 0]
 
                 # Get ground-truth labels
-                Y_train = df_train["info.P_ground_truth"].values  # [0:10]
-                Y_val = df_val["info.P_ground_truth"].values
-                Y_test = df_test["info.P_ground_truth"].values
-                Y_fold6 = df_f6["info.P_ground_truth"].values
+                if input_dict["predict"] == "P":
+                    Y_train = df_train["info.P_ground_truth"].values  # [0:10]
+                    Y_val = df_val["info.P_ground_truth"].values
+                    Y_test = df_test["info.P_ground_truth"].values
+                    Y_fold6 = df_f6["info.P_ground_truth"].values
+                elif input_dict["predict"] == "E":
+                    Y_train = df_train["info.E_ground_truth"].values  # [0:10]
+                    Y_val = df_val["info.E_ground_truth"].values
+                    Y_test = df_test["info.E_ground_truth"].values
+                    Y_fold6 = df_f6["info.E_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
@@ -862,30 +886,32 @@ def run_variations_KNN(input_dict):
                 X_fold6 = df_f6[features_to_use].values  # [:,0:100]
 
                 # Get features normalized_data = (data - mean) / (std)
-                """ X_train, mean, std=normalize_columns(X_train)
-                X_val= (X_val - mean) / (std)
-                X_test= (X_test - mean) / (std)
-                X_fold6= (X_fold6 - mean) / (std) """
+                if input_dict["std_mean_norm"]:
+                    X_train, mean, std = normalize_columns(X_train)
+                    X_val = (X_val - mean) / (std)
+                    X_test = (X_test - mean) / (std)
+                    X_fold6 = (X_fold6 - mean) / (std)
                 # Get features normalized_data = (data - min) / (max-min)
-                """ X_train, min, max=normalize_columns_minmax(X_train)
-                X_val= (X_val - min) / (max - min)
-                X_test= (X_test - min) / (max - min)
-                X_fold6= (X_fold6 - min) / (max - min) """
+                if input_dict["min_max_norm"]:
+                    X_train, min, max = normalize_columns_minmax(X_train)
+                    X_val = (X_val - min) / (max - min)
+                    X_test = (X_test - min) / (max - min)
+                    X_fold6 = (X_fold6 - min) / (max - min)
 
                 # Fit model
-                X_LR = model.fit(X_train, Y_train)
+                model.fit(X_train, Y_train)
                 print(".")
                 # print("iterations ", X_LR.n_iter_, X_LR.n_features_in_)
 
                 # Get MSEs
-                MSE_train = np.mean((clip(X_LR.predict(X_train)) - Y_train) ** 2)
-                MSE_val = np.mean((clip(X_LR.predict(X_val)) - Y_val) ** 2)
-                MSE_test = np.mean((clip(X_LR.predict(X_test)) - Y_test) ** 2)
-                MSE_fold6 = np.mean((clip(X_LR.predict(X_fold6)) - Y_fold6) ** 2)
-                ME_train = np.mean(np.abs(clip(X_LR.predict(X_train)) - Y_train))
-                ME_val = np.mean(np.abs(clip(X_LR.predict(X_val)) - Y_val))
-                ME_test = np.mean(np.abs(clip(X_LR.predict(X_test)) - Y_test))
-                ME_fold6 = np.mean(np.abs(clip(X_LR.predict(X_fold6)) - Y_fold6))
+                MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
+                MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
+                MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
+                MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+                ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
+                ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
+                ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
+                ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
 
                 # Add metrics
                 MSEs_train.append(MSE_train)
@@ -898,10 +924,16 @@ def run_variations_KNN(input_dict):
                 MEs_fold6.append(ME_fold6)
 
                 # print(f'{val_fold:4d} | {MSE_train:.4f} | {MSE_val:.4f} | {MSE_test:.4f} | {ME_train:.4f} | {ME_val:.4f} | {ME_test:.4f} | {X_LR.intercept_:7.4f} | {X_train.shape[0]:5d} | {X_val.shape[0]:5d} | {X_test.shape[0]:^4d} | {X_train.shape[1]:^5d} | {np.sum(np.abs(X_LR.coef_) > 0):^5d} |')
-            print("Parameters ", value)
-            print(
+            f.write(f"Parameters {value}")
+            f.write("\n")
+            f.write(
                 f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
             )
+            f.write("\n")
+            f.write(
+                "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+            )
+            f.write("\n")
 
             current_mean = (
                 np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_fold6)
