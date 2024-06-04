@@ -5,8 +5,13 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.exceptions import ConvergenceWarning
 import warnings
-from joblib import dump
-
+import json
+from joblib import dump, load
+import copy
+from SoundLights.dataset.dataset_functions import import_json_to_dataframe
+from SoundLights.dataset.features_groups import (
+    general_info,
+)
 
 def prepare_data_models(
     dataframe,
@@ -52,8 +57,6 @@ def prepare_data_models(
     # For fold 0, group data
     dataframe_fold0 = dataframe[dataframe["info.fold"] == 0]
     # Drop string columns
-    print("\n dataframe fold 0 before anything", dataframe_fold0.info())
-    print(" ----------------------------- ")
     dataframe_fold0 = dataframe_fold0.drop("info.file", axis=1)
     dataframe_fold0 = dataframe_fold0.drop("info.participant", axis=1)
     dataframe_fold0 = dataframe_fold0.groupby(
@@ -156,180 +159,85 @@ def normalize_columns_log(data):
     return log_transformed_data
 
 
-## Se usa?
-def train_elastic_net(
-    dataframe, features, alpha, l1_ratio, val_fold, prediction, model_path_name
-):
-    """
-    Train an ElasticNet regression model using specified hyperparameters and dataset splits.
+def test_model(model_path:str, config_file_path:str, df:pd.DataFrame):
 
-    Args:
-        dataframe (pd.DataFrame): The input DataFrame containing the dataset.
-        features (list): The list of feature column names.
-        alpha (float): The alpha parameter for the ElasticNet model.
-        l1_ratio (float): The l1_ratio parameter for the ElasticNet model.
-        val_fold (int): The fold number to be used as the validation set.
-        prediction (str): The type of prediction to perform ("P" for Pleasantness or "E" for Eventfulness).
-        model_path_name (str): The file path to save the trained model.
+    # Load data in dataframe
+    #df = import_json_to_dataframe(data_path, False, "")
 
-    Returns:
-        None
+    # Load the JSON data
+    with open(config_file_path, "r") as file:
+        config_dict = json.load(file)
+    features = config_dict["features"]
+    maskers_active = config_dict["maskers_active"]
+    masker_gain = config_dict["masker_gain"]
+    masker_transform = config_dict["masker_transform"]
+    std_mean_norm = config_dict["std_mean_norm"]
+    min_max_norm = config_dict["min_max_norm"]
+    predict = config_dict["predict"]
+    min = config_dict["min"]
+    max = config_dict["max"]
+    mean = config_dict["mean"]
+    std = config_dict["std"]
 
-    Notes:
-        - The function fits an ElasticNet regression model to the training data and saves the model to the specified path.
-        - It evaluates the model's performance on training, validation, and test sets, and prints the mean squared error
-          (MSE) and mean absolute error (MAE) for each fold.
-    """
-    # Define your ElasticNet model with specific hyperparameters
-    model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, selection="random")
+    # Prepare data for inputting model
+    if maskers_active:
+        """ features = features + [
+            "info.masker_bird",
+            "info.masker_construction",
+            "info.masker_silence",
+            "info.masker_traffic",
+            "info.masker_water",
+            "info.masker_wind",
+        ] """
+        if masker_transform == "-1,1":
+            df["info.masker_bird"] = (df["info.masker_bird"] * 2 - 1) * masker_gain
+            df["info.masker_construction"] = (
+                df["info.masker_construction"] * 2 - 1
+            ) * masker_gain
+            df["info.masker_traffic"] = (
+                df["info.masker_traffic"] * 2 - 1
+            ) * masker_gain
+            df["info.masker_silence"] = (
+                df["info.masker_silence"] * 2 - 1
+            ) * masker_gain
+            df["info.masker_water"] = (df["info.masker_water"] * 2 - 1) * masker_gain
+            df["info.masker_wind"] = (df["info.masker_wind"] * 2 - 1) * masker_gain
+        else:
+            df["info.masker_bird"] = (df["info.masker_bird"]) * masker_gain
+            df["info.masker_construction"] = (
+                df["info.masker_construction"] * masker_gain
+            )
+            df["info.masker_traffic"] = df["info.masker_traffic"] * masker_gain
+            df["info.masker_silence"] = df["info.masker_silence"] * masker_gain
+            df["info.masker_water"] = df["info.masker_water"] * masker_gain
+            df["info.masker_wind"] = df["info.masker_wind"] * masker_gain
 
-    # Extract dataframes
-    df_train = dataframe[
-        (dataframe["info.fold"] != val_fold) & (dataframe["info.fold"] > 0)
-    ]  # For the training set, use all samples that are not in the test set (fold 0) and current validation fold.
-    df_val = dataframe[dataframe["info.fold"] == val_fold]
-    df_test = (
-        dataframe[dataframe["info.fold"] == 0]
-        .groupby(["info.soundscape", "info.masker", "info.smr"])
-        .mean()
-    )  # For the test set, the same 48 stimuli were shown to all participants so we take the mean of their ratings as the ground truth
+    # Get X and Y arrays
+    X_test = df[features].values
+    if predict == "P":
+        Y_test = df["info.P_ground_truth"].values
+    elif predict == "E":
+        Y_test = df["info.E_ground_truth"].values
 
-    # Get ground-truth labels
-    if prediction == "P":
-        print("Predicting Pleasantess")
-        Y_train = df_train["info.P_ground_truth"].values
-        Y_val = df_val["info.P_ground_truth"].values
-        Y_test = df_test["info.P_ground_truth"].values
-    elif prediction == "E":
-        print("Predicting Eventfulness")
-        Y_train = df_train["info.E_ground_truth"].values
-        Y_val = df_val["info.E_ground_truth"].values
-        Y_test = df_test["info.E_ground_truth"].values
+    # If needed, apply normalization to data
+    if std_mean_norm:
+        X_test = (X_test - np.array(mean)) / (np.array(std))
+    if min_max_norm:
+        X_test = (X_test - np.array(min)) / (np.array(max) - np.array(min))
 
-    # Get features
-    X_train = df_train[features].values
-    X_val = df_val[features].values
-    X_test = df_test[features].values
+    # Load the model from the .joblib file
+    model = load(model_path)
 
-    # Fit model
-    X_LR = model.fit(X_train, Y_train)
-
-    # Save model to given path
-    dump(model, model_path_name)
-
+    # Do predictions
+    Y_prediction = clip(model.predict(X_test))
     # Get MSEs
-    MSE_train = np.mean((clip(X_LR.predict(X_train)) - Y_train) ** 2)
-    MSE_val = np.mean((clip(X_LR.predict(X_val)) - Y_val) ** 2)
-    MSE_test = np.mean((clip(X_LR.predict(X_test)) - Y_test) ** 2)
-    MAE_train = np.mean(np.abs(clip(X_LR.predict(X_train)) - Y_train))
-    MAE_val = np.mean(np.abs(clip(X_LR.predict(X_val)) - Y_val))
-    MAE_test = np.mean(np.abs(clip(X_LR.predict(X_test)) - Y_test))
-
-    print("     |    Mean squared error    |        Mean  error       |")
-    print("Fold |--------+--------+--------|--------+--------+--------|")
-    print("     | Train  |   Val  |  Test  | Train  |   Val  |  Test  | ")
-    print("-----+--------+--------+--------+--------+--------+---------")
-    print(
-        f"Result| {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MAE_train):.4f} | {(MAE_val):.4f} | {(MAE_test):.4f} |"
-    )
-
-
-## Se usa?
-def train_RFR(dataframe, features, n_estimators, val_fold, prediction, model_path_name):
-    """
-    Train an ElasticNet regression model using specified hyperparameters and dataset splits.
-
-    Args:
-        dataframe (pd.DataFrame): The input DataFrame containing the dataset.
-        features (list): The list of feature column names.
-        alpha (float): The alpha parameter for the ElasticNet model.
-        l1_ratio (float): The l1_ratio parameter for the ElasticNet model.
-        val_fold (int): The fold number to be used as the validation set.
-        prediction (str): The type of prediction to perform ("P" for Pleasantness or "E" for Eventfulness).
-        model_path_name (str): The file path to save the trained model.
-
-    Returns:
-        None
-
-    Notes:
-        - The function fits an ElasticNet regression model to the training data and saves the model to the specified path.
-        - It evaluates the model's performance on training, validation, and test sets, and prints the mean squared error
-          (MSE) and mean absolute error (MAE) for each fold.
-    """
-    # Define your Random forest regressor model with specific hyperparameters
-    model = RandomForestRegressor(n_estimators=n_estimators, random_state=0)
-
-    # Process dataframe
-    dataframe, features = prepare_data_models(
-        dataframe,
-        features,
-    )
-
-    # Extract dataframes
-    df_train = dataframe[
-        (dataframe["info.fold"] != val_fold) & (dataframe["info.fold"] > 0)
-    ]  # For the training set, use all samples that are not in the test set (fold 0) and current validation fold.
-    df_val = dataframe[dataframe["info.fold"] == val_fold]
-    df_test = dataframe[dataframe["info.fold"] == 0]
-
-    # Get ground-truth labels
-    if prediction == "P":
-        print("Predicting Pleasantess")
-        Y_train = df_train["info.P_ground_truth"].values
-        Y_val = df_val["info.P_ground_truth"].values
-        Y_test = df_test["info.P_ground_truth"].values
-    elif prediction == "E":
-        print("Predicting Eventfulness")
-        Y_train = df_train["info.E_ground_truth"].values
-        Y_val = df_val["info.E_ground_truth"].values
-        Y_test = df_test["info.E_ground_truth"].values
-
-    # Get features
-    X_train = df_train[features].values
-    X_val = df_val[features].values
-    X_test = df_test[features].values
-
-    # Fit model
-    X_LR = model.fit(X_train, Y_train)
-
-    # Save model to given path
-    dump(model, model_path_name)
-
-    # Get MSEs
-    MSE_train = np.mean((clip(X_LR.predict(X_train)) - Y_train) ** 2)
-    MSE_val = np.mean((clip(X_LR.predict(X_val)) - Y_val) ** 2)
-    MSE_test = np.mean((clip(X_LR.predict(X_test)) - Y_test) ** 2)
-    MAE_train = np.mean(np.abs(clip(X_LR.predict(X_train)) - Y_train))
-    MAE_val = np.mean(np.abs(clip(X_LR.predict(X_val)) - Y_val))
-    MAE_test = np.mean(np.abs(clip(X_LR.predict(X_test)) - Y_test))
-
-    print("     |    Mean squared error    |        Mean  error       |")
-    print("Fold |--------+--------+--------|--------+--------+--------|")
-    print("     | Train  |   Val  |  Test  | Train  |   Val  |  Test  | ")
-    print("-----+--------+--------+--------+--------+--------+---------")
-    print(
-        f"Result| {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MAE_train):.4f} | {(MAE_val):.4f} | {(MAE_test):.4f} |"
-    )
-
-
-# Se usa?
-def test_model(model, dataframe, features, prediction):
-
-    X_test = dataframe[features].values
-    if prediction == "P":
-        Y_test = dataframe["info.P_ground_truth"].values
-    elif prediction == "E":
-        Y_test = dataframe["info.E_ground_truth"].values
-
-    # Get MSEs
-    MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
-    MAE_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
+    MSE_test = np.mean((Y_prediction - Y_test) ** 2)
+    MAE_test = np.mean(np.abs(Y_prediction - Y_test))
 
     # Print metrics
     print("|   MSE   |   MAE     |")
     print("|---------+-----------|")
     print(f"|  {MSE_test:.4f} |   {MAE_test:.4f}  |")
-    print()
 
 
 def run_variations_EN(input_dict):
@@ -944,3 +852,658 @@ def run_variations_KNN(input_dict):
 
         f.write(f"Best parameter: {chosen}, giving a mean of {prev_mean}")
         f.write("\n")
+
+
+def train_EN(input_dict):
+    masker_transform = input_dict["masker_transform"]
+    masker_gain = input_dict["masker_gain"]
+    df_to_use, features_to_use = prepare_data_models(
+        input_dict["dataframe"].copy(),
+        input_dict["features"],
+        masker_transform,
+        masker_gain,
+    )
+    df_f6 = input_dict["df_fold6"].copy()
+    if input_dict["maskers_active"]:
+        features_to_use = features_to_use + [
+            "info.masker_bird",
+            "info.masker_construction",
+            "info.masker_silence",
+            "info.masker_traffic",
+            "info.masker_water",
+            "info.masker_wind",
+        ]
+
+    pd.options.mode.chained_assignment = None  # Ignore warning, default='warn'
+    # Prepare data fold 6
+    if masker_transform == "-1,1":
+        df_f6["info.masker_bird"] = (df_f6["info.masker_bird"] * 2 - 1) * masker_gain
+        df_f6["info.masker_construction"] = (
+            df_f6["info.masker_construction"] * 2 - 1
+        ) * masker_gain
+        df_f6["info.masker_silence"] = (
+            df_f6["info.masker_silence"] * 2 - 1
+        ) * masker_gain
+        df_f6["info.masker_traffic"] = (
+            df_f6["info.masker_traffic"] * 2 - 1
+        ) * masker_gain
+        df_f6["info.masker_water"] = (df_f6["info.masker_water"] * 2 - 1) * masker_gain
+        df_f6["info.masker_wind"] = (df_f6["info.masker_wind"] * 2 - 1) * masker_gain
+    else:
+        df_f6["info.masker_bird"] = df_f6["info.masker_bird"] * masker_gain
+        df_f6["info.masker_construction"] = (
+            df_f6["info.masker_construction"] * masker_gain
+        )
+        df_f6["info.masker_silence"] = df_f6["info.masker_silence"] * masker_gain
+        df_f6["info.masker_traffic"] = df_f6["info.masker_traffic"] * masker_gain
+        df_f6["info.masker_water"] = df_f6["info.masker_water"] * masker_gain
+        df_f6["info.masker_wind"] = df_f6["info.masker_wind"] * masker_gain
+
+    # Suppress ConvergenceWarning
+    warnings.filterwarnings("ignore", category=ConvergenceWarning)
+    from sklearn.linear_model import ElasticNet
+
+    # Store input data in output dictionary
+    output_dict = {
+        "maskers_active": input_dict["maskers_active"],
+        "masker_gain": input_dict["masker_gain"],
+        "masker_transform": input_dict["masker_transform"],
+        "std_mean_norm": input_dict["std_mean_norm"],
+        "min_max_norm": input_dict["min_max_norm"],
+        "features": features_to_use,
+        "predict": input_dict["predict"],
+        "params": input_dict["params"],
+    }
+
+    print(
+        "     |         Mean squared error        |             Mean  error            |"
+    )
+    print(
+        "Fold |--------+--------+--------+--------|--------+--------+--------|---------|"
+    )
+    print(
+        "     | Train  |   Val  |  Test  |Test(f6)| Train  |   Val  |  Test  | Test(f6)|"
+    )
+    print(
+        "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+    )
+    # Get parametres
+    alpha = input_dict["params"][0]
+    l1_ratio = input_dict["params"][1]
+
+    print(f"Parameters {alpha, l1_ratio}")
+
+    # Auxiliary variables to save once best model is chosen
+    prev_mean = 9999
+    val_fold_chosen = 0
+    min_chosen = 0
+    max_chosen = 0
+    mean_chosen = 0
+    std_chosen = 0
+
+    model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, selection="random")
+
+    MSEs_train = []
+    MSEs_val = []
+    MSEs_test = []
+    MSEs_fold6 = []
+    MEs_train = []
+    MEs_val = []
+    MEs_test = []
+    MEs_fold6 = []
+
+    for val_fold in [1, 2, 3, 4, 5]:
+
+        # Extract dataframes
+        df_train = df_to_use[
+            (df_to_use["info.fold"] != val_fold) & (df_to_use["info.fold"] > 0)
+        ]  # For the training set, use all samples that are not in the test set (fold 0) and current validation fold.
+        df_val = df_to_use[df_to_use["info.fold"] == val_fold]
+        df_test = df_to_use[df_to_use["info.fold"] == 0]
+
+        # Get ground-truth labels
+        if input_dict["predict"] == "P":
+            Y_train = df_train["info.P_ground_truth"].values  # [0:10]
+            Y_val = df_val["info.P_ground_truth"].values
+            Y_test = df_test["info.P_ground_truth"].values
+            Y_fold6 = df_f6["info.P_ground_truth"].values
+        elif input_dict["predict"] == "E":
+            Y_train = df_train["info.E_ground_truth"].values  # [0:10]
+            Y_val = df_val["info.E_ground_truth"].values
+            Y_test = df_test["info.E_ground_truth"].values
+            Y_fold6 = df_f6["info.E_ground_truth"].values
+
+        # Get feature matrices
+        X_train = df_train[features_to_use].values  # [:,0:100]
+        X_val = df_val[features_to_use].values  # [:,0:100]
+        X_test = df_test[features_to_use].values  # [:,0:100]
+        X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+
+        # Get features normalized_data = (data - mean) / (std)
+        if input_dict["std_mean_norm"]:
+            X_train, mean, std = normalize_columns(X_train)
+            X_val = (X_val - mean) / (std)
+            X_test = (X_test - mean) / (std)
+            X_fold6 = (X_fold6 - mean) / (std)
+        # Get features normalized_data = (data - min) / (max-min)
+        if input_dict["min_max_norm"]:
+            X_train, min, max = normalize_columns_minmax(X_train)
+            X_val = (X_val - min) / (max - min)
+            X_test = (X_test - min) / (max - min)
+            X_fold6 = (X_fold6 - min) / (max - min)
+
+        # Fit model
+        model.fit(X_train, Y_train)
+
+        # Get MSEs
+        MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
+        MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
+        MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
+        MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+        ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
+        ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
+        ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
+        ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+
+        # Add metrics
+        MSEs_train.append(MSE_train)
+        MSEs_val.append(MSE_val)
+        MSEs_test.append(MSE_test)
+        MSEs_fold6.append(MSE_fold6)
+        MEs_train.append(ME_train)
+        MEs_val.append(ME_val)
+        MEs_test.append(ME_test)
+        MEs_fold6.append(ME_fold6)
+
+        print(
+            f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_fold6):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_fold6):.4f} |"
+        )
+        print(
+            "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+        )
+
+        # Check if validation fold provide the best results
+        current_mean = (ME_val + ME_test + ME_fold6) / 3
+        if current_mean < prev_mean:
+            prev_mean = current_mean
+            model_chosen = copy.deepcopy(model)
+            val_fold_chosen = val_fold
+            if input_dict["std_mean_norm"]:
+                std_chosen = std
+                mean_chosen = mean
+            if input_dict["min_max_norm"]:
+                min_chosen = min
+                max_chosen = max
+
+    print(
+        f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+    )
+    print(
+        "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+    )
+    print(f"Parameters {alpha, l1_ratio}, best validation fold {val_fold_chosen}")
+
+    # Save data to given path
+    if type(min_chosen) == np.ndarray:
+        output_dict["min"] = min_chosen.tolist()
+    else:
+        output_dict["min"] = min_chosen
+    if type(max_chosen) == np.ndarray:
+        output_dict["max"] = max_chosen.tolist()
+    else:
+        output_dict["max"] = max_chosen
+    if type(mean_chosen) == np.ndarray:
+        output_dict["mean"] = mean_chosen.tolist()
+    else:
+        output_dict["mean"] = mean_chosen
+    if type(mean_chosen) == np.ndarray:
+        output_dict["std"] = mean_chosen.tolist()
+    else:
+        output_dict["std"] = std_chosen
+    output_dict["val_fold"] = val_fold_chosen
+    json_path_name = (
+        input_dict["folder_path"] + input_dict["model_name"] + "_config.json"
+    )
+    with open(json_path_name, "w") as json_file:
+        json.dump(output_dict, json_file, indent=4)
+
+    # Save model to given path
+    model_path_name = input_dict["folder_path"] + input_dict["model_name"] + ".joblib"
+    dump(model_chosen, model_path_name)
+
+
+def train_KNN(input_dict):
+    masker_transform = input_dict["masker_transform"]
+    masker_gain = input_dict["masker_gain"]
+    df_to_use, features_to_use = prepare_data_models(
+        input_dict["dataframe"].copy(),
+        input_dict["features"],
+        masker_transform,
+        masker_gain,
+    )
+    df_f6 = input_dict["df_fold6"].copy()
+    if input_dict["maskers_active"]:
+        features_to_use = features_to_use + [
+            "info.masker_bird",
+            "info.masker_construction",
+            "info.masker_silence",
+            "info.masker_traffic",
+            "info.masker_water",
+            "info.masker_wind",
+        ]
+
+    pd.options.mode.chained_assignment = None  # Ignore warning, default='warn'
+    # Prepare data fold 6
+    if masker_transform == "-1,1":
+        df_f6["info.masker_bird"] = (df_f6["info.masker_bird"] * 2 - 1) * masker_gain
+        df_f6["info.masker_construction"] = (
+            df_f6["info.masker_construction"] * 2 - 1
+        ) * masker_gain
+        df_f6["info.masker_silence"] = (
+            df_f6["info.masker_silence"] * 2 - 1
+        ) * masker_gain
+        df_f6["info.masker_traffic"] = (
+            df_f6["info.masker_traffic"] * 2 - 1
+        ) * masker_gain
+        df_f6["info.masker_water"] = (df_f6["info.masker_water"] * 2 - 1) * masker_gain
+        df_f6["info.masker_wind"] = (df_f6["info.masker_wind"] * 2 - 1) * masker_gain
+    else:
+        df_f6["info.masker_bird"] = df_f6["info.masker_bird"] * masker_gain
+        df_f6["info.masker_construction"] = (
+            df_f6["info.masker_construction"] * masker_gain
+        )
+        df_f6["info.masker_silence"] = df_f6["info.masker_silence"] * masker_gain
+        df_f6["info.masker_traffic"] = df_f6["info.masker_traffic"] * masker_gain
+        df_f6["info.masker_water"] = df_f6["info.masker_water"] * masker_gain
+        df_f6["info.masker_wind"] = df_f6["info.masker_wind"] * masker_gain
+
+    # Suppress ConvergenceWarning
+    warnings.filterwarnings("ignore", category=ConvergenceWarning)
+    from sklearn.linear_model import ElasticNet
+
+    # Store input data in output dictionary
+    output_dict = {
+        "maskers_active": input_dict["maskers_active"],
+        "masker_gain": input_dict["masker_gain"],
+        "masker_transform": input_dict["masker_transform"],
+        "std_mean_norm": input_dict["std_mean_norm"],
+        "min_max_norm": input_dict["min_max_norm"],
+        "features": features_to_use,
+        "predict": input_dict["predict"],
+        "params": input_dict["params"],
+    }
+
+    print(
+        "     |         Mean squared error        |             Mean  error            |"
+    )
+    print(
+        "Fold |--------+--------+--------+--------|--------+--------+--------|---------|"
+    )
+    print(
+        "     | Train  |   Val  |  Test  |Test(f6)| Train  |   Val  |  Test  | Test(f6)|"
+    )
+    print(
+        "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+    )
+    # Get parameter
+    n_neighbors = input_dict["params"][0]
+
+    print(f"Number of neighbors {n_neighbors}")
+
+    # Auxiliary variables to save once best model is chosen
+    prev_mean = 9999
+    val_fold_chosen = 0
+    min_chosen = 0
+    max_chosen = 0
+    mean_chosen = 0
+    std_chosen = 0
+
+    model = KNeighborsRegressor(n_neighbors=n_neighbors)
+
+    MSEs_train = []
+    MSEs_val = []
+    MSEs_test = []
+    MSEs_fold6 = []
+    MEs_train = []
+    MEs_val = []
+    MEs_test = []
+    MEs_fold6 = []
+
+    for val_fold in [1, 2, 3, 4, 5]:
+
+        # Extract dataframes
+        df_train = df_to_use[
+            (df_to_use["info.fold"] != val_fold) & (df_to_use["info.fold"] > 0)
+        ]  # For the training set, use all samples that are not in the test set (fold 0) and current validation fold.
+        df_val = df_to_use[df_to_use["info.fold"] == val_fold]
+        df_test = df_to_use[df_to_use["info.fold"] == 0]
+
+        # Get ground-truth labels
+        if input_dict["predict"] == "P":
+            Y_train = df_train["info.P_ground_truth"].values  # [0:10]
+            Y_val = df_val["info.P_ground_truth"].values
+            Y_test = df_test["info.P_ground_truth"].values
+            Y_fold6 = df_f6["info.P_ground_truth"].values
+        elif input_dict["predict"] == "E":
+            Y_train = df_train["info.E_ground_truth"].values  # [0:10]
+            Y_val = df_val["info.E_ground_truth"].values
+            Y_test = df_test["info.E_ground_truth"].values
+            Y_fold6 = df_f6["info.E_ground_truth"].values
+
+        # Get feature matrices
+        X_train = df_train[features_to_use].values  # [:,0:100]
+        X_val = df_val[features_to_use].values  # [:,0:100]
+        X_test = df_test[features_to_use].values  # [:,0:100]
+        X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+
+        # Get features normalized_data = (data - mean) / (std)
+        if input_dict["std_mean_norm"]:
+            X_train, mean, std = normalize_columns(X_train)
+            X_val = (X_val - mean) / (std)
+            X_test = (X_test - mean) / (std)
+            X_fold6 = (X_fold6 - mean) / (std)
+        # Get features normalized_data = (data - min) / (max-min)
+        if input_dict["min_max_norm"]:
+            X_train, min, max = normalize_columns_minmax(X_train)
+            X_val = (X_val - min) / (max - min)
+            X_test = (X_test - min) / (max - min)
+            X_fold6 = (X_fold6 - min) / (max - min)
+
+        # Fit model
+        model.fit(X_train, Y_train)
+
+        # Get MSEs
+        MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
+        MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
+        MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
+        MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+        ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
+        ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
+        ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
+        ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+
+        # Add metrics
+        MSEs_train.append(MSE_train)
+        MSEs_val.append(MSE_val)
+        MSEs_test.append(MSE_test)
+        MSEs_fold6.append(MSE_fold6)
+        MEs_train.append(ME_train)
+        MEs_val.append(ME_val)
+        MEs_test.append(ME_test)
+        MEs_fold6.append(ME_fold6)
+
+        print(
+            f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_fold6):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_fold6):.4f} |"
+        )
+        print(
+            "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+        )
+
+        # Check if validation fold provide the best results
+        current_mean = (ME_val + ME_test + ME_fold6) / 3
+        if current_mean < prev_mean:
+            prev_mean = current_mean
+            model_chosen = copy.deepcopy(model)
+            val_fold_chosen = val_fold
+            if input_dict["std_mean_norm"]:
+                std_chosen = std
+                mean_chosen = mean
+            if input_dict["min_max_norm"]:
+                min_chosen = min
+                max_chosen = max
+
+    print(
+        f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+    )
+    print(
+        "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+    )
+    print(f"N_neighbors {n_neighbors}, best validation fold {val_fold_chosen}")
+
+    # Save data to given path
+    if type(min_chosen) == np.ndarray:
+        output_dict["min"] = min_chosen.tolist()
+    else:
+        output_dict["min"] = min_chosen
+    if type(max_chosen) == np.ndarray:
+        output_dict["max"] = max_chosen.tolist()
+    else:
+        output_dict["max"] = max_chosen
+    if type(mean_chosen) == np.ndarray:
+        output_dict["mean"] = mean_chosen.tolist()
+    else:
+        output_dict["mean"] = mean_chosen
+    if type(mean_chosen) == np.ndarray:
+        output_dict["std"] = mean_chosen.tolist()
+    else:
+        output_dict["std"] = std_chosen
+    output_dict["val_fold"] = val_fold_chosen
+    json_path_name = (
+        input_dict["folder_path"] + input_dict["model_name"] + "_config.json"
+    )
+    with open(json_path_name, "w") as json_file:
+        json.dump(output_dict, json_file, indent=4)
+
+    # Save model to given path
+    model_path_name = input_dict["folder_path"] + input_dict["model_name"] + ".joblib"
+    dump(model_chosen, model_path_name)
+
+
+def train_RFR(input_dict):
+
+    txt_name = input_dict["folder_path"] + input_dict["model_name"]+".txt"
+    with open(txt_name, "a") as f:
+        masker_transform = input_dict["masker_transform"]
+        masker_gain = input_dict["masker_gain"]
+        df_to_use, features_to_use = prepare_data_models(
+            input_dict["dataframe"].copy(),
+            input_dict["features"],
+            masker_transform,
+            masker_gain,
+        )
+        df_f6 = input_dict["df_fold6"].copy()
+        if input_dict["maskers_active"]:
+            features_to_use = features_to_use + [
+                "info.masker_bird",
+                "info.masker_construction",
+                "info.masker_silence",
+                "info.masker_traffic",
+                "info.masker_water",
+                "info.masker_wind",
+            ]
+
+        pd.options.mode.chained_assignment = None  # Ignore warning, default='warn'
+        # Prepare data fold 6
+        if masker_transform == "-1,1":
+            df_f6["info.masker_bird"] = (df_f6["info.masker_bird"] * 2 - 1) * masker_gain
+            df_f6["info.masker_construction"] = (
+                df_f6["info.masker_construction"] * 2 - 1
+            ) * masker_gain
+            df_f6["info.masker_silence"] = (
+                df_f6["info.masker_silence"] * 2 - 1
+            ) * masker_gain
+            df_f6["info.masker_traffic"] = (
+                df_f6["info.masker_traffic"] * 2 - 1
+            ) * masker_gain
+            df_f6["info.masker_water"] = (df_f6["info.masker_water"] * 2 - 1) * masker_gain
+            df_f6["info.masker_wind"] = (df_f6["info.masker_wind"] * 2 - 1) * masker_gain
+        else:
+            df_f6["info.masker_bird"] = df_f6["info.masker_bird"] * masker_gain
+            df_f6["info.masker_construction"] = (
+                df_f6["info.masker_construction"] * masker_gain
+            )
+            df_f6["info.masker_silence"] = df_f6["info.masker_silence"] * masker_gain
+            df_f6["info.masker_traffic"] = df_f6["info.masker_traffic"] * masker_gain
+            df_f6["info.masker_water"] = df_f6["info.masker_water"] * masker_gain
+            df_f6["info.masker_wind"] = df_f6["info.masker_wind"] * masker_gain
+
+        # Suppress ConvergenceWarning
+        warnings.filterwarnings("ignore", category=ConvergenceWarning)
+        from sklearn.linear_model import ElasticNet
+
+        # Store input data in output dictionary
+        output_dict = {
+            "maskers_active": input_dict["maskers_active"],
+            "masker_gain": input_dict["masker_gain"],
+            "masker_transform": input_dict["masker_transform"],
+            "std_mean_norm": input_dict["std_mean_norm"],
+            "min_max_norm": input_dict["min_max_norm"],
+            "features": features_to_use,
+            "predict": input_dict["predict"],
+            "params": input_dict["params"],
+        }
+
+        f.write(
+            "     |         Mean squared error        |             Mean  error            |"
+        )
+        f.write(
+            "Fold |--------+--------+--------+--------|--------+--------+--------|---------|"
+        )
+        f.write(
+            "     | Train  |   Val  |  Test  |Test(f6)| Train  |   Val  |  Test  | Test(f6)|"
+        )
+        f.write(
+            "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+        )
+        # Get parameter
+        n_estimators = input_dict["params"][0]
+
+        f.write(f"Number of estimators {n_estimators}")
+
+        # Auxiliary variables to save once best model is chosen
+        prev_mean = 9999
+        val_fold_chosen = 0
+        min_chosen = 0
+        max_chosen = 0
+        mean_chosen = 0
+        std_chosen = 0
+
+        model = RandomForestRegressor(n_estimators=n_estimators, random_state=0)
+
+        MSEs_train = []
+        MSEs_val = []
+        MSEs_test = []
+        MSEs_fold6 = []
+        MEs_train = []
+        MEs_val = []
+        MEs_test = []
+        MEs_fold6 = []
+
+        for val_fold in [1, 2, 3, 4, 5]:
+
+            # Extract dataframes
+            df_train = df_to_use[
+                (df_to_use["info.fold"] != val_fold) & (df_to_use["info.fold"] > 0)
+            ]  # For the training set, use all samples that are not in the test set (fold 0) and current validation fold.
+            df_val = df_to_use[df_to_use["info.fold"] == val_fold]
+            df_test = df_to_use[df_to_use["info.fold"] == 0]
+
+            # Get ground-truth labels
+            if input_dict["predict"] == "P":
+                Y_train = df_train["info.P_ground_truth"].values  # [0:10]
+                Y_val = df_val["info.P_ground_truth"].values
+                Y_test = df_test["info.P_ground_truth"].values
+                Y_fold6 = df_f6["info.P_ground_truth"].values
+            elif input_dict["predict"] == "E":
+                Y_train = df_train["info.E_ground_truth"].values  # [0:10]
+                Y_val = df_val["info.E_ground_truth"].values
+                Y_test = df_test["info.E_ground_truth"].values
+                Y_fold6 = df_f6["info.E_ground_truth"].values
+
+            # Get feature matrices
+            X_train = df_train[features_to_use].values  # [:,0:100]
+            X_val = df_val[features_to_use].values  # [:,0:100]
+            X_test = df_test[features_to_use].values  # [:,0:100]
+            X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+
+            # Get features normalized_data = (data - mean) / (std)
+            if input_dict["std_mean_norm"]:
+                X_train, mean, std = normalize_columns(X_train)
+                X_val = (X_val - mean) / (std)
+                X_test = (X_test - mean) / (std)
+                X_fold6 = (X_fold6 - mean) / (std)
+            # Get features normalized_data = (data - min) / (max-min)
+            if input_dict["min_max_norm"]:
+                X_train, min, max = normalize_columns_minmax(X_train)
+                X_val = (X_val - min) / (max - min)
+                X_test = (X_test - min) / (max - min)
+                X_fold6 = (X_fold6 - min) / (max - min)
+
+            # Fit model
+            model.fit(X_train, Y_train)
+
+            # Get MSEs
+            MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
+            MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
+            MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
+            MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+            ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
+            ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
+            ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
+            ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+
+            # Add metrics
+            MSEs_train.append(MSE_train)
+            MSEs_val.append(MSE_val)
+            MSEs_test.append(MSE_test)
+            MSEs_fold6.append(MSE_fold6)
+            MEs_train.append(ME_train)
+            MEs_val.append(ME_val)
+            MEs_test.append(ME_test)
+            MEs_fold6.append(ME_fold6)
+
+            f.write(
+                f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_fold6):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_fold6):.4f} |"
+            )
+            f.write(
+                "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+            )
+
+            # Check if validation fold provide the best results
+            current_mean = (ME_val + ME_test + ME_fold6) / 3
+            if current_mean < prev_mean:
+                prev_mean = current_mean
+                model_chosen = copy.deepcopy(model)
+                val_fold_chosen = val_fold
+                if input_dict["std_mean_norm"]:
+                    std_chosen = std
+                    mean_chosen = mean
+                if input_dict["min_max_norm"]:
+                    min_chosen = min
+                    max_chosen = max
+
+        f.write(
+            f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+        )
+        f.write(
+            "-----+--------+--------+--------+--------+--------+--------+--------+----------"
+        )
+        f.write(f"N_estimators {n_estimators}, best validation fold {val_fold_chosen}")
+
+        # Save data to given path
+        if type(min_chosen) == np.ndarray:
+            output_dict["min"] = min_chosen.tolist()
+        else:
+            output_dict["min"] = min_chosen
+        if type(max_chosen) == np.ndarray:
+            output_dict["max"] = max_chosen.tolist()
+        else:
+            output_dict["max"] = max_chosen
+        if type(mean_chosen) == np.ndarray:
+            output_dict["mean"] = mean_chosen.tolist()
+        else:
+            output_dict["mean"] = mean_chosen
+        if type(mean_chosen) == np.ndarray:
+            output_dict["std"] = mean_chosen.tolist()
+        else:
+            output_dict["std"] = std_chosen
+        output_dict["val_fold"] = val_fold_chosen
+        json_path_name = (
+            input_dict["folder_path"] + input_dict["model_name"] + "_config.json"
+        )
+        with open(json_path_name, "w") as json_file:
+            json.dump(output_dict, json_file, indent=4)
+
+        # Save model to given path
+        model_path_name = input_dict["folder_path"] + input_dict["model_name"] + ".joblib"
+        dump(model_chosen, model_path_name)
