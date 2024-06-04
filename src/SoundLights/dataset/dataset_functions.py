@@ -10,6 +10,12 @@ from SoundLights.dataset.features import (
     extract_CLAP_embeddings,
     calculate_P_E,
 )
+from SoundLights.dataset.features_groups import (
+    ARAUS_features,
+    Freesound_features,
+    masker_features,
+    clap_features,
+)
 from SoundLights.dataset.wav_files import save_wav, delete_wav
 
 
@@ -151,11 +157,8 @@ def import_jsons_to_json(jsons_path: list, save: bool, saving_path: str):
     return single_json
 
 
+""" 
 def prepare_data_models(dataframe, features_evaluated, maskers_gain: float = 5):
-
-    # Drop string columns
-    """dataframe = dataframe.drop("info.file", axis=1)
-    dataframe = dataframe.drop("info.participant", axis=1)"""
 
     # Maskers colum, increase values
     dataframe["info.masker_bird"] = dataframe["info.masker_bird"] * maskers_gain
@@ -191,6 +194,8 @@ def prepare_data_models(dataframe, features_evaluated, maskers_gain: float = 5):
     dataframe.drop(columns=columns_to_drop, inplace=True)
 
     return dataframe, columns_to_mantain
+
+ """
 
 
 def file_origin_info(file, participant, gain, audio_info, origin):
@@ -466,3 +471,32 @@ def generate_features(
             json.dump(output, json_file, indent=4)
 
     return output
+
+
+def expand_CLAP_features(df):
+    all_columns = (
+        ARAUS_features
+        + Freesound_features
+        + masker_features
+        + ["info.P_ground_truth", "info.E_ground_truth"]
+        + clap_features
+    )
+
+    full_list = []
+    for index, row in df.iterrows():
+        string_list = row["CLAP"].split("[")[1].split("]")[0].split(",")
+        clap_list = [float(item) for item in string_list]
+        complete_new_row = (
+            list(
+                row[
+                    ARAUS_features
+                    + Freesound_features
+                    + masker_features
+                    + ["info.P_ground_truth", "info.E_ground_truth"]
+                ].values
+            )
+            + clap_list
+        )
+        full_list.append(complete_new_row)
+    df = pd.DataFrame(data=full_list, columns=all_columns)
+    return df
