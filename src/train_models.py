@@ -84,9 +84,119 @@ if not os.path.exists(saving_folder):
 #
 #
 
+input_dicts = [
+    {
+        "maskers_active": True,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "predict": "P",
+        "params": [100],
+        "folder_path": saving_folder,
+        "model_name": "RFR_ARAUS_P",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_ARAUS,
+        "features": ARAUS_features,
+        "df_fold6": df_fold6,
+        "predict": "E",
+        "params": [400],
+        "folder_path": saving_folder,
+        "model_name": "RFR_ARAUS_E",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": True,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "predict": "P",
+        "params": [250],
+        "folder_path": saving_folder,
+        "model_name": "RFR_Freesound_P",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_Freesound,
+        "features": Freesound_features,
+        "df_fold6": df_fold6,
+        "predict": "E",
+        "params": [250],
+        "folder_path": saving_folder,
+        "model_name": "RFR_Freesound_E",
+    },
+    {
+        "maskers_active": True,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "predict": "P",
+        "params": [100],
+        "folder_path": saving_folder,
+        "model_name": "RFR_CLAP_P",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "predict": "E",
+        "params": [500],
+        "folder_path": saving_folder,
+        "model_name": "RFR_CLAP_E",
+    },
+    {
+        "maskers_active": False,
+        "masker_gain": 1,
+        "masker_transform": "None",
+        "std_mean_norm": False,
+        "min_max_norm": False,
+        "dataframe": df_clap,
+        "features": clap_features,
+        "df_fold6": df_fold6,
+        "predict": "P",
+        "params": [250],
+        "folder_path": saving_folder,
+        "model_name": "RFR_CLAP_P_raw",
+    },
+]
+
+from pymtg.processing import WorkParallelizer
+
+wp = WorkParallelizer()
+for input_dict in input_dicts:
+    wp.add_task(train_RFR, input_dict)
+
+wp.run(num_workers=14)
+if wp.num_tasks_failed > 0:
+    wp.show_errors()
 
 ### RFR - ARAUS - Pleasantness
-input_dict = {
+""" input_dict = {
     "maskers_active": True,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -100,10 +210,10 @@ input_dict = {
     "folder_path": saving_folder,
     "model_name": "RFR_ARAUS_P",
 }
-train_RFR(input_dict)
+train_RFR(input_dict) """
 
 ### RFR - ARAUS - Eventfulness
-input_dict = {
+""" input_dict = {
     "maskers_active": True,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -117,10 +227,10 @@ input_dict = {
     "folder_path": saving_folder,
     "model_name": "RFR_ARAUS_E",
 }
-train_RFR(input_dict)
+train_RFR(input_dict) """
 
 ### RFR - Freesound - Pleasantness
-input_dict = {
+""" input_dict = {
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -134,10 +244,10 @@ input_dict = {
     "folder_path": saving_folder,
     "model_name": "RFR_Freesound_P",
 }
-train_RFR(input_dict)
+train_RFR(input_dict) """
 
 ### RFR - Freesound - Eventfulness
-input_dict = {
+""" input_dict = {
     "maskers_active": True,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -151,10 +261,10 @@ input_dict = {
     "folder_path": saving_folder,
     "model_name": "RFR_Freesound_E",
 }
-train_RFR(input_dict)
+train_RFR(input_dict) """
 
 ### RFR - CLAP - Pleasantness
-input_dict = {
+""" input_dict = {
     "maskers_active": True,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -168,10 +278,10 @@ input_dict = {
     "folder_path": saving_folder,
     "model_name": "RFR_CLAP_P",
 }
-train_RFR(input_dict)
+train_RFR(input_dict) """
 
 ### RFR - CLAP - Eventfulness
-input_dict = {
+""" input_dict = {
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -185,10 +295,10 @@ input_dict = {
     "folder_path": saving_folder,
     "model_name": "RFR_CLAP_E",
 }
-train_RFR(input_dict)
+train_RFR(input_dict) """
 
 ### RFR - CLAP - Pleasantness (ADDITIONAL)
-input_dict = {
+""" input_dict = {
     "maskers_active": False,
     "masker_gain": 1,
     "masker_transform": "None",
@@ -200,15 +310,15 @@ input_dict = {
     "predict": "P",
     "params": [250],
     "folder_path": saving_folder,
-    "model_name": "RFR_CLAP_P",
+    "model_name": "RFR_CLAP_P_raw",
 }
-train_RFR(input_dict)
+train_RFR(input_dict) """
 
 ############# RUN ###################################################################
-print("\n")
-print("\n")
-print("##########################################################################")
-print("ELASTIC NET ")
+# print("\n")
+# print("\n")
+# print("##########################################################################")
+# print("ELASTIC NET ")
 
 ### Elastic Net - ARAUS - Pleasantness
 """
@@ -323,10 +433,10 @@ train_EN(input_dict) """
 train_EN(input_dict) """
 
 
-print("\n")
-print("\n")
-print("##########################################################################")
-print("KNN ")
+# print("\n")
+# print("\n")
+# print("##########################################################################")
+# print("KNN ")
 
 """ 
 ### KNN - ARAUS - Pleasantness
