@@ -181,7 +181,7 @@ def test_model(model_path:str, config_file_path:str, df:pd.DataFrame):
 
     # Prepare data for inputting model
     if maskers_active:
-        """ features = features + [
+        """ features = features + [ # Already saved in "features" field
             "info.masker_bird",
             "info.masker_construction",
             "info.masker_silence",

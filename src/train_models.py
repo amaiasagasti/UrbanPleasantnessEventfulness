@@ -195,6 +195,12 @@ wp.run(num_workers=14)
 if wp.num_tasks_failed > 0:
     wp.show_errors()
 
+############# RUN ###################################################################
+# print("\n")
+# print("\n")
+# print("##########################################################################")
+# print("RANDOM FOREST REGRESSOR ")
+
 ### RFR - ARAUS - Pleasantness
 """ input_dict = {
     "maskers_active": True,
@@ -314,7 +320,6 @@ train_RFR(input_dict) """
 }
 train_RFR(input_dict) """
 
-############# RUN ###################################################################
 # print("\n")
 # print("\n")
 # print("##########################################################################")

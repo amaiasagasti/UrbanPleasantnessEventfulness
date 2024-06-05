@@ -68,6 +68,11 @@ files_dicts = [
         "config_file_path": "data/models/trained/KNN_ARAUS_P_config.json",
     },
     {
+        "title": "RFR - ARAUS - PLEASANTNESS",
+        "model_path": "data/models/trained/RFR_ARAUS_P.joblib",
+        "config_file_path": "data/models/trained/RFR_ARAUS_P_config.json",
+    },
+    {
         "title": "ELASTIC NET - Freesound - PLEASANTNESS",
         "model_path": "data/models/trained/EN_Freesound_P.joblib",
         "config_file_path": "data/models/trained/EN_Freesound_P_config.json",
@@ -76,6 +81,11 @@ files_dicts = [
         "title": "KNN - Freesound - PLEASANTNESS",
         "model_path": "data/models/trained/KNN_Freesound_P.joblib",
         "config_file_path": "data/models/trained/KNN_Freesound_P_config.json",
+    },
+    {
+        "title": "RFR - Freesound - PLEASANTNESS",
+        "model_path": "data/models/trained/RFR_Freesound_P.joblib",
+        "config_file_path": "data/models/trained/RFR_Freesound_P_config.json",
     },
     {
         "title": "ELASTIC NET - CLAP - PLEASANTNESS",
@@ -88,6 +98,16 @@ files_dicts = [
         "config_file_path": "data/models/trained/KNN_CLAP_P_config.json",
     },
     {
+        "title": "RFR - CLAP - PLEASANTNESS",
+        "model_path": "data/models/trained/RFR_CLAP_P.joblib",
+        "config_file_path": "data/models/trained/RFR_CLAP_P_config.json",
+    },
+    {
+        "title": "RFR RAW  CLAP - PLEASANTNESS",
+        "model_path": "data/models/trained/RFR_CLAP_P_raw.joblib",
+        "config_file_path": "data/models/trained/RFR_CLAP_P_raw_config.json",
+    },
+    {
         "title": "ELASTIC NET - ARAUS - EVENTFULNESS",
         "model_path": "data/models/trained/EN_ARAUS_E.joblib",
         "config_file_path": "data/models/trained/EN_ARAUS_E_config.json",
@@ -96,6 +116,11 @@ files_dicts = [
         "title": "KNN - ARAUS - EVENTFULNESS",
         "model_path": "data/models/trained/KNN_ARAUS_E.joblib",
         "config_file_path": "data/models/trained/KNN_ARAUS_E_config.json",
+    },
+    {
+        "title": "RFR - ARAUS - EVENTFULNESS",
+        "model_path": "data/models/trained/RFR_ARAUS_E.joblib",
+        "config_file_path": "data/models/trained/RFR_ARAUS_E_config.json",
     },
     {
         "title": "ELASTIC NET - Freesound - EVENTFULNESS",
@@ -108,6 +133,11 @@ files_dicts = [
         "config_file_path": "data/models/trained/KNN_Freesound_E_config.json",
     },
     {
+        "title": "RFR - Freesound - EVENTFULNESS",
+        "model_path": "data/models/trained/RFR_Freesound_E.joblib",
+        "config_file_path": "data/models/trained/RFR_Freesound_E_config.json",
+    },
+    {
         "title": "ELASTIC NET - CLAP - EVENTFULNESS",
         "model_path": "data/models/trained/EN_CLAP_E.joblib",
         "config_file_path": "data/models/trained/EN_CLAP_E_config.json",
@@ -116,6 +146,11 @@ files_dicts = [
         "title": "KNN - CLAP - EVENTFULNESS",
         "model_path": "data/models/trained/KNN_CLAP_E.joblib",
         "config_file_path": "data/models/trained/KNN_CLAP_E_config.json",
+    },
+    {
+        "title": "RFR - CLAP - EVENTFULNESS",
+        "model_path": "data/models/trained/RFR_CLAP_E.joblib",
+        "config_file_path": "data/models/trained/RFR_CLAP_E_config.json",
     },
 ]
 
@@ -141,44 +176,3 @@ for file_dict in files_dicts:
     print("fold0 variation random")
     test_model(model_path, config_file_path, df_random.copy())
     print("################################################################")
-
-""" 
-,
-    
-model_path = "data/models/EN_Freesound_P.joblib"
-config_file_path = "data/models/trained/EN_Freesound_P_config.json"
-test_model(model_path, config_file_path, df)
-
-model_path = "data/models/EN_CLAP_P.joblib"
-config_file_path = "data/models/trained/EN_CLAP_P_config.json"
-test_model(model_path, config_file_path, df)
-
-# KNN
-model_path = "data/models/KNN_ARAUS_P.joblib"
-config_file_path = "data/models/trained/KNN_ARAUS_P_config.json"
-test_model(model_path, config_file_path, df)
-
-model_path = "data/models/KNN_Freesound_P.joblib"
-config_file_path = "data/models/trained/KNN_Freesound_P_config.json"
-test_model(model_path, config_file_path, df)
-
-model_path = "data/models/KNN_CLAP_P.joblib"
-config_file_path = "data/models/trained/KNN_CLAP_P_config.json"
-test_model(model_path, config_file_path, df)
-
-# RFR
-model_path = "data/models/RFR_ARAUS_P.joblib"
-config_file_path = "data/models/trained/RFR_ARAUS_P_config.json"
-test_model(model_path, config_file_path, df)
-
-model_path = "data/models/RFR_Freesound_P.joblib"
-config_file_path = "data/models/trained/RFR_Freesound_P_config.json"
-test_model(model_path, config_file_path, df)
-
-model_path = "data/models/RFR_CLAP_P.joblib"
-config_file_path = "data/models/trained/RFR_CLAP_P_config.json"
-test_model(model_path, config_file_path, df)
-
-print("################################################################")
-print("\n")
- """
