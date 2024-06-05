@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import os
 import numpy as np
+import time
 from CLAP.src.laion_clap import CLAP_Module
 from Mosqito.loadFiles import load
 from SoundLights.dataset.features import (
@@ -318,6 +319,9 @@ def generate_features(
     """
     output = {}
     files_count = 0
+    duration_time_ARAUS = 0
+    duration_time_Freesound = 0
+    duration_time_CLAP = 0
 
     # Find the first and last WAV files for json name
     first_wav = None
@@ -419,7 +423,9 @@ def generate_features(
                     "roughness",
                     "fluctuation",
                 ]
+                start_time_ARAUS = time.time()
                 audio_acoustic_features = extract_ARAUS_features(audio_r, fs, list)
+                duration_time_ARAUS = time.time() - start_time_ARAUS
                 # Add to dictionary
                 audio_info["ARAUS"] = audio_acoustic_features
             ################################################################################################
@@ -427,9 +433,11 @@ def generate_features(
             ## NON-PSYCHOACOUSTIC FEATURES EXTRACTION ######################################################
             if "Freesound" in type:
                 # Extract features for signal
+                start_time_Freesound = time.time()
                 audio_freesound_features = extract_Freesound_features(
                     provisional_saving_path_complete
                 )
+                duration_time_Freesound = time.time() - start_time_Freesound
                 # Add to dictionary
                 audio_info["freesound"] = audio_freesound_features
 
@@ -437,9 +445,11 @@ def generate_features(
 
             ## EMBEDDING EXTRACTION ########################################################################
             if "embedding" in type:
+                start_time_CLAP = time.time()
                 embedding = extract_CLAP_embeddings(
                     provisional_saving_path_complete, model
                 )
+                duration_time_CLAP = time.time() - start_time_CLAP
                 audio_info["CLAP"] = embedding
             ################################################################################################
 
@@ -469,6 +479,11 @@ def generate_features(
         json_name = saving_path + "Sounds_" + csv_base_name + ".json"
         with open(json_name, "w") as json_file:
             json.dump(output, json_file, indent=4)
+
+    print("TIME STATISTICS ")
+    print(f"ARAUS features {duration_time_ARAUS} seconds")
+    print(f"Freesound features {duration_time_Freesound} seconds")
+    print(f"CLAP features {duration_time_CLAP} seconds")
 
     return output
 
