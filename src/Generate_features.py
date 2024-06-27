@@ -11,13 +11,11 @@ from SoundLights.dataset.dataset_functions import (
     generate_features,
 )
 
-sys.path.append("..")
-
 
 # Inputs
 audios_path = "data/listening_test_audios/"
 csv_path = "data/main_files/answers_listening_tests.csv"
-saving_path = "data/listening_test_data_delete/"
+saving_path = "data/listening_test_data/"
 
 
 csv_file = pd.read_csv(csv_path, delimiter=";")
