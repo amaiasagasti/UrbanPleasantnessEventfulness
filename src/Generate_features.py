@@ -2,14 +2,13 @@ import sys
 import os
 from scipy.io.wavfile import WavFileWarning
 import warnings
+import pandas as pd
 
 # Suppress WavFileWarning
 warnings.filterwarnings("ignore", category=WavFileWarning)
 
 from SoundLights.dataset.dataset_functions import (
     generate_features,
-    generate_features_internal,
-    generate_features_new_audios,
 )
 
 sys.path.append("..")
@@ -17,13 +16,18 @@ sys.path.append("..")
 
 # Inputs
 audios_path = "data/listening_test_audios/"
-csv_path = "data/csv_files/listening_test_data.csv"
-saving_path = "data/listening_test_data/"
+csv_path = "data/main_files/answers_listening_tests.csv"
+saving_path = "data/listening_test_data_delete/"
 
+
+csv_file = pd.read_csv(csv_path, delimiter=";")
 # Call function
-generate_features_new_audios(
+generate_features(
     audios_path,
-    csv_path,
+    csv_file,
     saving_path,
     ["ARAUS", "Freesound", "embedding"],
+    "new_data",
+    6.44,
+    1,
 )
