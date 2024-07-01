@@ -2,7 +2,7 @@ from pydub import AudioSegment
 import numpy as np
 import joblib
 import time
-from Mosqito.loadFiles import load
+from SoundLights.dataset.Mosqito.loadFiles import load
 from CLAP.src.laion_clap import CLAP_Module
 from SoundLights.dataset.dataset_functions import extract_CLAP_embeddings
 

@@ -7,18 +7,18 @@ from numpy import pi, convolve
 from maad.spl import pressure2leq
 from maad.util import mean_dB, dB2power, power2dB
 from mosqito.sq_metrics import loudness_zwtv, roughness_dw
-from Mosqito.Sharpness import sharpness_din
-from PsychoacousticParametersMeasurerAndreaCastiella.Roughness import (
+from SoundLights.dataset.Mosqito.Sharpness import sharpness_din
+from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.Roughness import (
     acousticRoughness,
 )
-from PsychoacousticParametersMeasurerAndreaCastiella.FluctuationStrength import (
+from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.FluctuationStrength import (
     acousticFluctuation,
     fmoddetection,
 )
-from PsychoacousticParametersMeasurerAndreaCastiella.loudness_ISO532 import (
+from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.loudness_ISO532 import (
     loudness_ISO532_time,
 )
-from PsychoacousticParametersMeasurerAndreaCastiella.ThirdOctaveFilters import (
+from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.ThirdOctaveFilters import (
     ThirdOctaveLevelTime,
 )
 from SoundLights.dataset.freesound_auxiliary_info import (
