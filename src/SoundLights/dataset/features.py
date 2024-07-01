@@ -15,12 +15,6 @@ from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.Fluctua
     acousticFluctuation,
     fmoddetection,
 )
-from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.loudness_ISO532 import (
-    loudness_ISO532_time,
-)
-from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.ThirdOctaveFilters import (
-    ThirdOctaveLevelTime,
-)
 from SoundLights.dataset.freesound_auxiliary_info import (
     barkbands,
     erbbands,
