@@ -1,9 +1,13 @@
-import sklearn.linear_model
-import numpy as np
 import pandas as pd
 import os
-import warnings
-from sklearn.exceptions import ConvergenceWarning
+import sys
+
+# Path importing
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+sys.path.append(src_dir)
+
+# Imports from this project
 from SoundLights.dataset.features_groups import (
     general_info,
     ARAUS_features,
@@ -17,8 +21,9 @@ from SoundLights.models.models_functions import (
 )
 
 # INPUT #############################################################################
-df = pd.read_csv("data/main_files/SoundLights_complete.csv")
-saving_folder = "data/training_KNN/"
+data_path = "data/main_files/SoundLights_complete.csv"
+data_foldFs_path = "data/main_files/SoundLights_fold6.csv"
+saving_folder = "data/training_KNN_delete/"
 #####################################################################################
 #
 #
@@ -26,6 +31,7 @@ saving_folder = "data/training_KNN/"
 #
 #
 ############# PREPARE DATA #########################################################
+df = pd.read_csv(data_path)
 # ARAUS features dataframe
 df_ARAUS = df[general_info + ARAUS_features]
 # Freesound features dataframe
@@ -43,7 +49,7 @@ for index, row in df_clap.iterrows():
     full_list.append(complete_new_row)
 df_clap = pd.DataFrame(data=full_list, columns=all_columns)
 
-df_real = pd.read_csv("data/main_files/SoundLights_fold6.csv")
+df_real = pd.read_csv(data_foldFs_path)
 # Adapt CLAP features
 df_fold6 = df_real[
     ARAUS_features
@@ -419,17 +425,3 @@ input_dicts = [
 
 for input_dict in input_dicts:
     run_variations_KNN(input_dict)
-
-
-# To use pymtg, you need to install the package like this:
-# pip install git+https://github.com/MTG/pymtg
-
-""" from pymtg.processing import WorkParallelizer
-
-wp = WorkParallelizer()
-for input_dict in input_dicts:
-    wp.add_task(run_variations_model, input_dict)
-
-wp.run(num_workers=14)
-if wp.num_tasks_failed > 0:
-    wp.show_errors() """
