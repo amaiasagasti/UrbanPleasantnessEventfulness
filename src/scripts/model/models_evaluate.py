@@ -5,6 +5,12 @@ import pandas as pd
 from sklearn.linear_model import ElasticNet
 from joblib import load
 
+# Path importing
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+sys.path.append(src_dir)
+
+# Imports from this project
 from SoundLights.dataset.features_groups import (
     general_info,
     ARAUS_features,
@@ -25,10 +31,16 @@ WARNING:
 We are importing .csv files of fold 0 variations. If you only have the .json versions, use function
 import_json_to_dataframe() to save them first and then proceed.
 """
-
-# Load data
-# Data of fold 0 to know "ground truth"
+# INPUT #############################################################################
 data_path = "data/main_files/SoundLights_complete.csv"
+data_0_5_path = "data/main_files/variations_fold0/variations_fold0_0_5.csv"
+data_2_path = "data/main_files/variations_fold0/variations_fold0_2.csv"
+data_4_path = "data/main_files/variations_fold0/variations_fold0_4.csv"
+data_6_path = "data/main_files/variations_fold0/variations_fold0_6.csv"
+data_random_path = "data/main_files/variations_fold0/variations_fold0_random.csv"
+#####################################################################################
+
+# Data of fold 0 to know "ground truth"
 df_fold0 = pd.read_csv(data_path)
 full_list = []
 all_columns = general_info + ARAUS_features + Freesound_features + clap_features
@@ -43,19 +55,15 @@ df_fold0 = pd.DataFrame(data=full_list, columns=all_columns)
 all_features = ARAUS_features + Freesound_features + clap_features
 df_fold0, features = prepare_data_models(df_fold0, all_features)
 df_fold0 = df_fold0[df_fold0["info.fold"] == 0]
-# Data of fold 0 variations
-data_path = "data/main_files/variations_fold0/variations_fold0_0_5.csv"
-df_0_5 = expand_CLAP_features(pd.read_csv(data_path))
-data_path = "data/main_files/variations_fold0/variations_fold0_2.csv"
-df_2 = expand_CLAP_features(pd.read_csv(data_path))
-data_path = "data/main_files/variations_fold0/variations_fold0_4.csv"
-df_4 = expand_CLAP_features(pd.read_csv(data_path))
-data_path = "data/main_files/variations_fold0/variations_fold0_6.csv"
-df_6 = expand_CLAP_features(pd.read_csv(data_path))
-data_path = "data/main_files/variations_fold0/variations_fold0_random.csv"
-df_random = expand_CLAP_features(pd.read_csv(data_path))
 
+# Dataframes of fold 0 variations
+df_0_5 = expand_CLAP_features(pd.read_csv(data_0_5_path))
+df_2 = expand_CLAP_features(pd.read_csv(data_2_path))
+df_4 = expand_CLAP_features(pd.read_csv(data_4_path))
+df_6 = expand_CLAP_features(pd.read_csv(data_6_path))
+df_random = expand_CLAP_features(pd.read_csv(data_random_path))
 
+# Calculate
 files_dicts = [
     {
         "title": "ELASTIC NET - ARAUS - PLEASANTNESS",
@@ -153,8 +161,6 @@ files_dicts = [
         "config_file_path": "data/models/trained/RFR_CLAP_E_config.json",
     },
 ]
-
-""" """
 
 for file_dict in files_dicts:
     title = file_dict["title"]
