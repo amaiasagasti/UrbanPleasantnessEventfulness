@@ -18,7 +18,7 @@ from SoundLights.dataset.dataset_functions import (
 )
 
 
-################# ARAUS extended dataset ############################
+############### Code to generate ARAUS extended dataset ###############
 # Inputs
 audios_path = "data/listening_test_audios/"
 csv_path = "data/main_files/answers_listening_tests.csv"
