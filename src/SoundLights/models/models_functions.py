@@ -8,10 +8,6 @@ import warnings
 import json
 from joblib import dump, load
 import copy
-from SoundLights.dataset.dataset_functions import import_json_to_dataframe
-from SoundLights.dataset.features_groups import (
-    general_info,
-)
 
 def prepare_data_models(
     dataframe,
@@ -287,7 +283,6 @@ def run_variations_EN(input_dict):
 
     # Suppress ConvergenceWarning
     warnings.filterwarnings("ignore", category=ConvergenceWarning)
-    from sklearn.linear_model import ElasticNet
 
     with open(input_dict["name"], "a") as f:
         f.write(
@@ -470,6 +465,7 @@ def run_variations_EN(input_dict):
 
                 # Fit model
                 model.fit(X_train, Y_train)
+                print(".")
 
                 # Get MSEs
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
@@ -640,6 +636,7 @@ def run_variations_RFR(input_dict):
 
                 # Fit model
                 model.fit(X_train, Y_train)
+                print(".")
 
                 # Get MSEs
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
@@ -901,7 +898,7 @@ def train_EN(input_dict):
 
     # Suppress ConvergenceWarning
     warnings.filterwarnings("ignore", category=ConvergenceWarning)
-    from sklearn.linear_model import ElasticNet
+
 
     # Store input data in output dictionary
     output_dict = {
@@ -994,6 +991,7 @@ def train_EN(input_dict):
 
         # Fit model
         model.fit(X_train, Y_train)
+        print(".")
 
         # Get MSEs
         MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
@@ -1119,7 +1117,6 @@ def train_KNN(input_dict):
 
     # Suppress ConvergenceWarning
     warnings.filterwarnings("ignore", category=ConvergenceWarning)
-    from sklearn.linear_model import ElasticNet
 
     # Store input data in output dictionary
     output_dict = {
@@ -1211,6 +1208,7 @@ def train_KNN(input_dict):
 
         # Fit model
         model.fit(X_train, Y_train)
+        print(".")
 
         # Get MSEs
         MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
@@ -1339,7 +1337,6 @@ def train_RFR(input_dict):
 
         # Suppress ConvergenceWarning
         warnings.filterwarnings("ignore", category=ConvergenceWarning)
-        from sklearn.linear_model import ElasticNet
 
         # Store input data in output dictionary
         output_dict = {
@@ -1431,6 +1428,7 @@ def train_RFR(input_dict):
 
             # Fit model
             model.fit(X_train, Y_train)
+            print(".")
 
             # Get MSEs
             MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
