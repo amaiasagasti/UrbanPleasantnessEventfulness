@@ -36,8 +36,8 @@ file_path = "segments/output_file.txt"
 palette = {"q1": "#FC694D", "q2": "#0DB2AC", "q3": "#FABA32", "q4": "#84B66F"}
 
 # Wait until the file has some lines
-print("Waiting for data...")
 while True:
+    print("Waiting for data...")
     with open(file_path, "r") as file:
         lines = file.readlines()
         if lines:
@@ -73,11 +73,8 @@ y_data = []
 # Start reading and plotting data
 while True:
     x, y, timestamp = read_last_line(file_path)
-    print(x, y, timestamp)
+    print(" Pleasantness ", x, " and Eventfulness ", y, " Time stamp", timestamp)
     if x is not None and y is not None:
-        # x_data.append(x)
-        # y_data.append(y)
-
         if x >= 0:
             if y >= 0:
                 color = palette["q2"]
