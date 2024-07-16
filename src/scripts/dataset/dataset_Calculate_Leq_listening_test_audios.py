@@ -5,15 +5,24 @@ from maad.util import mean_dB
 from maad.spl import pressure2leq
 
 
-sys.path.append(os.getcwd())
-from src.Mosqito.loadFiles import load
+# Path importing
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+sys.path.append(src_dir)
 
+# Imports from this project
+from SoundLights.dataset.Mosqito.loadFiles import load
+
+############### Code to calculate raw Leq of listening test audios ###############
+# Inputs
 audioFolderPath = "data/listening_test_audios/"
+saving_path = "data/output_delete/raw_Leq_listening_test.csv"
+
+# Calculate
 files = sorted(os.listdir(audioFolderPath))
 df = pd.DataFrame(columns=["info.file", "info.Leq_R", "info.Leq_L"])
 for file in files:
     if file.endswith(".mp3") or file.endswith(".wav"):
-        print("File ", file)
         audio_path = audioFolderPath + file
         # Load the stereo audio file
         audio_r, fs = load(audio_path, wav_calib=1.0, ch=1)
@@ -26,9 +35,5 @@ for file in files:
         df = pd.concat([df, pd.DataFrame([new_row])])
 
 # Save
-# df.to_csv("output.csv", index=False)
-
-""" audio_tone_path = "data/listening_test_audios/1000Hz-calibration.wav"
-audio_tone, fs = load(audio_tone_path, wav_calib=1.0, ch=1)
-audio_tone_Leq = mean_dB(pressure2leq(audio_tone, fs, 0.125))
-print("Calibration tone Leq =", audio_tone_Leq) """
+df.to_csv(saving_path, index=False)
+##################################################################################
