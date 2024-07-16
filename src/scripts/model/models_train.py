@@ -1,9 +1,13 @@
-import sklearn.linear_model
-import numpy as np
 import pandas as pd
 import os
-import warnings
-from sklearn.exceptions import ConvergenceWarning
+import sys
+
+# Path importing
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+sys.path.append(src_dir)
+
+# Imports from this project
 from SoundLights.dataset.features_groups import (
     general_info,
     ARAUS_features,
@@ -15,8 +19,9 @@ from SoundLights.dataset.features_groups import (
 from SoundLights.models.models_functions import train_EN, train_KNN, train_RFR
 
 # INPUT #############################################################################
-df = pd.read_csv("data/main_files/SoundLights_complete.csv")
-saving_folder = "data/models/trained/"
+data_path = "data/main_files/SoundLights_complete.csv"
+data_foldFs_path = "data/main_files/SoundLights_fold6.csv"
+saving_folder = "data/models/trained_delete/"
 #####################################################################################
 #
 #
@@ -24,6 +29,7 @@ saving_folder = "data/models/trained/"
 #
 #
 ############# PREPARE DATA #########################################################
+df = pd.read_csv(data_path)
 # ARAUS features dataframe
 df_ARAUS = df[general_info + ARAUS_features]
 # Freesound features dataframe
@@ -41,7 +47,7 @@ for index, row in df_clap.iterrows():
     full_list.append(complete_new_row)
 df_clap = pd.DataFrame(data=full_list, columns=all_columns)
 
-df_real = pd.read_csv("data/main_files/SoundLights_fold6.csv")
+df_real = pd.read_csv(data_foldFs_path)
 # Adapt CLAP features
 df_fold6 = df_real[
     ARAUS_features
@@ -82,119 +88,6 @@ if not os.path.exists(saving_folder):
 #
 #
 #
-#
-
-input_dicts = [
-    {
-        "maskers_active": True,
-        "masker_gain": 1,
-        "masker_transform": "None",
-        "std_mean_norm": False,
-        "min_max_norm": False,
-        "dataframe": df_ARAUS,
-        "features": ARAUS_features,
-        "df_fold6": df_fold6,
-        "predict": "P",
-        "params": [100],
-        "folder_path": saving_folder,
-        "model_name": "RFR_ARAUS_P",
-    },
-    {
-        "maskers_active": True,
-        "masker_gain": 1,
-        "masker_transform": "None",
-        "std_mean_norm": False,
-        "min_max_norm": False,
-        "dataframe": df_ARAUS,
-        "features": ARAUS_features,
-        "df_fold6": df_fold6,
-        "predict": "E",
-        "params": [400],
-        "folder_path": saving_folder,
-        "model_name": "RFR_ARAUS_E",
-    },
-    {
-        "maskers_active": False,
-        "masker_gain": 1,
-        "masker_transform": "None",
-        "std_mean_norm": True,
-        "min_max_norm": False,
-        "dataframe": df_Freesound,
-        "features": Freesound_features,
-        "df_fold6": df_fold6,
-        "predict": "P",
-        "params": [250],
-        "folder_path": saving_folder,
-        "model_name": "RFR_Freesound_P",
-    },
-    {
-        "maskers_active": True,
-        "masker_gain": 1,
-        "masker_transform": "None",
-        "std_mean_norm": False,
-        "min_max_norm": False,
-        "dataframe": df_Freesound,
-        "features": Freesound_features,
-        "df_fold6": df_fold6,
-        "predict": "E",
-        "params": [250],
-        "folder_path": saving_folder,
-        "model_name": "RFR_Freesound_E",
-    },
-    {
-        "maskers_active": True,
-        "masker_gain": 1,
-        "masker_transform": "None",
-        "std_mean_norm": False,
-        "min_max_norm": False,
-        "dataframe": df_clap,
-        "features": clap_features,
-        "df_fold6": df_fold6,
-        "predict": "P",
-        "params": [100],
-        "folder_path": saving_folder,
-        "model_name": "RFR_CLAP_P",
-    },
-    {
-        "maskers_active": False,
-        "masker_gain": 1,
-        "masker_transform": "None",
-        "std_mean_norm": False,
-        "min_max_norm": False,
-        "dataframe": df_clap,
-        "features": clap_features,
-        "df_fold6": df_fold6,
-        "predict": "E",
-        "params": [500],
-        "folder_path": saving_folder,
-        "model_name": "RFR_CLAP_E",
-    },
-    {
-        "maskers_active": False,
-        "masker_gain": 1,
-        "masker_transform": "None",
-        "std_mean_norm": False,
-        "min_max_norm": False,
-        "dataframe": df_clap,
-        "features": clap_features,
-        "df_fold6": df_fold6,
-        "predict": "P",
-        "params": [250],
-        "folder_path": saving_folder,
-        "model_name": "RFR_CLAP_P_raw",
-    },
-]
-
-from pymtg.processing import WorkParallelizer
-
-wp = WorkParallelizer()
-for input_dict in input_dicts:
-    wp.add_task(train_RFR, input_dict)
-
-wp.run(num_workers=14)
-if wp.num_tasks_failed > 0:
-    wp.show_errors()
-
 ############# RUN ###################################################################
 # print("\n")
 # print("\n")
