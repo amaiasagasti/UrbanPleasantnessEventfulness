@@ -4,7 +4,7 @@ import os
 import numpy as np
 import time
 from CLAP.src.laion_clap import CLAP_Module
-from Mosqito.loadFiles import load
+from SoundLights.dataset.Mosqito.loadFiles import load
 from SoundLights.dataset.features import (
     extract_ARAUS_features,
     extract_Freesound_features,
