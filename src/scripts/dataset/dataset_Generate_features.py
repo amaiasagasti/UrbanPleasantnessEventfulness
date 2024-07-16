@@ -22,7 +22,7 @@ from SoundLights.dataset.dataset_functions import (
 # Inputs
 audios_path = "data/soundscapes_augmented/ARAUS_fold0_01/"
 csv_path = "data/main_files/responses_SoundLights.csv"
-saving_path = "data/ARAUS_extended_delete/"
+saving_path = "data/ARAUS_extended/"
 
 
 csv_file = pd.read_csv(csv_path)
