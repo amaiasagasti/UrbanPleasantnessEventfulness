@@ -21,7 +21,7 @@ from SoundLights.models.models_functions import run_variations_RFR
 # INPUT #############################################################################
 data_path = "data/main_files/SoundLights_complete.csv"
 data_foldFs_path = "data/main_files/SoundLights_fold6.csv"
-saving_folder = "data/training_RFR_delete/"
+saving_folder = "data/training_RFR/"
 #####################################################################################
 #
 #
