@@ -16,7 +16,7 @@ from SoundLights.dataset.Mosqito.loadFiles import load
 ############### Code to calculate raw Leq of listening test audios ###############
 # Inputs
 audioFolderPath = "data/listening_test_audios/"
-saving_path = "data/output_delete/raw_Leq_listening_test.csv"
+saving_path = "data/output/raw_Leq_listening_test_delete.csv"
 
 # Calculate
 files = sorted(os.listdir(audioFolderPath))
