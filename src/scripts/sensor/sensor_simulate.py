@@ -12,6 +12,14 @@ import matplotlib.pyplot as plt
 import matplotlib
 import joblib
 import csv
+import sys
+
+# Path importing
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+sys.path.append(src_dir)
+
+# Imports from this project
 from CLAP.src.laion_clap import CLAP_Module
 
 matplotlib.use("Agg")  # Use the 'Agg' backend which does not require a GUI
