@@ -1,4 +1,13 @@
-# Provisional
+"""
+This script contains lists of names that are used as column names and dictionary keys across various 
+parts of the project.
+
+The purpose of this script is to centralize and manage naming conventions for consistency throughout
+the project. By maintaining these lists in a single location, the script ensures that column names
+and dictionary keys are uniformly applied, making the codebase more maintainable and reducing the 
+risk of errors due to inconsistent naming.
+"""
+
 general_info = [
     "info.file",
     "info.participant",
@@ -914,5 +923,3 @@ clap_features = [
     "clap_510",
     "clap_511",
 ]
-""" 
-     """,
