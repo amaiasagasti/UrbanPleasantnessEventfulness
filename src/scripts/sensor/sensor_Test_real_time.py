@@ -2,9 +2,9 @@ from pydub import AudioSegment
 import numpy as np
 import joblib
 import time
-from SoundLights.dataset.auxiliary_functions import load
+from code.dataset.auxiliary_functions import load
 from CLAP.src.laion_clap import CLAP_Module
-from SoundLights.dataset.dataset_functions import extract_CLAP_embeddings
+from code.dataset.dataset_functions import extract_CLAP_embeddings
 
 # Load the audio file
 gain = 1.412537545

@@ -7,13 +7,13 @@ from numpy import pi, convolve
 from maad.spl import pressure2leq
 from maad.util import mean_dB, dB2power, power2dB
 from mosqito.sq_metrics import loudness_zwtv, roughness_dw
-from SoundLights.dataset.auxiliary_functions import (
+from code.dataset.auxiliary_functions import (
     sharpness_din,
     acousticRoughness,
     acousticFluctuation,
     fmoddetection,
 )
-from SoundLights.dataset.freesound_auxiliary_info import (
+from code.dataset.freesound_auxiliary_info import (
     barkbands,
     erbbands,
     gfcc,

@@ -11,7 +11,7 @@ src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
 sys.path.append(src_dir)
 
 # Imports from this project
-from SoundLights.dataset.features_groups import (
+from code.dataset.features_groups import (
     general_info,
     ARAUS_features,
     Freesound_features,
@@ -19,12 +19,12 @@ from SoundLights.dataset.features_groups import (
     mix_features,
     masker_features,
 )
-from SoundLights.models.models_functions import test_model
-from SoundLights.dataset.dataset_functions import (
+from code.models.models_functions import test_model
+from code.dataset.dataset_functions import (
     import_json_to_dataframe,
     expand_CLAP_features,
 )
-from SoundLights.models.models_functions import prepare_data_models
+from code.models.models_functions import prepare_data_models
 
 """
 WARNING:

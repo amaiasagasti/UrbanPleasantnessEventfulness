@@ -13,7 +13,7 @@ src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
 sys.path.append(src_dir)
 
 # Imports from this project
-from SoundLights.dataset.dataset_functions import (
+from code.dataset.dataset_functions import (
     generate_features,
 )
 
