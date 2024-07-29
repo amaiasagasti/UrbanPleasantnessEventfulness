@@ -7,11 +7,9 @@ from numpy import pi, convolve
 from maad.spl import pressure2leq
 from maad.util import mean_dB, dB2power, power2dB
 from mosqito.sq_metrics import loudness_zwtv, roughness_dw
-from SoundLights.dataset.Mosqito.Sharpness import sharpness_din
-from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.Roughness import (
+from SoundLights.dataset.auxiliary_functions import (
+    sharpness_din,
     acousticRoughness,
-)
-from SoundLights.dataset.PsychoacousticParametersMeasurerAndreaCastiella.FluctuationStrength import (
     acousticFluctuation,
     fmoddetection,
 )
