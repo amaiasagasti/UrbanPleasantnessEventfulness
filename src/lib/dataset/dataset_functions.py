@@ -1,3 +1,10 @@
+"""
+This script contains a set of functions to create the new dataset 'ARAUS extension'. 
+
+generate_features() is the main function, the other functions adapt the output of 
+the first function for re-use or processing.
+"""
+
 import pandas as pd
 import json
 import os
@@ -21,6 +28,27 @@ from lib.dataset.wav_files import save_wav, delete_wav
 
 
 def import_json_to_dataframe(json_path: str, save: bool, saving_path: str):
+    """
+    Import data from a JSON file and transform it into a DataFrame.
+
+    This function reads a JSON file containing a dataset generated using generate_features()
+    from the specified path and converts its content into a pandas DataFrame. Optionally,
+    the resulting DataFrame can be saved to a specified path as a CSV file.
+
+    Parameters
+    ----------
+    json_path : str
+        Path to the JSON file to be imported.
+    save : bool
+        If True, the DataFrame will be saved to the specified saving path.
+    saving_path : str
+        Path where the DataFrame will be saved if the save parameter is True.
+
+    Outputs
+    -------
+    dataframe : pandas.DataFrame
+        A DataFrame containing the data imported from the JSON file.
+    """
 
     # Load the JSON data
     with open(json_path, "r") as file:
@@ -45,6 +73,30 @@ def import_json_to_dataframe(json_path: str, save: bool, saving_path: str):
 
 
 def import_jsons_to_dataframe(jsons_path: list, save: bool, saving_path: str):
+    """
+    Import data from a list of JSON files and combine them into a single DataFrame.
+
+    This function reads multiple JSON files (each containing the features generated with
+    generate_features() for a single audio file) from the specified list of paths, all
+    of which shares the same keys and format, and combines their content into a single
+    pandas DataFrame. Optionally, the resulting DataFrame can be saved to a specified path
+    as a CSV file.
+
+    Parameters
+    ----------
+    jsons_path : list of str
+        List of paths to the JSON files to be imported. Each JSON file should have the same
+        structure and keys.
+    save : bool
+        If True, the combined DataFrame will be saved to the specified saving path.
+    saving_path : str
+        Path where the DataFrame will be saved if the save parameter is True.
+
+    Outputs:
+    -------
+    df : pandas.DataFrame
+        A DataFrame containing the combined data from all the JSON files.
+    """
     jsons = sorted(os.listdir(jsons_path))
     dfs = []
 
@@ -68,6 +120,28 @@ def import_jsons_to_dataframe(jsons_path: list, save: bool, saving_path: str):
 
 
 def import_dataframe_to_json(df, save: bool, saving_path: str):
+    """
+    Convert a DataFrame to JSON format and optionally save it to a file.
+
+    This function converts a pandas DataFrame containing the dataset of features into a
+    JSON format. If specified, the JSON data can be saved to a file at the given path.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame to be converted to JSON format.
+    save : bool
+        If True, the JSON data will be saved to the specified saving path.
+    saving_path : str
+        Path where the JSON file will be saved if the save parameter is True.
+
+    Outputs
+    -------
+    None
+        This function does not return a value. The DataFrame is converted to JSON and
+        optionally saved to a file.
+    """
+
     print("Converting dataframe to json")
     json_file = {}
     columns = df.columns.tolist()
@@ -140,6 +214,30 @@ def import_dataframe_to_json(df, save: bool, saving_path: str):
 
 
 def import_jsons_to_json(jsons_path: list, save: bool, saving_path: str):
+    """
+    Combine multiple JSON files into a single JSON file.
+
+    This function reads multiple JSON files (each containing the features generated with
+    generate_features() for a single audio file) from the specified list of paths, each of which
+    shares the same keys and format, and combines their content into a single JSON object.
+    Optionally, the combined JSON data can be saved to a specified path.
+
+    Parameters
+    ----------
+    jsons_path : list of str
+        List of paths to the JSON files to be combined. Each JSON file should have the same
+        structure and keys.
+    save : bool
+        If True, the combined JSON data will be saved to the specified saving path.
+    saving_path : str
+        Path where the combined JSON file will be saved if the save parameter is True.
+
+    Returns
+    -------
+    single_json : dict
+        A dictionary containing the combined data from all the JSON files.
+    """
+
     jsons = sorted(os.listdir(jsons_path))
     single_json = {}
     count = 0
@@ -159,6 +257,38 @@ def import_jsons_to_json(jsons_path: list, save: bool, saving_path: str):
 
 
 def file_origin_info(file, participant, gain, audio_info, origin):
+    """
+    Adapts metadata information from the dataset when generate_features() is called.
+
+    We can work with three different origins of data to generate a dataset with generate_features():
+    - "new_data": new audios not found in ARAUS dataset. CSV file of metadata only contains Leq,
+        wav_gain, punctuation from listening tests and maskers information.
+    - "ARAUS_original": original audios found in ARAUS dataset. CSV file of metadata contains the very
+        same content as the original (constitutes responses_SoundLights.csv).
+    - "ARAUS_extended": once a new dataset has been generated using generate_features(), any changes on this
+        file, is done with this option.
+    This function is called when generate_features() is called. It reads input metadata and adapts it depending
+    on the data origin so that the resulting datastets, regardless of the origin, have the same metadata format.
+
+    Parameters
+    ----------
+    file : str
+        Name of file.
+    participant : str
+        Participant information that labelled current file.
+    gain : float
+        wav_gain information that transforms digital signal to peak-Pascals signal.
+    audio_info: dict
+        Dictionary with metadata of current file. Its keys depend on the origin.
+    origin: str
+        Possible origin of file (see explanation above).
+
+    Returns
+    -------
+    audio_info_json : dict
+        Adapted metadata dictionary.
+    """
+
     audio_info_json = {}
 
     if origin == "new_data":
@@ -259,22 +389,30 @@ def generate_features(
     variation_gain: float = 1,
 ):
     """
-    IN PROCESS
-    Function to generate features from any input set of audios the desired
-    acoustic and psychoacoustic features found in ARAUS dataset and the signal
-    processing features extracted with Freesound Feature Extractor.
+    Function to generate features from any input set of audios. Specifically:
+    - 'ARAUS' features: Statistics of the acoustic and psychoacoustic features used in
+        ARAUS dataset.
+    - 'Freesound' features: Statistics of a set of audio signal analysis features
+        generated with FreesoundExtractor function from Essentia Library
+    - 'CLAP' features: CLAP embeddings generated with LAION-AI's CLAP model.
 
-    Input:
-    audioFolderPath: relative path to the folder that contains the
-        ARAUS augmented soundscapes (.wav files)
-    csvPath: absolute path to csv file that contains gain
-    savingPath: save where output JSON is desired to be saved
-    type: type of features to generate ["ARAUS", "Freesound"]
+    Parameters
+    ----------
+    audioFolderPath: str
+        Relative path to the folder that contains the audios (.wav files)
+    csv_file: pandas.Dataframe
+        File that contains metadata information of the audios
+    saving_path: str
+        Saving path where output JSON or dataset is desired to be saved
+    type: list
+        Type of features to generate ["ARAUS", "Freesound", "embedding"]
+    origin: str
+        Origin of the generated features "new_data", "ARAUS_original", "ARAUS_extended"
 
-    Returns:
-        output: version/subset of ARAUS-extended JSON file containing selected features of
-            the corresponding audio files. It is directly saved in /data. It can be imported
-            as a Pandas dataframe using import_json_to_dataframe() from dataset_functions.py
+    Outputs:
+        output: JSON file / dictionary containing selected features of the corresponding audio files.
+        It is saved in automatically in the specified path. Output can be imported as a Pandas dataframe
+        using import_json_to_dataframe() function.
     """
     output = {}
     files_count = 0
@@ -448,6 +586,28 @@ def generate_features(
 
 
 def expand_CLAP_features(df):
+    """
+    Expand the 'CLAP' column in the DataFrame into multiple columns.
+
+    This function processes a DataFrame where one of the columns, 'CLAP', contains a vector
+    of numbers. The vector is split into individual components, with each component being placed
+    into a new column. This transformation allows for more manageable and accessible data for
+    subsequent analysis.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame or dataset. Each entry in the 'CLAP' column is a list or array-like structure
+        with numerical values, generated using generate_features().
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        The DataFrame with the 'CLAP' column expanded into multiple columns. Each component of the
+        original 'CLAP' vectors is now in its own separate column (column names determined in
+        'clap_features' variable)
+    """
+
     all_columns = (
         ARAUS_features
         + Freesound_features
