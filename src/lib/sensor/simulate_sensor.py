@@ -1,3 +1,16 @@
+"""
+This script simulates the workflow of a sensor connected to a microphone by progressively reading an audio file, 
+similar to how a real sensor would record data in real-time.
+
+The script performs the following tasks:
+- Simulates audio recording by reading an audio file in fragments, emulating how a sensor would capture and process audio data in chunks.
+- In a separate thread, it reassembles these data fragments to reconstruct the complete audio signal.
+- The reconstructed audio is then fed into a model to predict values of P (pleasantness) and E (eventfulness).
+- The predicted P and E values are saved into a text file, with each prediction on a new line.
+- Simultaneously, in a separate thread, old data fragments are deleted.
+
+"""
+
 import pyaudio
 import wave
 import threading
