@@ -1,3 +1,13 @@
+"""
+This script contains lists of feature names specifically designed for organizing the output of the 
+`FreesoundExtractor` function from Essentia's library.
+
+The `FreesoundExtractor` function generates a comprehensive set of audio features. This script centralizes 
+the naming conventions for these features, ensuring that each feature is clearly labeled and easily 
+identifiable in the resulting dataset. By maintaining these feature names in a single script, it helps in
+managing and structuring the dataset in a well-organized manner, making it more accessible and easier to interpret.
+"""
+
 barkbands = [
     "0_0",
     "50_0",
