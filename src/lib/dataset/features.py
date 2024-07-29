@@ -1,4 +1,13 @@
-import sys
+"""
+This script contains a set of functions to generate features, specifically:
+
+- 'ARAUS' features: Statistics of the acoustic and psychoacoustic features used in 
+    ARAUS dataset.
+- 'Freesound' features: Statistics of a set of audio signal analysis features 
+    generated with FreesoundExtractor function from Essentia Library
+- 'CLAP' features: CLAP embeddings generated with LAION-AI's CLAP model.
+"""
+
 import numpy as np
 from scipy.signal import lfilter
 from scipy.signal.filter_design import bilinear
@@ -26,9 +35,6 @@ from lib.dataset.freesound_auxiliary_info import (
     tristimulus,
     hpcp,
 )
-
-
-sys.path.append("..")
 
 
 auxiliars = {
@@ -83,6 +89,9 @@ center_freq = [
     16000.0,
     20000.0,
 ]
+
+
+# FUNCTIONS TO OBTAIN 'ARAUS' FEATURES ##########################################
 
 
 def calculate_P_E(data):
@@ -275,6 +284,274 @@ def C_weighting(fs):
     return bilinear(NUMs, DENs, fs)
 
 
+def extract_ARAUS_features(signal: np.array, fs: float, feature_list: list):
+
+    # Check if feature list is empty
+    if len(feature_list) == 0:
+        raise ValueError("List of features is empty, please provide.")
+
+    # Prepare output
+    output = {}
+
+    # Initialize to zero data(loudnes value, and A-weigth filter) that is
+    #  re-used in several feature calculations
+    N = None
+    A_A = None
+    B_A = None
+
+    # Stats to calculate
+    stats = [
+        "avg",
+        "min",
+        "max",
+        "median",
+        "var",
+        "p05",
+        "p10",
+        "p20",
+        "p30",
+        "p40",
+        "p50",
+        "p60",
+        "p70",
+        "p80",
+        "p90",
+        "p95",
+    ]
+    stats_dB = [
+        "avgdB",
+        "vardB",
+        "min",
+        "max",
+        "median",
+        "p05",
+        "p10",
+        "p20",
+        "p30",
+        "p40",
+        "p50",
+        "p60",
+        "p70",
+        "p80",
+        "p90",
+        "p95",
+    ]
+
+    # Go over list of desired features
+    for i, feature in enumerate(feature_list):
+        if feature == "loudness":
+            print("Calculating loudness")
+            N, N_spec, bark_axis, time_axis = loudness_zwtv(
+                signal, fs, field_type="free"
+            )
+            loudness_data = calculate_stats(N, stats)
+            output["loudness"] = loudness_data
+
+        if feature == "sharpness":
+            print("Calculating sharpness")
+            if N is None:
+                N, N_spec, bark_axis, time_axis = loudness_zwtv(
+                    signal, fs, field_type="free"
+                )
+            S, S_time_axis = sharpness_din(N, N_spec, time_axis, 0.5)
+            sharpness_data = calculate_stats(S, stats)
+            output["sharpness"] = sharpness_data
+
+        if feature == "LA":
+            print("Calculating LA")
+            [B_A, A_A] = A_weighting(fs)
+            signal_A = lfilter(B_A, A_A, signal)
+            LAeq = pressure2leq(signal_A, fs, 0.125)
+            LA_data = calculate_stats(LAeq, stats)
+            output["LA"] = LA_data
+
+        if feature == "LC":
+            print("Calculating LC")
+            [B_C, A_C] = C_weighting(fs)
+            signal_C = lfilter(B_C, A_C, signal)
+            LCeq = pressure2leq(signal_C, fs, 0.125)
+            LC_data = calculate_stats(LCeq, stats)
+            output["LC"] = LC_data
+
+        if feature == "roughness":
+            print("Calculating roughness")
+            if N is None:
+                N, N_spec, _, time_axis = loudness_zwtv(signal, fs, field_type="free")
+            R = calculate_roughness(N_spec)
+            roughness_data = calculate_stats(R, stats)
+            output["roughness"] = roughness_data
+            R_dw, _, _, _ = roughness_dw(signal, fs)
+            roughness_data_dw = calculate_stats(R_dw, stats)
+            output["roughness_dw"] = roughness_data_dw
+
+        if feature == "fluctuation":
+            print("Calculating fluctuation strength")
+            if N is None:
+                N, N_spec, bark_axis, time_axis = loudness_zwtv(
+                    signal, fs, field_type="free"
+                )
+            FS = calculate_fluctuation(N_spec)
+            fluctuation_data = calculate_stats(FS, stats)
+            output["fluctuation"] = fluctuation_data
+
+        if feature == "frequency":
+            print("Calculating frequency features")
+            if B_A is None:
+                [B_A, A_A] = A_weighting(fs)
+                signal_A = lfilter(B_A, A_A, signal)
+            M_values = calculate_M(signal_A, fs)
+            output["energy_frequency"] = {
+                "00005_0": np.round(M_values[0], 4),
+                "00006_3": np.round(M_values[1], 4),
+                "00008_0": np.round(M_values[2], 4),
+                "00010_0": np.round(M_values[3], 4),
+                "00012_5": np.round(M_values[4], 4),
+                "00016_0": np.round(M_values[5], 4),
+                "00020_0": np.round(M_values[6], 4),
+                "00025_0": np.round(M_values[7], 4),
+                "00031_5": np.round(M_values[8], 4),
+                "00040_0": np.round(M_values[9], 4),
+                "00050_0": np.round(M_values[10], 4),
+                "00063_0": np.round(M_values[11], 4),
+                "00080_0": np.round(M_values[12], 4),
+                "00100_0": np.round(M_values[13], 4),
+                "00125_0": np.round(M_values[14], 4),
+                "00160_0": np.round(M_values[15], 4),
+                "00200_0": np.round(M_values[16], 4),
+                "00250_0": np.round(M_values[17], 4),
+                "00315_0": np.round(M_values[18], 4),
+                "00400_0": np.round(M_values[19], 4),
+                "00500_0": np.round(M_values[20], 4),
+                "00630_0": np.round(M_values[21], 4),
+                "00800_0": np.round(M_values[22], 4),
+                "01000_0": np.round(M_values[23], 4),
+                "01250_0": np.round(M_values[24], 4),
+                "01600_0": np.round(M_values[25], 4),
+                "02000_0": np.round(M_values[26], 4),
+                "02500_0": np.round(M_values[27], 4),
+                "03150_0": np.round(M_values[28], 4),
+                "04000_0": np.round(M_values[29], 4),
+                "05000_0": np.round(M_values[30], 4),
+                "06300_0": np.round(M_values[31], 4),
+                "08000_0": np.round(M_values[32], 4),
+                "10000_0": np.round(M_values[33], 4),
+                "12500_0": np.round(M_values[34], 4),
+                "16000_0": np.round(M_values[35], 4),
+                "20000_0": np.round(M_values[36], 4),
+            }
+
+    return output
+
+
+#################################################################################
+
+
+# FUNCTIONS TO OBTAIN 'Freesound' FEATURES ######################################
+
+
+def run_freesound_extractor(audiofile):
+    """Runs Essentia standard FreesoundExtractor
+    audiofile: absolute path to the audio file to analyze
+    """
+
+    parameters = {
+        "analysisSampleRate": 48000,
+        "startTime": 0,
+        "endTime": 30,
+        "lowlevelFrameSize": 2048,
+        "lowlevelHopSize": 1024,
+        "lowlevelSilentFrames": "noise",
+        "lowlevelStats": ["mean"],
+        "lowlevelWindowType": "hann",
+        "lowlevelZeroPadding": 0,
+        "mfccStats": ["mean"],
+        "gfccStats": ["mean"],
+        "rhythmMaxTempo": 208,
+        "rhythmMethod": "degara",
+        "rhythmMinTempo": 40,
+        "rhythmStats": ["mean"],
+        "tonalFrameSize": 2048,
+        "tonalHopSize": 1024,
+        "tonalSilentFrames": "noise",
+        "tonalStats": ["mean"],
+        "tonalWindowType": "hann",
+        "tonalZeroPadding": 0,
+    }
+
+    try:
+        result, resultFrames = FreesoundExtractor(**parameters)(audiofile)
+    except RuntimeError as e:
+        raise e
+    return result, resultFrames
+
+
+def extract_Freesound_features(input):
+    # Run the essentia standard FreesoundExtractor
+    _, frames = run_freesound_extractor(input)
+
+    # Calculate statistics and save all available features in a dictionary
+    features = {}
+    for descriptor in frames.descriptorNames():
+        d = descriptor.split(".")
+        # Calculate stats for arrays
+        if type(frames[descriptor]) == np.ndarray:
+            stats = [
+                "avg",
+                "median",
+                "var",
+                "min",
+                "max",
+                "p05",
+                "p10",
+                "p20",
+                "p30",
+                "p40",
+                "p50",
+                "p60",
+                "p70",
+                "p80",
+                "p90",
+                "p95",
+            ]
+            stats_result = calculate_stats(frames[descriptor], stats, d[1])
+            # Check if d[0] key exists
+            if d[0] not in features:
+                features[d[0]] = {}
+            # Now you can safely assign value to nested dictionary
+            features[str(d[0])][str(d[1])] = stats_result
+        # Otherwise just save in dictionary
+        else:
+            # Check if d[0] key exists
+            if d[0] not in features:
+                features[d[0]] = {}
+            features[str(d[0])][str(d[1])] = frames[descriptor]
+
+    # Metadata is returned, unwanted
+    del features["metadata"]
+
+    return features
+
+
+#################################################################################
+
+
+# FUNCTIONS TO OBTAIN 'CLAP' FEATURES ###########################################
+
+
+def extract_CLAP_embeddings(audio_path: str, model):
+
+    # Extract embedding
+    embedding = model.get_audio_embedding_from_filelist([audio_path], use_tensor=False)
+
+    return embedding[0].tolist()
+
+
+#################################################################################
+
+
+# FUNCTIONS TO CALCULATE STATISTICS FROM FEATURES ###############################
+
+
 def var_dB(vector, axis):
 
     # dB to energy as sum has to be done with energy
@@ -440,251 +717,4 @@ def calculate_stats(vector: np.array, stats: list, descriptor=None):
     return output
 
 
-def extract_ARAUS_features(signal: np.array, fs: float, feature_list: list):
-
-    # Check if feature list is empty
-    if len(feature_list) == 0:
-        raise ValueError("List of features is empty, please provide.")
-
-    # Prepare output
-    output = {}
-
-    # Initialize to zero data(loudnes value, and A-weigth filter) that is
-    #  re-used in several feature calculations
-    N = None
-    A_A = None
-    B_A = None
-
-    # Stats to calculate
-    stats = [
-        "avg",
-        "min",
-        "max",
-        "median",
-        "var",
-        "p05",
-        "p10",
-        "p20",
-        "p30",
-        "p40",
-        "p50",
-        "p60",
-        "p70",
-        "p80",
-        "p90",
-        "p95",
-    ]
-    stats_dB = [
-        "avgdB",
-        "vardB",
-        "min",
-        "max",
-        "median",
-        "p05",
-        "p10",
-        "p20",
-        "p30",
-        "p40",
-        "p50",
-        "p60",
-        "p70",
-        "p80",
-        "p90",
-        "p95",
-    ]
-
-    # Go over list of desired features
-    for i, feature in enumerate(feature_list):
-        if feature == "loudness":
-            print("Calculating loudness")
-            N, N_spec, bark_axis, time_axis = loudness_zwtv(
-                signal, fs, field_type="free"
-            )
-            loudness_data = calculate_stats(N, stats)
-            output["loudness"] = loudness_data
-
-        if feature == "sharpness":
-            print("Calculating sharpness")
-            if N is None:
-                N, N_spec, bark_axis, time_axis = loudness_zwtv(
-                    signal, fs, field_type="free"
-                )
-            S, S_time_axis = sharpness_din(N, N_spec, time_axis, 0.5)
-            sharpness_data = calculate_stats(S, stats)
-            output["sharpness"] = sharpness_data
-
-        if feature == "LA":
-            print("Calculating LA")
-            [B_A, A_A] = A_weighting(fs)
-            signal_A = lfilter(B_A, A_A, signal)
-            LAeq = pressure2leq(signal_A, fs, 0.125)
-            LA_data = calculate_stats(LAeq, stats)
-            output["LA"] = LA_data
-
-        if feature == "LC":
-            print("Calculating LC")
-            [B_C, A_C] = C_weighting(fs)
-            signal_C = lfilter(B_C, A_C, signal)
-            LCeq = pressure2leq(signal_C, fs, 0.125)
-            LC_data = calculate_stats(LCeq, stats)
-            output["LC"] = LC_data
-
-        if feature == "roughness":
-            print("Calculating roughness")
-            if N is None:
-                N, N_spec, _, time_axis = loudness_zwtv(signal, fs, field_type="free")
-            R = calculate_roughness(N_spec)
-            roughness_data = calculate_stats(R, stats)
-            output["roughness"] = roughness_data
-            R_dw, _, _, _ = roughness_dw(signal, fs)
-            roughness_data_dw = calculate_stats(R_dw, stats)
-            output["roughness_dw"] = roughness_data_dw
-
-        if feature == "fluctuation":
-            print("Calculating fluctuation strength")
-            if N is None:
-                N, N_spec, bark_axis, time_axis = loudness_zwtv(
-                    signal, fs, field_type="free"
-                )
-            FS = calculate_fluctuation(N_spec)
-            fluctuation_data = calculate_stats(FS, stats)
-            output["fluctuation"] = fluctuation_data
-
-        if feature == "frequency":
-            print("Calculating frequency features")
-            if B_A is None:
-                [B_A, A_A] = A_weighting(fs)
-                signal_A = lfilter(B_A, A_A, signal)
-            M_values = calculate_M(signal_A, fs)
-            output["energy_frequency"] = {
-                "00005_0": np.round(M_values[0], 4),
-                "00006_3": np.round(M_values[1], 4),
-                "00008_0": np.round(M_values[2], 4),
-                "00010_0": np.round(M_values[3], 4),
-                "00012_5": np.round(M_values[4], 4),
-                "00016_0": np.round(M_values[5], 4),
-                "00020_0": np.round(M_values[6], 4),
-                "00025_0": np.round(M_values[7], 4),
-                "00031_5": np.round(M_values[8], 4),
-                "00040_0": np.round(M_values[9], 4),
-                "00050_0": np.round(M_values[10], 4),
-                "00063_0": np.round(M_values[11], 4),
-                "00080_0": np.round(M_values[12], 4),
-                "00100_0": np.round(M_values[13], 4),
-                "00125_0": np.round(M_values[14], 4),
-                "00160_0": np.round(M_values[15], 4),
-                "00200_0": np.round(M_values[16], 4),
-                "00250_0": np.round(M_values[17], 4),
-                "00315_0": np.round(M_values[18], 4),
-                "00400_0": np.round(M_values[19], 4),
-                "00500_0": np.round(M_values[20], 4),
-                "00630_0": np.round(M_values[21], 4),
-                "00800_0": np.round(M_values[22], 4),
-                "01000_0": np.round(M_values[23], 4),
-                "01250_0": np.round(M_values[24], 4),
-                "01600_0": np.round(M_values[25], 4),
-                "02000_0": np.round(M_values[26], 4),
-                "02500_0": np.round(M_values[27], 4),
-                "03150_0": np.round(M_values[28], 4),
-                "04000_0": np.round(M_values[29], 4),
-                "05000_0": np.round(M_values[30], 4),
-                "06300_0": np.round(M_values[31], 4),
-                "08000_0": np.round(M_values[32], 4),
-                "10000_0": np.round(M_values[33], 4),
-                "12500_0": np.round(M_values[34], 4),
-                "16000_0": np.round(M_values[35], 4),
-                "20000_0": np.round(M_values[36], 4),
-            }
-
-    return output
-
-
-def run_freesound_extractor(audiofile):
-    """Runs Essentia standard FreesoundExtractor
-    audiofile: absolute path to the audio file to analyze
-    """
-
-    parameters = {
-        "analysisSampleRate": 48000,
-        "startTime": 0,
-        "endTime": 30,
-        "lowlevelFrameSize": 2048,
-        "lowlevelHopSize": 1024,
-        "lowlevelSilentFrames": "noise",
-        "lowlevelStats": ["mean"],
-        "lowlevelWindowType": "hann",
-        "lowlevelZeroPadding": 0,
-        "mfccStats": ["mean"],
-        "gfccStats": ["mean"],
-        "rhythmMaxTempo": 208,
-        "rhythmMethod": "degara",
-        "rhythmMinTempo": 40,
-        "rhythmStats": ["mean"],
-        "tonalFrameSize": 2048,
-        "tonalHopSize": 1024,
-        "tonalSilentFrames": "noise",
-        "tonalStats": ["mean"],
-        "tonalWindowType": "hann",
-        "tonalZeroPadding": 0,
-    }
-
-    try:
-        result, resultFrames = FreesoundExtractor(**parameters)(audiofile)
-    except RuntimeError as e:
-        raise e
-    return result, resultFrames
-
-
-def extract_Freesound_features(input):
-    # Run the essentia standard FreesoundExtractor
-    _, frames = run_freesound_extractor(input)
-
-    # Calculate statistics and save all available features in a dictionary
-    features = {}
-    for descriptor in frames.descriptorNames():
-        d = descriptor.split(".")
-        # Calculate stats for arrays
-        if type(frames[descriptor]) == np.ndarray:
-            stats = [
-                "avg",
-                "median",
-                "var",
-                "min",
-                "max",
-                "p05",
-                "p10",
-                "p20",
-                "p30",
-                "p40",
-                "p50",
-                "p60",
-                "p70",
-                "p80",
-                "p90",
-                "p95",
-            ]
-            stats_result = calculate_stats(frames[descriptor], stats, d[1])
-            # Check if d[0] key exists
-            if d[0] not in features:
-                features[d[0]] = {}
-            # Now you can safely assign value to nested dictionary
-            features[str(d[0])][str(d[1])] = stats_result
-        # Otherwise just save in dictionary
-        else:
-            # Check if d[0] key exists
-            if d[0] not in features:
-                features[d[0]] = {}
-            features[str(d[0])][str(d[1])] = frames[descriptor]
-
-    # Metadata is returned, unwanted
-    del features["metadata"]
-
-    return features
-
-
-def extract_CLAP_embeddings(audio_path: str, model):
-
-    # Extract embedding
-    embedding = model.get_audio_embedding_from_filelist([audio_path], use_tensor=False)
-
-    return embedding[0].tolist()
+#################################################################################
