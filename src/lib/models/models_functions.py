@@ -1,3 +1,13 @@
+"""
+This script contains a collection of functions used for model related operations.
+
+The purpose of this script is to provide a comprehensive set of utilities and methods that facilitate the entire machine learning workflow. It includes functions for:
+- Finding and tuning hyperparameters to optimize model performance.
+- Training models using different algorithms and configurations.
+- Saving and loading model states and configurations for reproducibility.
+- Testing and evaluating model performance on validation or test datasets.
+"""
+
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import ElasticNet
