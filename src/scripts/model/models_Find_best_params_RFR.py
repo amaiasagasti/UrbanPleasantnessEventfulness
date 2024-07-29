@@ -8,7 +8,7 @@ src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
 sys.path.append(src_dir)
 
 # Imports from this project
-from code.dataset.features_groups import (
+from lib.dataset.features_groups import (
     general_info,
     ARAUS_features,
     Freesound_features,
@@ -16,7 +16,7 @@ from code.dataset.features_groups import (
     masker_features,
     clap_features,
 )
-from code.models.models_functions import run_variations_RFR
+from lib.models.models_functions import run_variations_RFR
 
 # INPUT #############################################################################
 data_path = "data/main_files/SoundLights_complete.csv"

@@ -11,7 +11,7 @@ src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
 sys.path.append(src_dir)
 
 # Imports from this project
-from code.dataset.auxiliary_functions import load
+from lib.dataset.auxiliary_functions import load
 
 ############### Code to calculate raw Leq of listening test audios ###############
 # Inputs

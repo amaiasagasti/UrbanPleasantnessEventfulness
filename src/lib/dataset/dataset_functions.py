@@ -4,20 +4,20 @@ import os
 import numpy as np
 import time
 from CLAP.src.laion_clap import CLAP_Module
-from code.dataset.auxiliary_functions import load
-from code.dataset.features import (
+from lib.dataset.auxiliary_functions import load
+from lib.dataset.features import (
     extract_ARAUS_features,
     extract_Freesound_features,
     extract_CLAP_embeddings,
     calculate_P_E,
 )
-from code.dataset.features_groups import (
+from lib.dataset.features_groups import (
     ARAUS_features,
     Freesound_features,
     masker_features,
     clap_features,
 )
-from code.dataset.wav_files import save_wav, delete_wav
+from lib.dataset.wav_files import save_wav, delete_wav
 
 
 def import_json_to_dataframe(json_path: str, save: bool, saving_path: str):
