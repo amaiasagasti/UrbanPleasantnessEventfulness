@@ -158,47 +158,6 @@ def import_jsons_to_json(jsons_path: list, save: bool, saving_path: str):
     return single_json
 
 
-""" 
-def prepare_data_models(dataframe, features_evaluated, maskers_gain: float = 5):
-
-    # Maskers colum, increase values
-    dataframe["info.masker_bird"] = dataframe["info.masker_bird"] * maskers_gain
-    dataframe["info.masker_construction"] = (
-        dataframe["info.masker_construction"] * maskers_gain
-    )
-    dataframe["info.masker_traffic"] = dataframe["info.masker_traffic"] * maskers_gain
-    dataframe["info.masker_water"] = dataframe["info.masker_water"] * maskers_gain
-    dataframe["info.masker_wind"] = dataframe["info.masker_wind"] * maskers_gain
-
-    # For fold 0, group data
-    dataframe_fold0 = dataframe[dataframe["info.fold"] == 0]
-    # Drop string columns
-    dataframe_fold0 = dataframe_fold0.drop("info.file", axis=1)
-    dataframe_fold0 = dataframe_fold0.drop("info.participant", axis=1)
-    dataframe_fold0 = dataframe_fold0.groupby(
-        ["info.soundscape", "info.masker", "info.smr"]
-    ).mean()  # For the test set, the same 48 stimuli were shown to all participants so we take the mean of their ratings as the ground truth
-    dataframe_filtered = dataframe[
-        dataframe["info.fold"] != 0
-    ]  # Filter rows where 'fold' column is not equal to 0
-    dataframe = pd.concat(
-        [dataframe_fold0, dataframe_filtered], ignore_index=True
-    )  # Join together
-
-    # Drop columns with all equal values or std=0
-    std = np.std(dataframe[features_evaluated], axis=0)
-    columns_to_mantain_arg = np.where(std >= 0.00001)[0]
-    columns_to_drop_arg = np.where(std <= 0.00001)[0]
-    columns_to_mantain = [features_evaluated[i] for i in columns_to_mantain_arg]
-    columns_to_drop = [features_evaluated[i] for i in columns_to_drop_arg]
-    # print(features_evaluated[np.where(std == 0)[0]])
-    dataframe.drop(columns=columns_to_drop, inplace=True)
-
-    return dataframe, columns_to_mantain
-
- """
-
-
 def file_origin_info(file, participant, gain, audio_info, origin):
     audio_info_json = {}
 
