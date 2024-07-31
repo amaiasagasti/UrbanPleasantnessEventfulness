@@ -339,7 +339,7 @@ def play_audio(filename, seconds, maintain_time, saving_file):
 
 # if __name__ == "__main__":
 play_audio(
-    "data/listening_test_audios_32bit_simulation/audio_simulation_long3.wav",  # "data/listening_test_audios_32bit_simulation/freesound_23063_mono_16b.wav"
+    "data/simulation_audios/audio_simulation_long3.wav",  # "data/listening_test_audios_32bit_simulation/freesound_23063_mono_16b.wav"
     seconds=3,
     maintain_time=30,
     saving_file="segments/output_file.txt",
