@@ -1,3 +1,15 @@
+"""
+This script runs different configurations  of parameters for Elastic Net models in
+order to find the parameters that retrieve the smallest MAE error. 
+
+run_variations_EN() is the main function, it tests different Elastic Net parameters,
+alpha and l1_ratio, with the here specified input configurations. Training, validating
+and testing MAE values are stored in txt files in the specified saving folder. Then,
+manually, these text files were analysed to find the best working model configuration.
+The best performance options are the configurations trained and saved in the script 
+named models_train.py.
+"""
+
 import pandas as pd
 import os
 import sys
@@ -21,8 +33,8 @@ from lib.models.models_functions import (
 )
 
 # INPUT #############################################################################
-data_path = "data/main_files/SoundLights_complete.csv"
-data_foldFs_path = "data/main_files/SoundLights_fold6.csv"
+data_path = "data/ARAUS_extended.csv"
+data_foldFs_path = "data/fold_Fs.csv"
 saving_folder = "data/training_EN/"
 #####################################################################################
 #

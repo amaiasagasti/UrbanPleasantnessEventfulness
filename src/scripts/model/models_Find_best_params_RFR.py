@@ -1,3 +1,15 @@
+"""
+This script runs different configurations  of parameters for Random Forest Regressor
+models in order to find the parameters that retrieve the smallest MAE error. 
+
+run_variations_RFR() is the main function, it tests different Random Forest Regressor
+parameters, number of estimators, with the here specified input configurations. Training, 
+validating and testing MAE values are stored in txt files in the specified saving folder. 
+Then, manually, these text files were analysed to find the best working model configuration.
+The best performance options are the configurations trained and saved in the script 
+named models_train.py.
+"""
+
 import pandas as pd
 import os
 import sys
