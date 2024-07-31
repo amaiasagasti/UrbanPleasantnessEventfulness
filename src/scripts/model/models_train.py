@@ -57,7 +57,7 @@ df_clap = pd.DataFrame(data=full_list, columns=all_columns)
 
 df_real = pd.read_csv(data_foldFs_path)
 # Adapt CLAP features
-df_fold6 = df_real[
+df_foldFs = df_real[
     ARAUS_features
     + Freesound_features
     + masker_features
@@ -71,7 +71,7 @@ all_columns = (
     + clap_features
 )
 full_list = []
-for index, row in df_fold6.iterrows():
+for index, row in df_foldFs.iterrows():
     string_list = row["CLAP"].split("[")[1].split("]")[0].split(",")
     clap_list = [float(item) for item in string_list]
     complete_new_row = (
@@ -86,7 +86,7 @@ for index, row in df_fold6.iterrows():
         + clap_list
     )
     full_list.append(complete_new_row)
-df_fold6 = pd.DataFrame(data=full_list, columns=all_columns)
+df_foldFs = pd.DataFrame(data=full_list, columns=all_columns)
 
 # Saving folder
 if not os.path.exists(saving_folder):
@@ -111,7 +111,7 @@ if not os.path.exists(saving_folder):
     "min_max_norm": False,
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "P",
     "params": [100],
     "folder_path": saving_folder,
@@ -128,7 +128,7 @@ train_RFR(input_dict) """
     "min_max_norm": False,
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "E",
     "params": [400],
     "folder_path": saving_folder,
@@ -145,7 +145,7 @@ train_RFR(input_dict) """
     "min_max_norm": False,
     "dataframe": df_Freesound,
     "features": Freesound_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "P",
     "params": [250],
     "folder_path": saving_folder,
@@ -162,7 +162,7 @@ train_RFR(input_dict) """
     "min_max_norm": False,
     "dataframe": df_Freesound,
     "features": Freesound_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "E",
     "params": [250],
     "folder_path": saving_folder,
@@ -179,7 +179,7 @@ train_RFR(input_dict) """
     "min_max_norm": False,
     "dataframe": df_clap,
     "features": clap_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "P",
     "params": [100],
     "folder_path": saving_folder,
@@ -196,7 +196,7 @@ train_RFR(input_dict) """
     "min_max_norm": False,
     "dataframe": df_clap,
     "features": clap_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "E",
     "params": [500],
     "folder_path": saving_folder,
@@ -213,7 +213,7 @@ train_RFR(input_dict) """
     "min_max_norm": False,
     "dataframe": df_clap,
     "features": clap_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "P",
     "params": [250],
     "folder_path": saving_folder,
@@ -236,7 +236,7 @@ input_dict = {
     "min_max_norm": False,
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "P",
     "params": [0.6, 0.5],
     "folder_path": saving_folder,
@@ -255,7 +255,7 @@ input_dict = {
     "min_max_norm": False,
     "dataframe": df_ARAUS,
     "features": ARAUS_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "E",
     "params": [0.1, 0.6],
     "folder_path": saving_folder,
@@ -274,7 +274,7 @@ input_dict = {
     "min_max_norm": False,
     "dataframe": df_Freesound,
     "features": Freesound_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "P",
     "params": [0.3, 0.5],
     "folder_path": saving_folder,
@@ -293,7 +293,7 @@ input_dict = {
     "min_max_norm": False,
     "dataframe": df_Freesound,
     "features": Freesound_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "E",
     "params": [0.2, 0.6],
     "folder_path": saving_folder,
@@ -311,7 +311,7 @@ train_EN(input_dict) """
     "min_max_norm": False,
     "dataframe": df_clap,
     "features": clap_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "P",
     "params": [0.5, 0.5],
     "folder_path": saving_folder,
@@ -329,7 +329,7 @@ train_EN(input_dict) """
     "min_max_norm": False,
     "dataframe": df_clap,
     "features": clap_features,
-    "df_fold6": df_fold6,
+    "df_foldFs": df_foldFs,
     "predict": "E",
     "params": [0.5, 0.5],
     "folder_path": saving_folder,

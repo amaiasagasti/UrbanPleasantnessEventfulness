@@ -255,7 +255,7 @@ def run_variations_EN(input_dict):
         masker_transform,
         masker_gain,
     )
-    df_f6 = input_dict["df_fold6"].copy()
+    df_f6 = input_dict["df_foldFs"].copy()
     if input_dict["maskers_active"]:
         features_to_use = features_to_use + [
             "info.masker_bird",
@@ -324,11 +324,11 @@ def run_variations_EN(input_dict):
             MSEs_train = []
             MSEs_val = []
             MSEs_test = []
-            MSEs_fold6 = []
+            MSEs_foldFs = []
             MEs_train = []
             MEs_val = []
             MEs_test = []
-            MEs_fold6 = []
+            MEs_foldFs = []
 
             for val_fold in [1, 2, 3, 4, 5]:
 
@@ -344,31 +344,31 @@ def run_variations_EN(input_dict):
                     Y_train = df_train["info.P_ground_truth"].values  # [0:10]
                     Y_val = df_val["info.P_ground_truth"].values
                     Y_test = df_test["info.P_ground_truth"].values
-                    Y_fold6 = df_f6["info.P_ground_truth"].values
+                    Y_foldFs = df_f6["info.P_ground_truth"].values
                 elif input_dict["predict"] == "E":
                     Y_train = df_train["info.E_ground_truth"].values  # [0:10]
                     Y_val = df_val["info.E_ground_truth"].values
                     Y_test = df_test["info.E_ground_truth"].values
-                    Y_fold6 = df_f6["info.E_ground_truth"].values
+                    Y_foldFs = df_f6["info.E_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
                 X_val = df_val[features_to_use].values  # [:,0:100]
                 X_test = df_test[features_to_use].values  # [:,0:100]
-                X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+                X_foldFs = df_f6[features_to_use].values  # [:,0:100]
 
                 # Get features normalized_data = (data - mean) / (std)
                 if input_dict["std_mean_norm"]:
                     X_train, mean, std = normalize_columns(X_train)
                     X_val = (X_val - mean) / (std)
                     X_test = (X_test - mean) / (std)
-                    X_fold6 = (X_fold6 - mean) / (std)
+                    X_foldFs = (X_foldFs - mean) / (std)
                 # Get features normalized_data = (data - min) / (max-min)
                 if input_dict["min_max_norm"]:
                     X_train, min, max = normalize_columns_minmax(X_train)
                     X_val = (X_val - min) / (max - min)
                     X_test = (X_test - min) / (max - min)
-                    X_fold6 = (X_fold6 - min) / (max - min)
+                    X_foldFs = (X_foldFs - min) / (max - min)
 
                 # Fit model
                 model.fit(X_train, Y_train)
@@ -377,26 +377,26 @@ def run_variations_EN(input_dict):
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
                 MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
                 MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
-                MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+                MSE_foldFs = np.mean((clip(model.predict(X_foldFs)) - Y_foldFs) ** 2)
                 ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
                 ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
                 ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
-                ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+                ME_foldFs = np.mean(np.abs(clip(model.predict(X_foldFs)) - Y_foldFs))
 
                 # Add metrics
                 MSEs_train.append(MSE_train)
                 MSEs_val.append(MSE_val)
                 MSEs_test.append(MSE_test)
-                MSEs_fold6.append(MSE_fold6)
+                MSEs_foldFs.append(MSE_foldFs)
                 MEs_train.append(ME_train)
                 MEs_val.append(ME_val)
                 MEs_test.append(ME_test)
-                MEs_fold6.append(ME_fold6)
+                MEs_foldFs.append(ME_foldFs)
 
             f.write(f"Parameters {value}")
             f.write("\n")
             f.write(
-                f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+                f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
             )
             f.write("\n")
             f.write(
@@ -405,7 +405,7 @@ def run_variations_EN(input_dict):
             f.write("\n")
 
             current_mean = (
-                np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_fold6)
+                np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_foldFs)
             ) / 3
             if current_mean < prev_mean:
                 prev_mean = current_mean
@@ -427,11 +427,11 @@ def run_variations_EN(input_dict):
             MSEs_train = []
             MSEs_val = []
             MSEs_test = []
-            MSEs_fold6 = []
+            MSEs_foldFs = []
             MEs_train = []
             MEs_val = []
             MEs_test = []
-            MEs_fold6 = []
+            MEs_foldFs = []
 
             for val_fold in [1, 2, 3, 4, 5]:
 
@@ -447,31 +447,31 @@ def run_variations_EN(input_dict):
                     Y_train = df_train["info.P_ground_truth"].values  # [0:10]
                     Y_val = df_val["info.P_ground_truth"].values
                     Y_test = df_test["info.P_ground_truth"].values
-                    Y_fold6 = df_f6["info.P_ground_truth"].values
+                    Y_foldFs = df_f6["info.P_ground_truth"].values
                 elif input_dict["predict"] == "E":
                     Y_train = df_train["info.E_ground_truth"].values  # [0:10]
                     Y_val = df_val["info.E_ground_truth"].values
                     Y_test = df_test["info.E_ground_truth"].values
-                    Y_fold6 = df_f6["info.E_ground_truth"].values
+                    Y_foldFs = df_f6["info.E_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
                 X_val = df_val[features_to_use].values  # [:,0:100]
                 X_test = df_test[features_to_use].values  # [:,0:100]
-                X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+                X_foldFs = df_f6[features_to_use].values  # [:,0:100]
 
                 # Get features normalized_data = (data - mean) / (std)
                 if input_dict["std_mean_norm"]:
                     X_train, mean, std = normalize_columns(X_train)
                     X_val = (X_val - mean) / (std)
                     X_test = (X_test - mean) / (std)
-                    X_fold6 = (X_fold6 - mean) / (std)
+                    X_foldFs = (X_foldFs - mean) / (std)
                 # Get features normalized_data = (data - min) / (max-min)
                 if input_dict["min_max_norm"]:
                     X_train, min, max = normalize_columns_minmax(X_train)
                     X_val = (X_val - min) / (max - min)
                     X_test = (X_test - min) / (max - min)
-                    X_fold6 = (X_fold6 - min) / (max - min)
+                    X_foldFs = (X_foldFs - min) / (max - min)
 
                 # Fit model
                 model.fit(X_train, Y_train)
@@ -481,26 +481,26 @@ def run_variations_EN(input_dict):
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
                 MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
                 MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
-                MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+                MSE_foldFs = np.mean((clip(model.predict(X_foldFs)) - Y_foldFs) ** 2)
                 ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
                 ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
                 ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
-                ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+                ME_foldFs = np.mean(np.abs(clip(model.predict(X_foldFs)) - Y_foldFs))
 
                 # Add metrics
                 MSEs_train.append(MSE_train)
                 MSEs_val.append(MSE_val)
                 MSEs_test.append(MSE_test)
-                MSEs_fold6.append(MSE_fold6)
+                MSEs_foldFs.append(MSE_foldFs)
                 MEs_train.append(ME_train)
                 MEs_val.append(ME_val)
                 MEs_test.append(ME_test)
-                MEs_fold6.append(ME_fold6)
+                MEs_foldFs.append(ME_foldFs)
 
             f.write(f"Parameters {value}")
             f.write("\n")
             f.write(
-                f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+                f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
             )
             f.write("\n")
             f.write(
@@ -509,7 +509,7 @@ def run_variations_EN(input_dict):
             f.write("\n")
 
             current_mean = (
-                np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_fold6)
+                np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_foldFs)
             ) / 3
             if current_mean < prev_mean:
                 prev_mean = current_mean
@@ -528,7 +528,7 @@ def run_variations_RFR(input_dict):
         masker_transform,
         masker_gain,
     )
-    df_f6 = input_dict["df_fold6"].copy()
+    df_f6 = input_dict["df_foldFs"].copy()
     if input_dict["maskers_active"]:
         features_to_use = features_to_use + [
             "info.masker_bird",
@@ -598,11 +598,11 @@ def run_variations_RFR(input_dict):
             MSEs_train = []
             MSEs_val = []
             MSEs_test = []
-            MSEs_fold6 = []
+            MSEs_foldFs = []
             MEs_train = []
             MEs_val = []
             MEs_test = []
-            MEs_fold6 = []
+            MEs_foldFs = []
 
             for val_fold in [1, 2, 3, 4, 5]:
 
@@ -618,31 +618,31 @@ def run_variations_RFR(input_dict):
                     Y_train = df_train["info.P_ground_truth"].values  # [0:10]
                     Y_val = df_val["info.P_ground_truth"].values
                     Y_test = df_test["info.P_ground_truth"].values
-                    Y_fold6 = df_f6["info.P_ground_truth"].values
+                    Y_foldFs = df_f6["info.P_ground_truth"].values
                 elif input_dict["predict"] == "E":
                     Y_train = df_train["info.E_ground_truth"].values  # [0:10]
                     Y_val = df_val["info.E_ground_truth"].values
                     Y_test = df_test["info.E_ground_truth"].values
-                    Y_fold6 = df_f6["info.E_ground_truth"].values
+                    Y_foldFs = df_f6["info.E_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
                 X_val = df_val[features_to_use].values  # [:,0:100]
                 X_test = df_test[features_to_use].values  # [:,0:100]
-                X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+                X_foldFs = df_f6[features_to_use].values  # [:,0:100]
 
                 # Get features normalized_data = (data - mean) / (std)
                 if input_dict["std_mean_norm"]:
                     X_train, mean, std = normalize_columns(X_train)
                     X_val = (X_val - mean) / (std)
                     X_test = (X_test - mean) / (std)
-                    X_fold6 = (X_fold6 - mean) / (std)
+                    X_foldFs = (X_foldFs - mean) / (std)
                 # Get features normalized_data = (data - min) / (max-min)
                 if input_dict["min_max_norm"]:
                     X_train, min, max = normalize_columns_minmax(X_train)
                     X_val = (X_val - min) / (max - min)
                     X_test = (X_test - min) / (max - min)
-                    X_fold6 = (X_fold6 - min) / (max - min)
+                    X_foldFs = (X_foldFs - min) / (max - min)
 
                 # Fit model
                 model.fit(X_train, Y_train)
@@ -652,26 +652,26 @@ def run_variations_RFR(input_dict):
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
                 MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
                 MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
-                MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+                MSE_foldFs = np.mean((clip(model.predict(X_foldFs)) - Y_foldFs) ** 2)
                 ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
                 ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
                 ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
-                ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+                ME_foldFs = np.mean(np.abs(clip(model.predict(X_foldFs)) - Y_foldFs))
 
                 # Add metrics
                 MSEs_train.append(MSE_train)
                 MSEs_val.append(MSE_val)
                 MSEs_test.append(MSE_test)
-                MSEs_fold6.append(MSE_fold6)
+                MSEs_foldFs.append(MSE_foldFs)
                 MEs_train.append(ME_train)
                 MEs_val.append(ME_val)
                 MEs_test.append(ME_test)
-                MEs_fold6.append(ME_fold6)
+                MEs_foldFs.append(ME_foldFs)
 
             f.write(f"Parameters {value}")
             f.write("\n")
             f.write(
-                f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+                f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
             )
             f.write("\n")
             f.write(
@@ -680,7 +680,7 @@ def run_variations_RFR(input_dict):
             f.write("\n")
 
             current_mean = (
-                np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_fold6)
+                np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_foldFs)
             ) / 3
             if current_mean < prev_mean:
                 prev_mean = current_mean
@@ -699,7 +699,7 @@ def run_variations_KNN(input_dict):
         masker_transform,
         masker_gain,
     )
-    df_f6 = input_dict["df_fold6"].copy()
+    df_f6 = input_dict["df_foldFs"].copy()
     if input_dict["maskers_active"]:
         features_to_use = features_to_use + [
             "info.masker_bird",
@@ -767,11 +767,11 @@ def run_variations_KNN(input_dict):
             MSEs_train = []
             MSEs_val = []
             MSEs_test = []
-            MSEs_fold6 = []
+            MSEs_foldFs = []
             MEs_train = []
             MEs_val = []
             MEs_test = []
-            MEs_fold6 = []
+            MEs_foldFs = []
 
             for val_fold in [1, 2, 3, 4, 5]:
 
@@ -787,31 +787,31 @@ def run_variations_KNN(input_dict):
                     Y_train = df_train["info.P_ground_truth"].values  # [0:10]
                     Y_val = df_val["info.P_ground_truth"].values
                     Y_test = df_test["info.P_ground_truth"].values
-                    Y_fold6 = df_f6["info.P_ground_truth"].values
+                    Y_foldFs = df_f6["info.P_ground_truth"].values
                 elif input_dict["predict"] == "E":
                     Y_train = df_train["info.E_ground_truth"].values  # [0:10]
                     Y_val = df_val["info.E_ground_truth"].values
                     Y_test = df_test["info.E_ground_truth"].values
-                    Y_fold6 = df_f6["info.E_ground_truth"].values
+                    Y_foldFs = df_f6["info.E_ground_truth"].values
 
                 # Get feature matrices
                 X_train = df_train[features_to_use].values  # [:,0:100]
                 X_val = df_val[features_to_use].values  # [:,0:100]
                 X_test = df_test[features_to_use].values  # [:,0:100]
-                X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+                X_foldFs = df_f6[features_to_use].values  # [:,0:100]
 
                 # Get features normalized_data = (data - mean) / (std)
                 if input_dict["std_mean_norm"]:
                     X_train, mean, std = normalize_columns(X_train)
                     X_val = (X_val - mean) / (std)
                     X_test = (X_test - mean) / (std)
-                    X_fold6 = (X_fold6 - mean) / (std)
+                    X_foldFs = (X_foldFs - mean) / (std)
                 # Get features normalized_data = (data - min) / (max-min)
                 if input_dict["min_max_norm"]:
                     X_train, min, max = normalize_columns_minmax(X_train)
                     X_val = (X_val - min) / (max - min)
                     X_test = (X_test - min) / (max - min)
-                    X_fold6 = (X_fold6 - min) / (max - min)
+                    X_foldFs = (X_foldFs - min) / (max - min)
 
                 # Fit model
                 model.fit(X_train, Y_train)
@@ -822,27 +822,27 @@ def run_variations_KNN(input_dict):
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
                 MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
                 MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
-                MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+                MSE_foldFs = np.mean((clip(model.predict(X_foldFs)) - Y_foldFs) ** 2)
                 ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
                 ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
                 ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
-                ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+                ME_foldFs = np.mean(np.abs(clip(model.predict(X_foldFs)) - Y_foldFs))
 
                 # Add metrics
                 MSEs_train.append(MSE_train)
                 MSEs_val.append(MSE_val)
                 MSEs_test.append(MSE_test)
-                MSEs_fold6.append(MSE_fold6)
+                MSEs_foldFs.append(MSE_foldFs)
                 MEs_train.append(ME_train)
                 MEs_val.append(ME_val)
                 MEs_test.append(ME_test)
-                MEs_fold6.append(ME_fold6)
+                MEs_foldFs.append(ME_foldFs)
 
                 # print(f'{val_fold:4d} | {MSE_train:.4f} | {MSE_val:.4f} | {MSE_test:.4f} | {ME_train:.4f} | {ME_val:.4f} | {ME_test:.4f} | {X_LR.intercept_:7.4f} | {X_train.shape[0]:5d} | {X_val.shape[0]:5d} | {X_test.shape[0]:^4d} | {X_train.shape[1]:^5d} | {np.sum(np.abs(X_LR.coef_) > 0):^5d} |')
             f.write(f"Parameters {value}")
             f.write("\n")
             f.write(
-                f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+                f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
             )
             f.write("\n")
             f.write(
@@ -851,7 +851,7 @@ def run_variations_KNN(input_dict):
             f.write("\n")
 
             current_mean = (
-                np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_fold6)
+                np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_foldFs)
             ) / 3
             if current_mean < prev_mean:
                 prev_mean = current_mean
@@ -870,7 +870,7 @@ def train_EN(input_dict):
         masker_transform,
         masker_gain,
     )
-    df_f6 = input_dict["df_fold6"].copy()
+    df_f6 = input_dict["df_foldFs"].copy()
     if input_dict["maskers_active"]:
         features_to_use = features_to_use + [
             "info.masker_bird",
@@ -953,11 +953,11 @@ def train_EN(input_dict):
     MSEs_train = []
     MSEs_val = []
     MSEs_test = []
-    MSEs_fold6 = []
+    MSEs_foldFs = []
     MEs_train = []
     MEs_val = []
     MEs_test = []
-    MEs_fold6 = []
+    MEs_foldFs = []
 
     for val_fold in [1, 2, 3, 4, 5]:
 
@@ -973,31 +973,31 @@ def train_EN(input_dict):
             Y_train = df_train["info.P_ground_truth"].values  # [0:10]
             Y_val = df_val["info.P_ground_truth"].values
             Y_test = df_test["info.P_ground_truth"].values
-            Y_fold6 = df_f6["info.P_ground_truth"].values
+            Y_foldFs = df_f6["info.P_ground_truth"].values
         elif input_dict["predict"] == "E":
             Y_train = df_train["info.E_ground_truth"].values  # [0:10]
             Y_val = df_val["info.E_ground_truth"].values
             Y_test = df_test["info.E_ground_truth"].values
-            Y_fold6 = df_f6["info.E_ground_truth"].values
+            Y_foldFs = df_f6["info.E_ground_truth"].values
 
         # Get feature matrices
         X_train = df_train[features_to_use].values  # [:,0:100]
         X_val = df_val[features_to_use].values  # [:,0:100]
         X_test = df_test[features_to_use].values  # [:,0:100]
-        X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+        X_foldFs = df_f6[features_to_use].values  # [:,0:100]
 
         # Get features normalized_data = (data - mean) / (std)
         if input_dict["std_mean_norm"]:
             X_train, mean, std = normalize_columns(X_train)
             X_val = (X_val - mean) / (std)
             X_test = (X_test - mean) / (std)
-            X_fold6 = (X_fold6 - mean) / (std)
+            X_foldFs = (X_foldFs - mean) / (std)
         # Get features normalized_data = (data - min) / (max-min)
         if input_dict["min_max_norm"]:
             X_train, min, max = normalize_columns_minmax(X_train)
             X_val = (X_val - min) / (max - min)
             X_test = (X_test - min) / (max - min)
-            X_fold6 = (X_fold6 - min) / (max - min)
+            X_foldFs = (X_foldFs - min) / (max - min)
 
         # Fit model
         model.fit(X_train, Y_train)
@@ -1007,31 +1007,31 @@ def train_EN(input_dict):
         MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
         MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
         MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
-        MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+        MSE_foldFs = np.mean((clip(model.predict(X_foldFs)) - Y_foldFs) ** 2)
         ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
         ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
         ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
-        ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+        ME_foldFs = np.mean(np.abs(clip(model.predict(X_foldFs)) - Y_foldFs))
 
         # Add metrics
         MSEs_train.append(MSE_train)
         MSEs_val.append(MSE_val)
         MSEs_test.append(MSE_test)
-        MSEs_fold6.append(MSE_fold6)
+        MSEs_foldFs.append(MSE_foldFs)
         MEs_train.append(ME_train)
         MEs_val.append(ME_val)
         MEs_test.append(ME_test)
-        MEs_fold6.append(ME_fold6)
+        MEs_foldFs.append(ME_foldFs)
 
         print(
-            f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_fold6):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_fold6):.4f} |"
+            f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_foldFs):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_foldFs):.4f} |"
         )
         print(
             "-----+--------+--------+--------+--------+--------+--------+--------+----------"
         )
 
         # Check if validation fold provide the best results
-        current_mean = (ME_val + ME_test + ME_fold6) / 3
+        current_mean = (ME_val + ME_test + ME_foldFs) / 3
         if current_mean < prev_mean:
             prev_mean = current_mean
             model_chosen = copy.deepcopy(model)
@@ -1044,7 +1044,7 @@ def train_EN(input_dict):
                 max_chosen = max
 
     print(
-        f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+        f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
     )
     print(
         "-----+--------+--------+--------+--------+--------+--------+--------+----------"
@@ -1089,7 +1089,7 @@ def train_KNN(input_dict):
         masker_transform,
         masker_gain,
     )
-    df_f6 = input_dict["df_fold6"].copy()
+    df_f6 = input_dict["df_foldFs"].copy()
     if input_dict["maskers_active"]:
         features_to_use = features_to_use + [
             "info.masker_bird",
@@ -1170,11 +1170,11 @@ def train_KNN(input_dict):
     MSEs_train = []
     MSEs_val = []
     MSEs_test = []
-    MSEs_fold6 = []
+    MSEs_foldFs = []
     MEs_train = []
     MEs_val = []
     MEs_test = []
-    MEs_fold6 = []
+    MEs_foldFs = []
 
     for val_fold in [1, 2, 3, 4, 5]:
 
@@ -1190,31 +1190,31 @@ def train_KNN(input_dict):
             Y_train = df_train["info.P_ground_truth"].values  # [0:10]
             Y_val = df_val["info.P_ground_truth"].values
             Y_test = df_test["info.P_ground_truth"].values
-            Y_fold6 = df_f6["info.P_ground_truth"].values
+            Y_foldFs = df_f6["info.P_ground_truth"].values
         elif input_dict["predict"] == "E":
             Y_train = df_train["info.E_ground_truth"].values  # [0:10]
             Y_val = df_val["info.E_ground_truth"].values
             Y_test = df_test["info.E_ground_truth"].values
-            Y_fold6 = df_f6["info.E_ground_truth"].values
+            Y_foldFs = df_f6["info.E_ground_truth"].values
 
         # Get feature matrices
         X_train = df_train[features_to_use].values  # [:,0:100]
         X_val = df_val[features_to_use].values  # [:,0:100]
         X_test = df_test[features_to_use].values  # [:,0:100]
-        X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+        X_foldFs = df_f6[features_to_use].values  # [:,0:100]
 
         # Get features normalized_data = (data - mean) / (std)
         if input_dict["std_mean_norm"]:
             X_train, mean, std = normalize_columns(X_train)
             X_val = (X_val - mean) / (std)
             X_test = (X_test - mean) / (std)
-            X_fold6 = (X_fold6 - mean) / (std)
+            X_foldFs = (X_foldFs - mean) / (std)
         # Get features normalized_data = (data - min) / (max-min)
         if input_dict["min_max_norm"]:
             X_train, min, max = normalize_columns_minmax(X_train)
             X_val = (X_val - min) / (max - min)
             X_test = (X_test - min) / (max - min)
-            X_fold6 = (X_fold6 - min) / (max - min)
+            X_foldFs = (X_foldFs - min) / (max - min)
 
         # Fit model
         model.fit(X_train, Y_train)
@@ -1224,31 +1224,31 @@ def train_KNN(input_dict):
         MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
         MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
         MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
-        MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+        MSE_foldFs = np.mean((clip(model.predict(X_foldFs)) - Y_foldFs) ** 2)
         ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
         ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
         ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
-        ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+        ME_foldFs = np.mean(np.abs(clip(model.predict(X_foldFs)) - Y_foldFs))
 
         # Add metrics
         MSEs_train.append(MSE_train)
         MSEs_val.append(MSE_val)
         MSEs_test.append(MSE_test)
-        MSEs_fold6.append(MSE_fold6)
+        MSEs_foldFs.append(MSE_foldFs)
         MEs_train.append(ME_train)
         MEs_val.append(ME_val)
         MEs_test.append(ME_test)
-        MEs_fold6.append(ME_fold6)
+        MEs_foldFs.append(ME_foldFs)
 
         print(
-            f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_fold6):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_fold6):.4f} |"
+            f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_foldFs):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_foldFs):.4f} |"
         )
         print(
             "-----+--------+--------+--------+--------+--------+--------+--------+----------"
         )
 
         # Check if validation fold provide the best results
-        current_mean = (ME_val + ME_test + ME_fold6) / 3
+        current_mean = (ME_val + ME_test + ME_foldFs) / 3
         if current_mean < prev_mean:
             prev_mean = current_mean
             model_chosen = copy.deepcopy(model)
@@ -1261,7 +1261,7 @@ def train_KNN(input_dict):
                 max_chosen = max
 
     print(
-        f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+        f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
     )
     print(
         "-----+--------+--------+--------+--------+--------+--------+--------+----------"
@@ -1309,7 +1309,7 @@ def train_RFR(input_dict):
             masker_transform,
             masker_gain,
         )
-        df_f6 = input_dict["df_fold6"].copy()
+        df_f6 = input_dict["df_foldFs"].copy()
         if input_dict["maskers_active"]:
             features_to_use = features_to_use + [
                 "info.masker_bird",
@@ -1390,11 +1390,11 @@ def train_RFR(input_dict):
         MSEs_train = []
         MSEs_val = []
         MSEs_test = []
-        MSEs_fold6 = []
+        MSEs_foldFs = []
         MEs_train = []
         MEs_val = []
         MEs_test = []
-        MEs_fold6 = []
+        MEs_foldFs = []
 
         for val_fold in [1, 2, 3, 4, 5]:
 
@@ -1410,31 +1410,31 @@ def train_RFR(input_dict):
                 Y_train = df_train["info.P_ground_truth"].values  # [0:10]
                 Y_val = df_val["info.P_ground_truth"].values
                 Y_test = df_test["info.P_ground_truth"].values
-                Y_fold6 = df_f6["info.P_ground_truth"].values
+                Y_foldFs = df_f6["info.P_ground_truth"].values
             elif input_dict["predict"] == "E":
                 Y_train = df_train["info.E_ground_truth"].values  # [0:10]
                 Y_val = df_val["info.E_ground_truth"].values
                 Y_test = df_test["info.E_ground_truth"].values
-                Y_fold6 = df_f6["info.E_ground_truth"].values
+                Y_foldFs = df_f6["info.E_ground_truth"].values
 
             # Get feature matrices
             X_train = df_train[features_to_use].values  # [:,0:100]
             X_val = df_val[features_to_use].values  # [:,0:100]
             X_test = df_test[features_to_use].values  # [:,0:100]
-            X_fold6 = df_f6[features_to_use].values  # [:,0:100]
+            X_foldFs = df_f6[features_to_use].values  # [:,0:100]
 
             # Get features normalized_data = (data - mean) / (std)
             if input_dict["std_mean_norm"]:
                 X_train, mean, std = normalize_columns(X_train)
                 X_val = (X_val - mean) / (std)
                 X_test = (X_test - mean) / (std)
-                X_fold6 = (X_fold6 - mean) / (std)
+                X_foldFs = (X_foldFs - mean) / (std)
             # Get features normalized_data = (data - min) / (max-min)
             if input_dict["min_max_norm"]:
                 X_train, min, max = normalize_columns_minmax(X_train)
                 X_val = (X_val - min) / (max - min)
                 X_test = (X_test - min) / (max - min)
-                X_fold6 = (X_fold6 - min) / (max - min)
+                X_foldFs = (X_foldFs - min) / (max - min)
 
             # Fit model
             model.fit(X_train, Y_train)
@@ -1444,31 +1444,31 @@ def train_RFR(input_dict):
             MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
             MSE_val = np.mean((clip(model.predict(X_val)) - Y_val) ** 2)
             MSE_test = np.mean((clip(model.predict(X_test)) - Y_test) ** 2)
-            MSE_fold6 = np.mean((clip(model.predict(X_fold6)) - Y_fold6) ** 2)
+            MSE_foldFs = np.mean((clip(model.predict(X_foldFs)) - Y_foldFs) ** 2)
             ME_train = np.mean(np.abs(clip(model.predict(X_train)) - Y_train))
             ME_val = np.mean(np.abs(clip(model.predict(X_val)) - Y_val))
             ME_test = np.mean(np.abs(clip(model.predict(X_test)) - Y_test))
-            ME_fold6 = np.mean(np.abs(clip(model.predict(X_fold6)) - Y_fold6))
+            ME_foldFs = np.mean(np.abs(clip(model.predict(X_foldFs)) - Y_foldFs))
 
             # Add metrics
             MSEs_train.append(MSE_train)
             MSEs_val.append(MSE_val)
             MSEs_test.append(MSE_test)
-            MSEs_fold6.append(MSE_fold6)
+            MSEs_foldFs.append(MSE_foldFs)
             MEs_train.append(ME_train)
             MEs_val.append(ME_val)
             MEs_test.append(ME_test)
-            MEs_fold6.append(ME_fold6)
+            MEs_foldFs.append(ME_foldFs)
 
             f.write(
-                f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_fold6):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_fold6):.4f} |"
+                f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_foldFs):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_foldFs):.4f} |"
             )
             f.write(
                 "-----+--------+--------+--------+--------+--------+--------+--------+----------"
             )
 
             # Check if validation fold provide the best results
-            current_mean = (ME_val + ME_test + ME_fold6) / 3
+            current_mean = (ME_val + ME_test + ME_foldFs) / 3
             if current_mean < prev_mean:
                 prev_mean = current_mean
                 model_chosen = copy.deepcopy(model)
@@ -1481,7 +1481,7 @@ def train_RFR(input_dict):
                     max_chosen = max
 
         f.write(
-            f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_fold6):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_fold6):.4f} |"
+            f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
         )
         f.write(
             "-----+--------+--------+--------+--------+--------+--------+--------+----------"

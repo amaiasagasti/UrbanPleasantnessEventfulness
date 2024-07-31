@@ -1,11 +1,11 @@
 """
-This script runs different configurations  of parameters for Random Forest Regressor
-models in order to find the parameters that retrieve the smallest MAE error. 
+This script runs different configurations  of parameters for Elastic Net models in
+order to find the parameters that retrieve the smallest MAE error. 
 
-run_variations_RFR() is the main function, it tests different Random Forest Regressor
-parameters, number of estimators, with the here specified input configurations. Training, 
-validating and testing MAE values are stored in txt files in the specified saving folder. 
-Then, manually, these text files were analysed to find the best working model configuration.
+run_variations_EN() is the main function, it tests different Elastic Net parameters,
+alpha and l1_ratio, with the here specified input configurations. Training, validating
+and testing MAE values are stored in txt files in the specified saving folder. Then,
+manually, these text files were analysed to find the best working model configuration.
 The best performance options are the configurations trained and saved in the script 
 named models_train.py.
 """
@@ -28,12 +28,14 @@ from lib.dataset.features_groups import (
     masker_features,
     clap_features,
 )
-from lib.models.models_functions import run_variations_RFR
+from lib.models.models_functions import (
+    run_variations_EN,
+)
 
 # INPUT #############################################################################
 data_path = "data/ARAUS_extended.csv"
 data_foldFs_path = "data/fold_Fs.csv"
-saving_folder = "data/training_RFR/"
+saving_folder = "data/training_EN/"
 #####################################################################################
 #
 #
@@ -103,6 +105,7 @@ if not os.path.exists(saving_folder):
 #
 ############# RUN ###################################################################
 
+
 input_dicts = [
     # ARAUS
     {
@@ -114,8 +117,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_noM_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_noM_noNorm.txt",
     },
     {
         "maskers_active": False,
@@ -126,8 +129,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_noM_stdMeanNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_noM_stdMeanNorm.txt",
     },
     {
         "maskers_active": False,
@@ -138,8 +141,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_noM_minMaxnNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_noM_minMaxnNorm.txt",
     },
     {
         "maskers_active": True,
@@ -150,8 +153,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_M1_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_M1_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -162,8 +165,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_M5_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_M5_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -174,8 +177,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_M10_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_M10_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -186,8 +189,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_M20_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_M20_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -198,8 +201,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_M20_stdMeanNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_M20_stdMeanNorm.txt",
     },
     {
         "maskers_active": True,
@@ -210,8 +213,8 @@ input_dicts = [
         "dataframe": df_ARAUS,
         "features": ARAUS_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_ARAUS_M20_minMaxNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_ARAUS_M20_minMaxNorm.txt",
     },
     {  # Freesound
         "maskers_active": False,
@@ -222,8 +225,8 @@ input_dicts = [
         "dataframe": df_Freesound,
         "features": Freesound_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_Freesound_noM_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_Freesound_noM_noNorm.txt",
     },
     {
         "maskers_active": False,
@@ -234,8 +237,8 @@ input_dicts = [
         "dataframe": df_Freesound,
         "features": Freesound_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_Freesound_noM_stdMeanNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_Freesound_noM_stdMeanNorm.txt",
     },
     {
         "maskers_active": False,
@@ -246,8 +249,8 @@ input_dicts = [
         "dataframe": df_Freesound,
         "features": Freesound_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_Freesound_noM_minMaxnNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_Freesound_noM_minMaxnNorm.txt",
     },
     {
         "maskers_active": True,
@@ -258,8 +261,8 @@ input_dicts = [
         "dataframe": df_Freesound,
         "features": Freesound_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_Freesound_M1_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_Freesound_M1_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -270,8 +273,8 @@ input_dicts = [
         "dataframe": df_Freesound,
         "features": Freesound_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_Freesound_M5_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_Freesound_M5_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -281,9 +284,9 @@ input_dicts = [
         "min_max_norm": False,
         "dataframe": df_Freesound,
         "df_foldFs": df_foldFs,
-        "predict": "E",
+        "predict": "P",
         "features": Freesound_features,
-        "name": saving_folder + "E_RFR_Freesound_M10_noNorm.txt",
+        "name": saving_folder + "P_EN_Freesound_M10_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -294,8 +297,8 @@ input_dicts = [
         "dataframe": df_Freesound,
         "features": Freesound_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_Freesound_M20_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_Freesound_M20_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -306,8 +309,8 @@ input_dicts = [
         "dataframe": df_Freesound,
         "features": Freesound_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_Freesound_M20_stdMeanNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_Freesound_M20_stdMeanNorm.txt",
     },
     {
         "maskers_active": True,
@@ -318,8 +321,8 @@ input_dicts = [
         "dataframe": df_Freesound,
         "features": Freesound_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_Freesound_M20_minMaxNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_Freesound_M20_minMaxNorm.txt",
     },
     {  # CLAP
         "maskers_active": False,
@@ -330,8 +333,8 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_noM_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_noM_noNorm.txt",
     },
     {
         "maskers_active": False,
@@ -342,8 +345,8 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_noM_stdMeanNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_noM_stdMeanNorm.txt",
     },
     {
         "maskers_active": False,
@@ -354,8 +357,8 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_noM_minMaxnNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_noM_minMaxnNorm.txt",
     },
     {
         "maskers_active": True,
@@ -366,8 +369,8 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_M1_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_M1_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -378,8 +381,8 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_M5_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_M5_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -390,8 +393,8 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_M10_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_M10_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -402,8 +405,8 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_M20_noNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_M20_noNorm.txt",
     },
     {
         "maskers_active": True,
@@ -414,8 +417,8 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_M20_stdMeanNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_M20_stdMeanNorm.txt",
     },
     {
         "maskers_active": True,
@@ -426,11 +429,11 @@ input_dicts = [
         "dataframe": df_clap,
         "features": clap_features,
         "df_foldFs": df_foldFs,
-        "predict": "E",
-        "name": saving_folder + "E_RFR_clap_M20_minMaxNorm.txt",
+        "predict": "P",
+        "name": saving_folder + "P_EN_clap_M20_minMaxNorm.txt",
     },
 ]
 
 
 for input_dict in input_dicts:
-    run_variations_RFR(input_dict)
+    run_variations_EN(input_dict)
