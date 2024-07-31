@@ -86,11 +86,24 @@ To test the developed models for predicting the pleasantness (P) and eventfulnes
 The first script is ```src/scripts/sensor_simulate.py```. To run this script, the function ```play_audio()``` is called:
 ```
 play_audio(
-    "data/listening_test_audios_32bit_simulation/freesound_23063_mono_16b.wav",
-    seconds=3,
-    maintain_time=30,
+    path,
+    frequency,
+    duration,
+    maintain_time,
 )
 ```
+The first input is the path to the audio file that will simulate a real-time recording. The second input specifies the frequency, in seconds, at which new predictions for pleasantness (P) and eventfulness (E) will be made. This also determines the duration of the audio slices that will be saved locally. The third parameter defines the duration, in seconds, of audio that will be considered for prediction calculations. This duration must be an integer multiple of the frequency, allowing an exact number of audio slices to be concatenated. Finally, the fourth input sets the duration, in seconds, for which the audio slices will be stored locally. This value should be as small as possible but must be greater than or equal to the "duration" parameter and also an integer multiple of the "frequency. 
+
+This function saves the predicted values of P and E in a text file, with each new pair of values written on a new line.
+
+The second script, src/scripts/sensor_read_and_plot.py, operates by reading the most recent line from the aforementioned text file in real-time and plotting the values on a simple interface.
+
+<img src="data/images/simulation_capture.png" alt="Logo">
+
+<p></p>
+A demo of this simulation can be found <a href="link!!!">here </a>.
+<p></p>
+If you wish to integrate the predictions into your own code, you can find the models for predicting pleasantness and eventfulness in the /models/trained directory. These models require LAION-AI's CLAP embeddings of the input audio.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -99,6 +112,16 @@ play_audio(
 ## Reproducibility
 
 ### Generation of the dataset ARAUS-extended
+
+<img src="data/images/dataset-schema.png" alt="Logo">
+
+<img src="data/images/model-schema.png" alt="Logo">
+
+<img src="data/images/sensor-schema.png" alt="Logo">
+
+<img src="data/images/legend.png" alt="Logo">
+
+
 1) Preliminary adaptation
    ---
 
