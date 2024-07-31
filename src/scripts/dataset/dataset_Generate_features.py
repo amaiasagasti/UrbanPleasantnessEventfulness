@@ -18,11 +18,13 @@ from lib.dataset.dataset_functions import (
 )
 
 
-############### Code to generate ARAUS extended dataset ###############
+############### Code to generate ARAUS extended dataset ##################################
 # Inputs
-audios_path = "data/soundscapes_augmented/ARAUS_fold0_01/"
-csv_path = "data/main_files/responses_SoundLights.csv"
-saving_path = "data/ARAUS_extended/"
+audios_path = "data/soundscapes_augmented/ARAUS_fold0_01/"  # Run once for each folder
+csv_path = "data/responses_adapted.csv"
+saving_path = (
+    "data/ARAUS_extended/"  # Specify saving path for JSONS files (one per audio)
+)
 
 
 csv_file = pd.read_csv(csv_path)
@@ -37,14 +39,14 @@ generate_features(
     1,
 )
 
-######################################################################
+#########################################################################################
 
 
-# Code to generate features for new data (listenig tests audios) #####
+# Code to generate features for new data (listenig tests audios) ########################
 # Inputs
 audios_path = "data/listening_test_audios/"
 csv_path = "data/main_files/answers_listening_tests.csv"
-saving_path = "data/listening_test_data/"
+saving_path = "data/fold_Fs/"
 
 
 csv_file = pd.read_csv(csv_path, delimiter=";")
@@ -59,4 +61,9 @@ generate_features(
     1,
 )
 
-######################################################################
+#########################################################################################
+
+# NOTE:
+# Both these sections of code generate single JSONS for each analysed audio. To get general
+# JSON or CSV file, use import_jsons_to_json()  or import_jsons_to_dataframe() functions,
+# respectively, from lib/dataset/dataset_functions.py

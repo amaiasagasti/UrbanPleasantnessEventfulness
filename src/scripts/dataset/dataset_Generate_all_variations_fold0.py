@@ -14,9 +14,9 @@ from lib.dataset.dataset_functions import (
 
 ############### Code to generate fold0 variations (wav_gain variations) ###############
 # Inputs
-csvPath = "data/main_files/SoundLights_complete.csv"
-audios_path = "data/soundscapes_augmented/ARAUS_fold0_01/"
-saving_folder_path = "data/output/"
+csvPath = "data/ARAUS_extended.csv"
+audios_path = "data/soundscapes_augmented/ARAUS_fold0_01/"  # Fold_0 folder
+saving_folder_path = "data/variations_fold0/"
 
 # Calculate
 df = pd.read_csv(csvPath)
@@ -83,3 +83,8 @@ for variation in variations:
         )
 
 #######################################################################################
+
+# NOTE:
+# Both this section of code generates single JSONS for each analysed audio. To get general
+# JSON or CSV file, use import_jsons_to_json()  or import_jsons_to_dataframe() functions,
+# respectively, from lib/dataset/dataset_functions.py
