@@ -1,56 +1,21 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
-<a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
 
 
 
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
-
+---
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
   <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="data/images/logo.png" alt="Logo">
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">SOUNDLIGHTS</h3>
 
   <p align="center">
-    project_description
-    <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    ·
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    Research and development of AI models to predict the perceptual sound qualities of "pleasantness" and "eventfulness" in urban soundscapes with focus on prediction accuracy and suitability to real-time implementations. Additionally, an example code of a simulation is included: a recorded audio file simulates an audio being captured in real time, pleasantness and eventfulness values are calculated every few seconds.
   </p>
+  
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -82,59 +47,32 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-### Built With
-
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+<p align="left">
+    This project is a colaboration between the following institutions:
+    <p>
+    <img src="data/images/MTG_logo.jpeg" alt="Logo" height=60>    
+    </p>
+    <p>
+    <img src="data/images/Bitlab_logo.png" alt="Logo" height=60>
+    </p>
+    Funded by:
+    <p>
+    <img src="data/images/Logo-Bithabitat.png" alt="Logo" height=60>
+    </p>
+  </p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
+This section provides all the necessary information to set up the working environment The followiing bullet-list details the set up process:
+- It is recommended to use ```Python==3.10.14``` to guarantee compatibility.
+- Install all the depencencies detailed in the ```requirements.txt``` file of this project. 
+- <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP model</a> is used, make sure you install its dependencies too.
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
-
-### Installation
-
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -143,61 +81,42 @@ This is an example of how to list things you need to use the software and how to
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+To test the developed models for predicting the pleasantness (P) and eventfulness (E) values of an urban soundscape, two scripts have been implemented and are ready to run. These scripts simulate the functionality of an acoustic environment sensor by processing a WAV file containing an urban soundscape recording. The simulation operates in "real time," where the audio file is read continuously, and every X seconds, the scripts output the predicted values of P and E. This setup allows for the real-time analysis and evaluation of the acoustic environment based on the provided recordings.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
-
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
+The first script is ```src/scripts/sensor_simulate.py```. To run this script, the function ```play_audio()``` is called:
+```
+play_audio(
+    "data/listening_test_audios_32bit_simulation/freesound_23063_mono_16b.wav",
+    seconds=3,
+    maintain_time=30,
+)
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Roadmap
+
+
+## Reproducibility
+
+### Generation of the dataset ARAUS-extended
+1) Preliminary adaptation
+   ---
+
+    Data needed: responses.csv (from ARAUS original dataset)
+   
+    Script to run: `dataset_Adequate_ARAUS_for_extension.ipynb`
+
+    Result: responses_Soundlights.csv
+    
+    ---
+
+2) Generate dataset ARAUS-extended
+3) Generate fold0 variations
+4) Generate fold-Fs - listening test analysis
 
 ### Overview
 Our project aims to [brief description of the project's long-term goals and vision].
 
-### Milestones
-
-- **Version 1.0 (Q4 2024)**
-  - Complete the initial feature set.
-  - Ensure basic stability and performance.
-  - Documentation for end-users.
-
-- **Version 1.1 (Q1 2025)**
-  - Add feature X: [brief description].
-  - Improve performance of module Y.
-  - Bug fixes and minor improvements.
-
-- **Version 2.0 (Q3 2025)**
-  - Major redesign of the UI.
-  - Introduce feature Z: [brief description].
-  - Comprehensive testing and optimization.
-
-### Upcoming Features
-
-- **Feature X** (High Priority)
-  - [Description of what Feature X will do]
-  - Linked Issues: [#123](https://github.com/user/repo/issues/123), [#124](https://github.com/user/repo/issues/124)
-
-- **Feature Y** (Medium Priority)
-  - [Description of what Feature Y will do]
-  - Linked Issues: [#125](https://github.com/user/repo/issues/125)
-
-- **Feature Z** (Low Priority)
-  - [Description of what Feature Z will do]
-  - Linked Issues: [#126](https://github.com/user/repo/issues/126)
 
 ### Contributors' Guide
 
