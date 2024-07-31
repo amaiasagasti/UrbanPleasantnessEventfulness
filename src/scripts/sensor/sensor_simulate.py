@@ -45,8 +45,8 @@ def play_audio(filename, seconds, maintain_time, saving_file):
 
         # region MODEL LOADING #######################
         # Load the trained model
-        model_P = joblib.load("data/models/trained/RFR_CLAP_P_raw.joblib")
-        model_E = joblib.load("data/models/trained/RFR_CLAP_E.joblib")
+        model_P = joblib.load("data/models/trained/model_pleasantness.joblib")
+        model_E = joblib.load("data/models/trained/model_eventfulness.joblib")
         # Load the CLAP model to generate features
         print("------- code starts -----------")
         model_CLAP = CLAP_Module(enable_fusion=True)

@@ -2,8 +2,9 @@
 This script trains and saves the best performing models for each feature set. 
 
 train_RFR() and train_EN() are the main function, each for one algorithm type.
-Uncomment code below in order to train and save models according to the specified 
-input configuration.
+Best performing models are saved when you run code.
+Uncomment code at the bottom in order to train and save models according to the 
+specified input configuration.
 """
 
 import pandas as pd
@@ -97,6 +98,45 @@ if not os.path.exists(saving_folder):
 #
 #
 ############# RUN ###################################################################
+# BEST PERFORMING MODEL FOR PLEASANTNESS PREDICTION
+input_dict = {
+    "maskers_active": False,
+    "masker_gain": 1,
+    "masker_transform": "None",
+    "std_mean_norm": False,
+    "min_max_norm": False,
+    "dataframe": df_clap,
+    "features": clap_features,
+    "df_foldFs": df_foldFs,
+    "predict": "P",
+    "params": [250],
+    "folder_path": saving_folder,
+    "model_name": "model_pleasantness",
+}
+train_RFR(input_dict)
+# BEST PERFORMING MODEL FOR EVENTFULNESS PREDICTION
+input_dict = {
+    "maskers_active": False,
+    "masker_gain": 1,
+    "masker_transform": "None",
+    "std_mean_norm": False,
+    "min_max_norm": False,
+    "dataframe": df_clap,
+    "features": clap_features,
+    "df_foldFs": df_foldFs,
+    "predict": "E",
+    "params": [500],
+    "folder_path": saving_folder,
+    "model_name": "model_eventfulness",
+}
+train_RFR(input_dict)
+#####################################################################################
+#
+#
+#
+#
+#
+############# OTHERS ###############################################################
 # print("\n")
 # print("\n")
 # print("##########################################################################")
