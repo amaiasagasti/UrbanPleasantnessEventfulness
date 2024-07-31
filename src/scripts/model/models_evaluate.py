@@ -1,9 +1,14 @@
+"""
+This script tests models' robustess to changes in calibration (variations of fold_0). 
+
+test_model() is the main function. It imports the fold_0 variations subdatasets and
+applies the saved models to make predictions. Predicted values are compared to the
+ground-truth. Resulting MAE values are printed through terminal
+"""
+
 import os
 import sys
-import numpy as np
 import pandas as pd
-from sklearn.linear_model import ElasticNet
-from joblib import load
 
 # Path importing
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -21,23 +26,22 @@ from lib.dataset.features_groups import (
 )
 from lib.models.models_functions import test_model
 from lib.dataset.dataset_functions import (
-    import_json_to_dataframe,
     expand_CLAP_features,
 )
 from lib.models.models_functions import prepare_data_models
 
 """
-WARNING:
+NOTE:
 We are importing .csv files of fold 0 variations. If you only have the .json versions, use function
 import_json_to_dataframe() to save them first and then proceed.
 """
 # INPUT #############################################################################
-data_path = "data/main_files/SoundLights_complete.csv"
-data_0_5_path = "data/main_files/variations_fold0/variations_fold0_0_5.csv"
-data_2_path = "data/main_files/variations_fold0/variations_fold0_2.csv"
-data_4_path = "data/main_files/variations_fold0/variations_fold0_4.csv"
-data_6_path = "data/main_files/variations_fold0/variations_fold0_6.csv"
-data_random_path = "data/main_files/variations_fold0/variations_fold0_random.csv"
+data_path = "data/ARAUS_extended.csv"
+data_0_5_path = "data/variations_fold0/variations_fold0_0_5.csv"
+data_2_path = "data/variations_fold0/variations_fold0_2.csv"
+data_4_path = "data/variations_fold0/variations_fold0_4.csv"
+data_6_path = "data/variations_fold0/variations_fold0_6.csv"
+data_random_path = "data/variations_fold0/variations_fold0_random.csv"
 #####################################################################################
 
 # Data of fold 0 to know "ground truth"
@@ -71,11 +75,6 @@ files_dicts = [
         "config_file_path": "data/models/trained/EN_ARAUS_P_config.json",
     },
     {
-        "title": "KNN - ARAUS - PLEASANTNESS",
-        "model_path": "data/models/trained/KNN_ARAUS_P.joblib",
-        "config_file_path": "data/models/trained/KNN_ARAUS_P_config.json",
-    },
-    {
         "title": "RFR - ARAUS - PLEASANTNESS",
         "model_path": "data/models/trained/RFR_ARAUS_P.joblib",
         "config_file_path": "data/models/trained/RFR_ARAUS_P_config.json",
@@ -86,11 +85,6 @@ files_dicts = [
         "config_file_path": "data/models/trained/EN_Freesound_P_config.json",
     },
     {
-        "title": "KNN - Freesound - PLEASANTNESS",
-        "model_path": "data/models/trained/KNN_Freesound_P.joblib",
-        "config_file_path": "data/models/trained/KNN_Freesound_P_config.json",
-    },
-    {
         "title": "RFR - Freesound - PLEASANTNESS",
         "model_path": "data/models/trained/RFR_Freesound_P.joblib",
         "config_file_path": "data/models/trained/RFR_Freesound_P_config.json",
@@ -99,11 +93,6 @@ files_dicts = [
         "title": "ELASTIC NET - CLAP - PLEASANTNESS",
         "model_path": "data/models/trained/EN_CLAP_P.joblib",
         "config_file_path": "data/models/trained/EN_CLAP_P_config.json",
-    },
-    {
-        "title": "KNN - CLAP - PLEASANTNESS",
-        "model_path": "data/models/trained/KNN_CLAP_P.joblib",
-        "config_file_path": "data/models/trained/KNN_CLAP_P_config.json",
     },
     {
         "title": "RFR - CLAP - PLEASANTNESS",
@@ -121,11 +110,6 @@ files_dicts = [
         "config_file_path": "data/models/trained/EN_ARAUS_E_config.json",
     },
     {
-        "title": "KNN - ARAUS - EVENTFULNESS",
-        "model_path": "data/models/trained/KNN_ARAUS_E.joblib",
-        "config_file_path": "data/models/trained/KNN_ARAUS_E_config.json",
-    },
-    {
         "title": "RFR - ARAUS - EVENTFULNESS",
         "model_path": "data/models/trained/RFR_ARAUS_E.joblib",
         "config_file_path": "data/models/trained/RFR_ARAUS_E_config.json",
@@ -136,11 +120,6 @@ files_dicts = [
         "config_file_path": "data/models/trained/EN_Freesound_E_config.json",
     },
     {
-        "title": "KNN - Freesound - EVENTFULNESS",
-        "model_path": "data/models/trained/KNN_Freesound_E.joblib",
-        "config_file_path": "data/models/trained/KNN_Freesound_E_config.json",
-    },
-    {
         "title": "RFR - Freesound - EVENTFULNESS",
         "model_path": "data/models/trained/RFR_Freesound_E.joblib",
         "config_file_path": "data/models/trained/RFR_Freesound_E_config.json",
@@ -149,11 +128,6 @@ files_dicts = [
         "title": "ELASTIC NET - CLAP - EVENTFULNESS",
         "model_path": "data/models/trained/EN_CLAP_E.joblib",
         "config_file_path": "data/models/trained/EN_CLAP_E_config.json",
-    },
-    {
-        "title": "KNN - CLAP - EVENTFULNESS",
-        "model_path": "data/models/trained/KNN_CLAP_E.joblib",
-        "config_file_path": "data/models/trained/KNN_CLAP_E_config.json",
     },
     {
         "title": "RFR - CLAP - EVENTFULNESS",

@@ -1,3 +1,11 @@
+"""
+This script trains and saves the best performing models for each feature set. 
+
+train_RFR() and train_EN() are the main function, each for one algorithm type.
+Uncomment code below in order to train and save models according to the specified 
+input configuration.
+"""
+
 import pandas as pd
 import os
 import sys
@@ -16,12 +24,12 @@ from lib.dataset.features_groups import (
     masker_features,
     clap_features,
 )
-from lib.models.models_functions import train_EN, train_KNN, train_RFR
+from lib.models.models_functions import train_EN, train_RFR
 
 # INPUT #############################################################################
-data_path = "data/main_files/SoundLights_complete.csv"
-data_foldFs_path = "data/main_files/SoundLights_fold6.csv"
-saving_folder = "data/models/trained_delete/"
+data_path = "data/ARAUS_extended.csv"
+data_foldFs_path = "data/fold_Fs.csv"
+saving_folder = "data/models/trained/"
 #####################################################################################
 #
 #
@@ -329,128 +337,6 @@ train_EN(input_dict) """
 }
 
 train_EN(input_dict) """
-
-
-# print("\n")
-# print("\n")
-# print("##########################################################################")
-# print("KNN ")
-
-""" 
-### KNN - ARAUS - Pleasantness
-input_dict = {
-    "maskers_active": True,
-    "masker_gain": 20,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "df_fold6": df_fold6,
-    "predict": "P",
-    "params": [250],
-    "folder_path": saving_folder,
-    "model_name": "KNN_ARAUS_P",
-}
-
-train_KNN(input_dict)"""
-
-### KNN - ARAUS - Eventfulness
-"""
-input_dict = {
-    "maskers_active": True,
-    "masker_gain": 20,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_ARAUS,
-    "features": ARAUS_features,
-    "df_fold6": df_fold6,
-    "predict": "E",
-    "params": [250],
-    "folder_path": saving_folder,
-    "model_name": "KNN_ARAUS_E",
-}
-
-train_KNN(input_dict)"""
-
-
-### KNN - Freesound - Pleasantness
-"""
-input_dict = {
-    "maskers_active": True,
-    "masker_gain": 20,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "df_fold6": df_fold6,
-    "predict": "P",
-    "params": [350],
-    "folder_path": saving_folder,
-    "model_name": "KNN_Freesound_P",
-}
-
-train_KNN(input_dict)"""
-
-### KNN - Freesound - Eventfulness
-"""
-input_dict = {
-    "maskers_active": True,
-    "masker_gain": 20,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": True,
-    "dataframe": df_Freesound,
-    "features": Freesound_features,
-    "df_fold6": df_fold6,
-    "predict": "E",
-    "params": [200],
-    "folder_path": saving_folder,
-    "model_name": "KNN_Freesound_E",
-}
-
-train_KNN(input_dict)"""
-
-### KNN - CLAP - Pleasantness
-"""
-input_dict = {
-    "maskers_active": True,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "df_fold6": df_fold6,
-    "predict": "P",
-    "params": [50],
-    "folder_path": saving_folder,
-    "model_name": "KNN_CLAP_P",
-}
-
-train_KNN(input_dict)"""
-
-### KNN - CLAP - Pleasantness
-"""
-input_dict = {
-    "maskers_active": True,
-    "masker_gain": 1,
-    "masker_transform": "None",
-    "std_mean_norm": False,
-    "min_max_norm": False,
-    "dataframe": df_clap,
-    "features": clap_features,
-    "df_fold6": df_fold6,
-    "predict": "E",
-    "params": [50],
-    "folder_path": saving_folder,
-    "model_name": "KNN_CLAP_E",
-}
-
-train_KNN(input_dict)
-"""
 
 
 # To use pymtg, you need to install the package like this:
