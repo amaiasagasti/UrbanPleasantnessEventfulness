@@ -64,14 +64,17 @@
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
+## Reference
+- Amaia Sagasti, Martín Rocamora, Frederic Font: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - DCASE Workshop 2024 <a href="link-to-paper-once-published">Paper link</a>
+- Amaia Sagasti Martínez - MASTER THESIS: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - Sound and Music Computing Master (Music Technology Group, Universitat Pompeu Fabra - Barcelona) <a href="link-to-MasterThesis-once-published">Master Thesis Report link</a>
 
 <!-- GETTING STARTED -->
 ## Getting Started
-This section provides all the necessary information to set up the working environment The followiing bullet-list details the set up process:
+This section provides all the necessary information to set up the working environment. The followiing bullet-list details the set up process:
 - It is recommended to use ```Python==3.10.14``` to guarantee compatibility.
 - Install all the depencencies detailed in the ```requirements.txt``` file of this project. 
 - <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP model</a> is used, make sure you install its dependencies too.
+- For reproducibility, <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a> download and installation will be necessary. Specifically, you will need the metadata file ```responses.csv``` and the folder with the augmented urban soundscapes WAVs, ```augmented_soundscapes```. Follow the steps specified in their Github page to download/generate the mentioned file and folder. 
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -81,7 +84,7 @@ This section provides all the necessary information to set up the working enviro
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-To test the developed models for predicting the pleasantness (P) and eventfulness (E) values of an urban soundscape, two scripts have been implemented and are ready to run. These scripts simulate the functionality of an acoustic environment sensor by processing a WAV file containing an urban soundscape recording. The simulation operates in "real time," where the audio file is read continuously, and every X seconds, the scripts output the predicted values of P and E. This setup allows for the real-time analysis and evaluation of the acoustic environment based on the provided recordings.
+To test the developed models for predicting the pleasantness (P) and eventfulness (E) values of an urban soundscape, two scripts have been implemented and are ready to run. These scripts simulate the functionality of an acoustic environment sensor by processing a WAV file of an urban soundscape recording. The simulation operates in "real time," where the audio file is read continuously, and every X seconds, the scripts output the predicted values of P and E. This setup allows for the real-time analysis and evaluation of the acoustic environment based on the provided recordings.
 
 The first script is ```src/scripts/sensor_simulate.py```. To run this script, the function ```play_audio()``` is called:
 ```
@@ -103,7 +106,7 @@ The second script, src/scripts/sensor_read_and_plot.py, operates by reading the 
 <p></p>
 A demo of this simulation can be found <a href="link!!!">here </a>.
 <p></p>
-If you wish to integrate the predictions into your own code, you can find the models for predicting pleasantness and eventfulness in the /models/trained directory. These models require LAION-AI's CLAP embeddings of the input audio.
+If you wish to integrate the predictions into your own code, you can find the models for predicting pleasantness and eventfulness in the ´´´/models/trained´´´ directory. These models require LAION-AI's CLAP embeddings of the input audio.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
