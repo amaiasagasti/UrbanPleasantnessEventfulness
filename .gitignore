@@ -1,6 +1,4 @@
 data/soundscapes_augmented/
-data/ARAUS-extended_soundscapes/
-data/ARAUS-extended_soundscapes_v2/
 __pycache__/
 *.csv
 .m

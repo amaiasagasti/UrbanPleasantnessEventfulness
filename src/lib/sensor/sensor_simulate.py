@@ -1,3 +1,16 @@
+"""
+This script contains the function that simulates the workflow of a sensor connected to a microphone by progressively reading an audio file, 
+similar to how a real sensor would record data in real-time.
+
+The script performs the following tasks:
+- Simulates audio recording by reading an audio file in fragments, emulating how a sensor would capture and process audio data in chunks.
+- In a separate thread, it reassembles these data fragments to reconstruct the complete audio signal.
+- The reconstructed audio is then fed into a model to predict values of P (pleasantness), E (eventfulness) or sound sources (specified)
+- The predicted values are saved into a text file, with each prediction on a new line.
+- Simultaneously, in a separate thread, old data fragments are deleted.
+
+"""
+
 import pyaudio
 import wave
 import threading
@@ -11,7 +24,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 import joblib
-import csv
+import warnings
+from contextlib import redirect_stdout, redirect_stderr
+from transformers import logging
 import sys
 
 # Path importing
@@ -28,18 +43,103 @@ from lib.dataset.auxiliary_sources import sources_USM
 matplotlib.use("Agg")  # Use the 'Agg' backend which does not require a GUI
 
 
-# Function to play audio in real-time and save segments
-def play_audio(
-    audio_file_path,
-    seconds_segment,
-    maintain_time,
-    seconds_analysis,
-    saving_file,
-    sources,
-    sources_models_dir,
-    P_model_dir,
-    E_model_dir,
+def sensor_simulation(
+    audio_file_path: str,
+    seconds_segment: float,
+    maintain_time: float,
+    seconds_analysis: float,
+    saving_file: str,
+    sources: list = None,
+    sources_models_dir: str = None,
+    P_model_dir: str = None,
+    E_model_dir: str = None,
 ):
+    """
+    Simulates real-time audio recording and processing for predicting specified qualities such as sound sources,
+    pleasantness, and eventfulness.
+
+    Parameters:
+    ----------
+    audio_file_path : str
+        Path to the audio file that will be simulated for real-time recording.
+
+    seconds_segment : float
+        Duration of each audio chunk to be stored, in seconds.
+
+    maintain_time : float
+        Total time, in seconds, for which audio chunks are stored. Chunks older than this time limit will be deleted.
+        Must be a multiple of `seconds_segment`.
+
+    seconds_analysis : float
+        Time, in seconds, of audio chunks to be considered for processing.
+        Must be an integer multiple of `seconds_segment` and smaller than `maintain_time`.
+
+    saving_file : str
+        Path to the text file where the results of the predictions will be stored.
+        A new line will be added for each new prediction.
+
+    sources : list, optional
+        List of sound sources to be predicted. Each string in the list corresponds to the model name (e.g., 'source.joblib').
+
+    sources_models_dir : str, optional
+        Path to the directory containing the models for sound sources. The names of the models in this folder
+        must match the names in the `sources` list (e.g., 'source.joblib').
+
+    P_model_dir : str, optional
+        Path to the model for predicting pleasantness.
+
+    E_model_dir : str, optional
+        Path to the model for predicting eventfulness.
+
+
+    Notes:
+    -----
+    This function simulates real-time operating sensor by progressively reading audio. While the audio is being read, it is stored in chunks. Old audio
+    chunks are deleted as specified. Simulating real-time, the saved chunks are processed to make predictions about the presence of sound sources, pleasantness,
+    and eventfulness, saving these predictions to a specified text file.
+
+    ValueError raises:
+    If none of the optional parameters (`P_model_dir`, `E_model_dir`, `sources` and `sources_models_dir`)
+    are provided or if `sources` is provided without `sources_models_dir` or vice versa.
+    If `maintain_time` or `seconds_analysis` are not multiples of `seconds_segment`.
+    If `seconds_analysis` is not smaller than `maintain_time`.
+    """
+
+    # region CHECK INPUTS ########################
+    if (
+        P_model_dir is None
+        and E_model_dir is None
+        and (sources is None or sources_models_dir is None)
+    ):
+        raise ValueError(
+            "Cannot make any predictions. "
+            "At least one of the following conditions must be met: "
+            "1) P_model_dir is not None, "
+            "2) E_model_dir is not None, "
+            "3) Both sources and sources_models_dir are not None."
+        )
+
+    if (sources is not None and sources_models_dir is None) or (
+        sources is None and sources_models_dir is not None
+    ):
+        raise ValueError(
+            "Both sources and sources_models_dir must be provided together."
+        )
+
+    # Check if maintain_time and seconds_analysis are multiples of seconds_segment
+    if maintain_time % seconds_segment != 0:
+        raise ValueError("maintain_time must be a multiple of seconds_segment.")
+
+    if seconds_analysis % seconds_segment != 0:
+        raise ValueError("seconds_analysis must be a multiple of seconds_segment.")
+
+    # Check if seconds_analysis is smaller than maintain_time
+    if seconds_analysis >= maintain_time:
+        raise ValueError("seconds_analysis must be smaller than maintain_time.")
+
+    # Your function implementation
+
+    # endregion CHECK INPUTS #####################
 
     # region PREPARATION #########################
     # Frames will store the chunks to be stored
@@ -50,32 +150,62 @@ def play_audio(
     prev_i = 0
     # Create a condition variable
     condition = threading.Condition()
+    # Open the file in write mode to clear its contents
+    with open(saving_file, "w") as file:
+        file.write("")
     # Open the file in append mode
     with open(saving_file, "a") as file:
+        # Write first line with headers
+        first_line = []
+        if sources is not None:
+            for source in sources:
+                first_line.append(source)
+        if P_model_dir is not None:
+            first_line.append("P")
+        if E_model_dir is not None:
+            first_line.append("E")
+        first_line.append("datetime\n")
+        first_line_str = ";".join([header for header in first_line])
+        file.write(first_line_str)
+        file.flush()
         # endregion PREPARATION ######################
 
         # region MODEL LOADING #######################
         # Load model for source predictions and store in the dictionary
-        models_sources = {}
-        for source in sources:
-            if " " in source:
-                # Replace spaces with underscores
-                source_path = source.replace(" ", "_")
-            else:
-                source_path = source
-            model_path = os.path.join(sources_models_dir, f"{source_path}.joblib")
-            models_sources[source] = joblib.load(model_path)
+        if sources is not None:
+            models_sources = {}
+            for source in sources:
+                if " " in source:
+                    # Replace spaces with underscores
+                    source_path = source.replace(" ", "_")
+                else:
+                    source_path = source
+                model_path = os.path.join(sources_models_dir, f"{source_path}.joblib")
+                models_sources[source] = joblib.load(model_path)
+            print("------- sources models loaded -----------")
 
         # Load the trained P and E models
-        model_P = joblib.load(P_model_dir)
-        model_E = joblib.load(E_model_dir)
+        if P_model_dir is not None:
+            model_P = joblib.load(P_model_dir)
+            print("------- pleasantness model loaded -----------")
+        if E_model_dir is not None:
+            model_E = joblib.load(E_model_dir)
+            print("------- eventfulness model loaded -----------")
 
         # Load the CLAP model to generate features
-        print("------- code starts -----------")
-        model_CLAP = CLAP_Module(enable_fusion=True)
-        print("------- clap module -----------")
-        model_CLAP.load_ckpt("data/models/630k-fusion-best.pt")
-        print("------- model loaded -----------")
+        # Suppress specific warnings
+        warnings.filterwarnings(
+            "ignore",
+            category=UserWarning,
+            message="torch.meshgrid: in an upcoming release",
+        )
+        warnings.filterwarnings("ignore")
+        logging.set_verbosity_error()
+        with open(os.devnull, "w") as fnull:
+            with redirect_stdout(fnull), redirect_stderr(fnull):
+                model_CLAP = CLAP_Module(enable_fusion=True)
+                model_CLAP.load_ckpt("data/models/630k-fusion-best.pt")
+                print("------- clap model loaded -----------")
         # endregion MODEL LOADING ####################
 
         # region SAVE SEGMENTS ########################
@@ -128,7 +258,7 @@ def play_audio(
                             pickle.dump(
                                 {"audio": audio_data, "info": json_info}, f
                             )  # frames
-
+                        print(date_time, "- new segment")
                         frames = []
                         prev_i = i
                         condition.notify()
@@ -195,8 +325,6 @@ def play_audio(
             nonlocal prev_time, seconds_segment, seconds_analysis, i, prev_i, model_CLAP, models_sources, file
 
             while True:
-                # if (time.time() - prev_time) >= seconds:
-                # if i != prev_i:
                 with condition:
                     condition.wait()
                     joined_audio = np.array(
@@ -254,19 +382,20 @@ def play_audio(
 
                         # Calculate probabilities for each source model
                         predictions = []
-                        for source in sources:
-                            print("SOURCEEEEEE ", source)
-                            prediction = models_sources[source].predict_proba(features)[
-                                0
-                            ][1]
-                            predictions.append(prediction)
+                        if sources is not None:
+                            for source in sources:
+                                prediction = models_sources[source].predict_proba(
+                                    features
+                                )[0][1]
+                                predictions.append(prediction)
 
                         # Calculate prediction values for each P/E model
-                        prediction_P = model_P.predict(features)[0]
-                        prediction_E = model_E.predict(features)[0]
-                        print(prediction_P, "holaaa")
-                        predictions.append(prediction_P)
-                        predictions.append(prediction_E)
+                        if P_model_dir is not None:
+                            prediction_P = model_P.predict(features)[0]
+                            predictions.append(prediction_P)
+                        if E_model_dir is not None:
+                            prediction_E = model_E.predict(features)[0]
+                            predictions.append(prediction_E)
 
                         # Format the predictions into a string
                         prediction_str = ";".join(
@@ -329,16 +458,3 @@ def play_audio(
         p.terminate()
         wf.close()
         # endregion READ AUDIO FILE IN REAL TIME ######
-
-
-play_audio(
-    audio_file_path="data/simulation_audios/audio_simulation_sources.wav",
-    seconds_segment=1,
-    maintain_time=6,
-    seconds_analysis=3,
-    saving_file="data/simulation_predictions.txt",
-    sources=sources_USM,
-    sources_models_dir="data/models/sources",
-    P_model_dir="data/models/trained/model_pleasantness.joblib",
-    E_model_dir="data/models/trained/model_eventfulness.joblib",
-)
