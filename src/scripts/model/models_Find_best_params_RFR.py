@@ -10,7 +10,6 @@ The best performance options are the configurations trained and saved in the scr
 named models_train.py.
 """
 
-import pandas as pd
 import os
 import sys
 
@@ -20,15 +19,8 @@ src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
 sys.path.append(src_dir)
 
 # Imports from this project
-from lib.dataset.features_groups import (
-    general_info,
-    ARAUS_features,
-    Freesound_features,
-    mix_features,
-    masker_features,
-    clap_features,
-)
 from lib.models.models_functions import run_variations_RFR
+from lib.models.models_functions import prepare_dataframes_models
 
 # INPUT #############################################################################
 data_path = "data/ARAUS_extended.csv"
@@ -41,60 +33,15 @@ saving_folder = "data/training_RFR/"
 #
 #
 ############# PREPARE DATA #########################################################
-df = pd.read_csv(data_path)
-# ARAUS features dataframe
-df_ARAUS = df[general_info + ARAUS_features]
-# Freesound features dataframe
-df_Freesound = df[general_info + Freesound_features]
-# CLAP embeddings dataframe
-df_clap = df[general_info + ["CLAP"]]
-# print(df_clap["CLAP"].values[1])
-# print(df_clap["info.P_ground_truth"].values[1])
-all_columns = general_info + clap_features
-full_list = []
-for index, row in df_clap.iterrows():
-    string_list = row["CLAP"].split("[")[2].split("]")[0].split(",")
-    clap_list = [float(item) for item in string_list]
-    complete_new_row = list(row[general_info].values) + clap_list
-    full_list.append(complete_new_row)
-df_clap = pd.DataFrame(data=full_list, columns=all_columns)
-
-df_real = pd.read_csv(data_foldFs_path)
-# Adapt CLAP features
-df_foldFs = df_real[
-    ARAUS_features
-    + Freesound_features
-    + masker_features
-    + ["info.P_ground_truth", "info.E_ground_truth", "CLAP"]
-]
-all_columns = (
-    ARAUS_features
-    + Freesound_features
-    + masker_features
-    + ["info.P_ground_truth", "info.E_ground_truth"]
-    + clap_features
+df_ARAUS, ARAUS_features, df_foldFs = prepare_dataframes_models(
+    data_path, data_foldFs_path, saving_folder, "ARAUS"
 )
-full_list = []
-for index, row in df_foldFs.iterrows():
-    string_list = row["CLAP"].split("[")[1].split("]")[0].split(",")
-    clap_list = [float(item) for item in string_list]
-    complete_new_row = (
-        list(
-            row[
-                ARAUS_features
-                + Freesound_features
-                + masker_features
-                + ["info.P_ground_truth", "info.E_ground_truth"]
-            ].values
-        )
-        + clap_list
-    )
-    full_list.append(complete_new_row)
-df_foldFs = pd.DataFrame(data=full_list, columns=all_columns)
-
-# Saving folder
-if not os.path.exists(saving_folder):
-    os.makedirs(saving_folder)
+df_Freesound, Freesound_features, df_foldFs = prepare_dataframes_models(
+    data_path, data_foldFs_path, saving_folder, "Freesound"
+)
+df_clap, clap_features, df_foldFs = prepare_dataframes_models(
+    data_path, data_foldFs_path, saving_folder, "CLAP"
+)
 #####################################################################################
 #
 #

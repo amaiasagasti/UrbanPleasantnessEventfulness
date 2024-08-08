@@ -18,6 +18,23 @@ import warnings
 import json
 from joblib import dump, load
 import copy
+import os
+import sys
+
+# Path importing
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+sys.path.append(src_dir)
+
+# Imports from this project
+from lib.dataset.features_groups import (
+    general_info,
+    ARAUS_features,
+    Freesound_features,
+    mix_features,
+    masker_features,
+    clap_features,
+)
 
 def prepare_features_models(
     dataframe,
@@ -84,6 +101,76 @@ def prepare_features_models(
     dataframe.drop(columns=columns_to_drop, inplace=True)
 
     return dataframe, columns_to_mantain
+
+
+def prepare_dataframes_models(data_ARAUS_path, data_foldFs_path, saving_folder, feature_set:str):
+
+    ############# PREPARE DATA #########################################################
+    df = pd.read_csv(data_ARAUS_path)
+
+    if feature_set=="ARAUS":
+        # ARAUS features dataframe
+        df_ARAUS = df[general_info + ARAUS_features]
+    elif feature_set=="Freesound":
+        # Freesound features dataframe
+        df_Freesound = df[general_info + Freesound_features]
+    elif feature_set=="CLAP":
+        # CLAP embeddings dataframe
+        df_clap = df[general_info + ["CLAP"]]
+        all_columns = general_info + clap_features
+        full_list = []
+        for index, row in df_clap.iterrows():
+            string_list = row["CLAP"].split("[")[2].split("]")[0].split(",")
+            clap_list = [float(item) for item in string_list]
+            complete_new_row = list(row[general_info].values) + clap_list
+            full_list.append(complete_new_row)
+        df_clap = pd.DataFrame(data=full_list, columns=all_columns)
+
+    # Fold Fs preparation
+    df_Fs = pd.read_csv(data_foldFs_path)
+    df_foldFs = df_Fs[
+        ARAUS_features
+        + Freesound_features
+        + masker_features
+        + ["info.P_ground_truth", "info.E_ground_truth", "CLAP"]
+    ]
+    all_columns = (
+        ARAUS_features
+        + Freesound_features
+        + masker_features
+        + ["info.P_ground_truth", "info.E_ground_truth"]
+        + clap_features
+    )
+    # Add and adapt CLAP features
+    full_list = []
+    for index, row in df_foldFs.iterrows():
+        string_list = row["CLAP"].split("[")[1].split("]")[0].split(",")
+        clap_list = [float(item) for item in string_list]
+        complete_new_row = (
+            list(
+                row[
+                    ARAUS_features
+                    + Freesound_features
+                    + masker_features
+                    + ["info.P_ground_truth", "info.E_ground_truth"]
+                ].values
+            )
+            + clap_list
+        )
+        full_list.append(complete_new_row)
+    df_foldFs = pd.DataFrame(data=full_list, columns=all_columns)
+
+    # Saving folder
+    if not os.path.exists(saving_folder):
+        os.makedirs(saving_folder)
+    
+    # returns
+    if feature_set=="ARAUS":
+        return df_ARAUS, ARAUS_features, df_foldFs 
+    elif feature_set=="Freesound":
+        return df_Freesound, Freesound_features, df_foldFs 
+    elif feature_set=="CLAP":
+        return df_clap, clap_features, df_foldFs 
 
 
 def clip(x, x_min=-1, x_max=1):
@@ -1363,19 +1450,24 @@ def train_RFR(input_dict):
         f.write(
             "     |         Mean squared error        |             Mean  error            |"
         )
+        f.write("\n")
         f.write(
             "Fold |--------+--------+--------+--------|--------+--------+--------|---------|"
         )
+        f.write("\n")
         f.write(
             "     | Train  |   Val  |  Test  |Test(f6)| Train  |   Val  |  Test  | Test(f6)|"
         )
+        f.write("\n")
         f.write(
             "-----+--------+--------+--------+--------+--------+--------+--------+----------"
         )
+        f.write("\n")
         # Get parameter
         n_estimators = input_dict["params"][0]
 
         f.write(f"Number of estimators {n_estimators}")
+        f.write("\n")
 
         # Auxiliary variables to save once best model is chosen
         prev_mean = 9999
@@ -1463,9 +1555,11 @@ def train_RFR(input_dict):
             f.write(
                 f"fold{val_fold} | {(MSE_train):.4f} | {(MSE_val):.4f} | {(MSE_test):.4f} | {(MSE_foldFs):.4f} | {(ME_train):.4f} | {(ME_val):.4f} | {(ME_test):.4f} | {(ME_foldFs):.4f} |"
             )
+            f.write("\n")
             f.write(
                 "-----+--------+--------+--------+--------+--------+--------+--------+----------"
             )
+            f.write("\n")
 
             # Check if validation fold provide the best results
             current_mean = (ME_val + ME_test + ME_foldFs) / 3
@@ -1483,10 +1577,13 @@ def train_RFR(input_dict):
         f.write(
             f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
         )
+        f.write("\n")
         f.write(
             "-----+--------+--------+--------+--------+--------+--------+--------+----------"
         )
+        f.write("\n")
         f.write(f"N_estimators {n_estimators}, best validation fold {val_fold_chosen}")
+        f.write("\n")
 
         # Save data to given path
         if type(min_chosen) == np.ndarray:

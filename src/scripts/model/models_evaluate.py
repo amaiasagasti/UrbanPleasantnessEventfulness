@@ -21,8 +21,6 @@ from lib.dataset.features_groups import (
     ARAUS_features,
     Freesound_features,
     clap_features,
-    mix_features,
-    masker_features,
 )
 from lib.models.models_functions import test_model
 from lib.dataset.dataset_functions import (
@@ -43,7 +41,12 @@ data_4_path = "data/variations_fold0/variations_fold0_4.csv"
 data_6_path = "data/variations_fold0/variations_fold0_6.csv"
 data_random_path = "data/variations_fold0/variations_fold0_random.csv"
 #####################################################################################
-
+#
+#
+#
+#
+#
+############# PREPARE DATA #########################################################
 # Data of fold 0 to know "ground truth"
 df_fold0 = pd.read_csv(data_path)
 full_list = []
@@ -66,8 +69,13 @@ df_2 = expand_CLAP_features(pd.read_csv(data_2_path))
 df_4 = expand_CLAP_features(pd.read_csv(data_4_path))
 df_6 = expand_CLAP_features(pd.read_csv(data_6_path))
 df_random = expand_CLAP_features(pd.read_csv(data_random_path))
-
-# Calculate
+#####################################################################################
+#
+#
+#
+#
+#
+############# RUN ###################################################################
 files_dicts = [
     {
         "title": "ELASTIC NET - ARAUS - PLEASANTNESS",
