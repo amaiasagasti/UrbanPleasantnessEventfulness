@@ -28,7 +28,7 @@ from lib.models.models_functions import test_model
 from lib.dataset.dataset_functions import (
     expand_CLAP_features,
 )
-from lib.models.models_functions import prepare_data_models
+from lib.models.models_functions import prepare_features_models
 
 """
 NOTE:
@@ -57,7 +57,7 @@ for index, row in df_fold0.iterrows():
     full_list.append(complete_new_row)
 df_fold0 = pd.DataFrame(data=full_list, columns=all_columns)
 all_features = ARAUS_features + Freesound_features + clap_features
-df_fold0, features = prepare_data_models(df_fold0, all_features)
+df_fold0, features = prepare_features_models(df_fold0, all_features)
 df_fold0 = df_fold0[df_fold0["info.fold"] == 0]
 
 # Dataframes of fold 0 variations

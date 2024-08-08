@@ -19,7 +19,7 @@ import json
 from joblib import dump, load
 import copy
 
-def prepare_data_models(
+def prepare_features_models(
     dataframe,
     features_evaluated,
     masker_transform: str = "None",
@@ -249,7 +249,7 @@ def test_model(model_path:str, config_file_path:str, df:pd.DataFrame):
 def run_variations_EN(input_dict):
     masker_transform = input_dict["masker_transform"]
     masker_gain = input_dict["masker_gain"]
-    df_to_use, features_to_use = prepare_data_models(
+    df_to_use, features_to_use = prepare_features_models(
         input_dict["dataframe"].copy(),
         input_dict["features"],
         masker_transform,
@@ -522,7 +522,7 @@ def run_variations_EN(input_dict):
 def run_variations_RFR(input_dict):
     masker_transform = input_dict["masker_transform"]
     masker_gain = input_dict["masker_gain"]
-    df_to_use, features_to_use = prepare_data_models(
+    df_to_use, features_to_use = prepare_features_models(
         input_dict["dataframe"].copy(),
         input_dict["features"],
         masker_transform,
@@ -693,7 +693,7 @@ def run_variations_RFR(input_dict):
 def run_variations_KNN(input_dict):
     masker_transform = input_dict["masker_transform"]
     masker_gain = input_dict["masker_gain"]
-    df_to_use, features_to_use = prepare_data_models(
+    df_to_use, features_to_use = prepare_features_models(
         input_dict["dataframe"].copy(),
         input_dict["features"],
         masker_transform,
@@ -864,7 +864,7 @@ def run_variations_KNN(input_dict):
 def train_EN(input_dict):
     masker_transform = input_dict["masker_transform"]
     masker_gain = input_dict["masker_gain"]
-    df_to_use, features_to_use = prepare_data_models(
+    df_to_use, features_to_use = prepare_features_models(
         input_dict["dataframe"].copy(),
         input_dict["features"],
         masker_transform,
@@ -1083,7 +1083,7 @@ def train_EN(input_dict):
 def train_KNN(input_dict):
     masker_transform = input_dict["masker_transform"]
     masker_gain = input_dict["masker_gain"]
-    df_to_use, features_to_use = prepare_data_models(
+    df_to_use, features_to_use = prepare_features_models(
         input_dict["dataframe"].copy(),
         input_dict["features"],
         masker_transform,
@@ -1303,7 +1303,7 @@ def train_RFR(input_dict):
     with open(txt_name, "a") as f:
         masker_transform = input_dict["masker_transform"]
         masker_gain = input_dict["masker_gain"]
-        df_to_use, features_to_use = prepare_data_models(
+        df_to_use, features_to_use = prepare_features_models(
             input_dict["dataframe"].copy(),
             input_dict["features"],
             masker_transform,
