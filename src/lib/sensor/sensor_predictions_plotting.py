@@ -68,6 +68,8 @@ def read_last_line_PE(predictions_file_path):
 
 
 def plot_predictions_all(predictions_file_path, sound_classes, palette_PE):
+    """Function to plot predictions of all possible parameters: sound sources,
+    Pleasantness and Eventfulness in iterative interface."""
 
     # region --- Wait until the file has some data lines
     while True:
@@ -194,6 +196,8 @@ def plot_predictions_all(predictions_file_path, sound_classes, palette_PE):
 
 
 def plot_predictions_PE(predictions_file_path, palette):
+    """Function to plot predictions of only
+    Pleasantness and Eventfulness in iterative interface."""
 
     # Wait until the file has some lines
     while True:
