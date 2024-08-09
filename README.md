@@ -12,12 +12,12 @@
 <h3 align="center">SOUNDLIGHTS</h3>
 
   <p align="center">
-    Research and development of AI models to predict the perceptual sound qualities of "pleasantness" and "eventfulness" in urban soundscapes with focus on prediction accuracy and suitability to real-time implementations. Additionally, an example code of a simulation is included: a recorded audio file simulates an audio being captured in real time, pleasantness and eventfulness values are calculated every few seconds.
+    Research and development of AI models to predict the perceptual sound qualities of "pleasantness" and "eventfulness" in urban soundscapes with focus on prediction accuracy and suitability to real-time implementations.
   </p>
   
 </div>
 
-<!-- TABLE OF CONTENTS -->
+<!-- TABLE OF CONTENTS 
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -41,10 +41,10 @@
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
-</details>
+</details> -->
 
 
-
+Additionally, an example code of a simulation is included: a recorded audio file simulates an audio being captured in real time, pleasantness and eventfulness values are calculated every few seconds.
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 <p align="left">
@@ -67,6 +67,16 @@
 ## Reference
 - Amaia Sagasti, Martín Rocamora, Frederic Font: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - DCASE Workshop 2024 <a href="link-to-paper-once-published">Paper link</a>
 - Amaia Sagasti Martínez - MASTER THESIS: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - Sound and Music Computing Master (Music Technology Group, Universitat Pompeu Fabra - Barcelona) <a href="link-to-MasterThesis-once-published">Master Thesis Report link</a>
+
+## ARAUS-extended dataset
+ARAUS-extended dataset is a more comprehensive version of the <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a>. While the original ARAUS dataset includes a set of psychoacoustic features, ARAUS-extended contains these same features along with two additional feature sets: signal processing features generated using FreesoundExtractor() from the Essentia library and a set of CLAP embeddings, which are sound representations generated with LAION-AI's CLAP model. This repository contains the code necessary for reproducibility of the generation of ARAUS-extended dataset. In this README file, and in the two [#Reference] papers included  
+
+## Demo
+You can find two short demo videos with a simulation of real-time predictions of:
+- Pleasantness and eventfulness in <a href="link-to-demo-1">Demo 1</a>.
+- Sound sources present, pleasantness and eventfulness in <a href="link-to-Demo-2">Demo 2</a>.
+
+These demos simulate a sensor that captures audio in real-time and uses models trained with the 24400 augmented soundscapes of ARAUS or ARAUS-extended datasets, and LAION-AI's CLAP embeddings as input features. 
 
 <!-- GETTING STARTED -->
 ## Getting Started
