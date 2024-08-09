@@ -67,22 +67,22 @@
 - Amaia Sagasti Martínez - MASTER THESIS: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - Sound and Music Computing Master (Music Technology Group, Universitat Pompeu Fabra - Barcelona) <a href="link-to-MasterThesis-once-published">Master Thesis Report link</a>
 
 ## Soundlights sensors
-Soundlights is a technological and social project that aims to develop and implement a network of intelligent microphone sensors to be deployed in the city of Barcelona. This sensors capture the audio in real-time and process it to extract acoustic perceptual qualities. Then, the acoustic environment information will be displayed on a digital sign. The main goals of Soundlights are:
-- To collect data from the urban soundscapes in the city of Barcelona to gain knowledge of the noise environment from a perceptual point of view
-- To implement a display that delivers messages in real-time to raise *in situ* awareness of to reduce noise levels
+Soundlights is a technological and social project that aims to develop and implement a network of intelligent microphone sensors to be deployed in the city of Barcelona. These sensors capture the audio in real-time and process it to extract two acoustic perceptual qualities, pleasatness and eventfulness. Then, the obtained acoustic environment information will be displayed on a digital display. The main goals of Soundlights are:
+- To collect data from the urban soundscapes in the city of Barcelona to gain knowledge of the noise environment from a perceptual point of view.
+- To implement a display that delivers messages in real-time to raise *in situ* and long-term awareness of noise levels.
 
 Both <a href="#reference">reference</a> documents provided above are part of a research line for finding which feature set and model delivers the highest accuracy in the predictions of the perceptual qualities pleasantness and eventfulness, with special focus on real-time applications. For this purpose, <a href="#araus-extended-dataset">ARAUS-extended dataset</a> is developped, and three different feature sets are put under test.
 
 *CLAP features*, the sound representations explained in the following section, result as the most suitable for real-time monitoring techniques because they achieve strong accuracy in the predictions, they are the fastest to generate, and they are the most robust to changes in audio-calibration. Therefore, we use the *CLAP features* of the five cross-validation folds of ARAUS dataset to train two models for the prediction of pleasantness and eventfulness, respectively, and save them. 
 
-In addition to the pleasantness and eventfulness prediction models, this repository includes the development of urban sound source identification models too. In comparisson to the perceptual qualities, not as much effort and research was put into the study of this models. The audio recordings from <a href="https://github.com/jakobabesser/USM">USM dataset</a> and *CLAP features* were used directly to train one-vs-all models for predicting the following sound sources: airplane, alarm, birds, bus, car, cheering, church bell, dogs, drilling, glass break, gunshot, hammer, helicopter, jackhammer, lawn mower, motorcycle, music, rain, sawing, scream, siren, speech, thunderstorm, train, truck and wind.
+In addition to the pleasantness and eventfulness prediction models, this repository includes the development of urban sound source identification models too. In comparisson to the perceptual qualities, not as much effort and research was put into the study of this models. The audio recordings from <a href="https://github.com/jakobabesser/USM">USM dataset</a> and *CLAP features* were used to train one-vs-all models for predicting the following sound sources: airplane, alarm, birds, bus, car, cheering, church bell, dogs, drilling, glass break, gunshot, hammer, helicopter, jackhammer, lawn mower, motorcycle, music, rain, sawing, scream, siren, speech, thunderstorm, train, truck and wind.
 
 The final step of this research, as part of the Soundlights project, is to implement the trained models in a sensor that operates in real-time. This sensor will capture sound, process it by making the predictions with the trained models and output a message with information about the acoustic environment. In this code repository, you can find code for simulating the working of one of this sensors operating in real-time, using a WAV file as input.
 
 ## ARAUS-extended dataset
 ARAUS-extended dataset is a more comprehensive version of the <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a>. 
 
-ARAUS-extended is formed by the same 25400 augmented urban soundscape audios (organised in 5 train-validation folds and one testing fold) found in ARAUS original dataset. Additionally, it includes another testing fold created with 25 real urban soundscapes recordings downloaded from the <a href="#https://freesound.org/">Freesound sound library</a>. 
+ARAUS-extended is formed by the same 25440 augmented urban soundscape audios (organised in 5 train-validation folds and one testing fold) found in ARAUS original dataset. Additionally, it includes another testing fold created with 25 real urban soundscapes recordings downloaded from the <a href="#https://freesound.org/">Freesound sound library</a>. 
 
 While the original ARAUS dataset includes a set of acoustic and psychoacoustic features, ARAUS-extended contains these same features along with two additional feature sets: signal processing features and a set of CLAP embeddings. This repository contains the code necessary for reproducibility of the generation of ARAUS-extended dataset. 
 
@@ -93,11 +93,11 @@ In this README file, and in the two <a href="#reference">reference</a> documents
 
 
 ## Demo
-You can find two short demo videos created with the provided simulation code (see <a href="#usage">ARAUS dataset</a> section) of the simulations of real-time predictions of:
+You can find two short demo videos created with the provided simulation code (see <a href="#usage">Usage</a> section) of the simulations of real-time predictions of:
 - Pleasantness and eventfulness in <a href="link-to-demo-1">Demo 1</a>.
 - Sound sources present, pleasantness and eventfulness in <a href="link-to-Demo-2">Demo 2</a>.
 
-These demos simulate a sensor that captures audio in real-time and uses models trained with the 25440 augmented soundscapes of ARAUS or ARAUS-extended datasets, and LAION-AI's CLAP embeddings as input features. 
+These demos simulate a sensor that captures audio in real-time and uses the models trained with the 25440 augmented soundscapes of ARAUS or ARAUS-extended datasets, and LAION-AI's CLAP embeddings as input features. 
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -135,7 +135,7 @@ The second script, src/scripts/sensor_read_and_plot.py, operates by reading the 
 <img src="data/images/simulation_capture.png" alt="Logo">
 
 <p></p>
-A demo of this simulation can be found <a href="link!!!">here </a>.
+See <a href="#demo">demos</a>.
 <p></p>
 If you wish to integrate the predictions into your own code, you can find the models for predicting pleasantness and eventfulness in the ´´´/models/trained´´´ directory. These models require LAION-AI's CLAP embeddings of the input audio.
 
@@ -155,24 +155,7 @@ If you wish to integrate the predictions into your own code, you can find the mo
 
 <img src="data/images/legend.png" alt="Logo">
 
-
-1) Preliminary adaptation
-   ---
-
-    Data needed: responses.csv (from ARAUS original dataset)
-   
-    Script to run: `dataset_Adequate_ARAUS_for_extension.ipynb`
-
-    Result: responses_Soundlights.csv
-    
-    ---
-
-2) Generate dataset ARAUS-extended
-3) Generate fold0 variations
-4) Generate fold-Fs - listening test analysis
-
-### Overview
-Our project aims to [brief description of the project's long-term goals and vision].
+...
 
 
 ### Contributors' Guide
@@ -180,7 +163,7 @@ Our project aims to [brief description of the project's long-term goals and visi
 We welcome contributions to help achieve these milestones. Please check out our [contributing guide](CONTRIBUTING.md) for more details on how to get involved.
 
 
-<!-- CONTRIBUTING -->
+<!-- CONTRIBUTING 
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -194,38 +177,16 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 
 
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Distributed under the ...<!-- MIT License. See `LICENSE.txt` for more information.<p align="right">(<a href="#readme-top">back to top</a>)</p>-->
 
 
-
-<!-- CONTACT -->
-## Contact
-
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
-
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-* []()
-* []()
-* []()
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
