@@ -12,7 +12,7 @@
 <h3 align="center">SOUNDLIGHTS</h3>
 
   <p align="center">
-    Research and development of AI models to predict the perceptual sound qualities of "pleasantness" and "eventfulness" in urban soundscapes with focus on prediction accuracy and suitability to real-time implementations.
+    Development of a network of sensors in Barcelona that extract perceptual characteristics of the urban environment. These sensors aim to collect data, raise awareness and modify the behaviour of citizens towards a more respectful environment. This project bases on a research for AI models to predict the perceptual sound qualities of "pleasantness" and "eventfulness" in urban soundscapes with focus on prediction accuracy and suitability to real-time implementations. 
   </p>
   
 </div>
