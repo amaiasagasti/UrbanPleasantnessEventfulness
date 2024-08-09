@@ -69,7 +69,19 @@ Additionally, an example code of a simulation is included: a recorded audio file
 - Amaia Sagasti Martínez - MASTER THESIS: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - Sound and Music Computing Master (Music Technology Group, Universitat Pompeu Fabra - Barcelona) <a href="link-to-MasterThesis-once-published">Master Thesis Report link</a>
 
 ## ARAUS-extended dataset
-ARAUS-extended dataset is a more comprehensive version of the <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a>. While the original ARAUS dataset includes a set of psychoacoustic features, ARAUS-extended contains these same features along with two additional feature sets: signal processing features generated using FreesoundExtractor() from the Essentia library and a set of CLAP embeddings, which are sound representations generated with LAION-AI's CLAP model. This repository contains the code necessary for reproducibility of the generation of ARAUS-extended dataset. In this README file, and in the two [#Reference] papers included  
+ARAUS-extended dataset is a more comprehensive version of the <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a>. 
+
+ARAUS-extended is formed by the same 24400 augmented urban soundscape audios (organised in 5 train-validation folds and one testing fold) found in ARAUS original dataset. Additionally, it includes another testing fold created with 25 real urban soundscapes recordings downloaded from the <a href="#https://freesound.org/">Freesound sound library</a>. 
+
+While the original ARAUS dataset includes a set of acoustic and psychoacoustic features, ARAUS-extended contains these same features along with two additional feature sets: signal processing features and a set of CLAP embeddings. This repository contains the code necessary for reproducibility of the generation of ARAUS-extended dataset. 
+
+In this README file, and in the two <a href="#reference">reference</a> documents included above, we are refering to the three mentioned feature sets of ARAUS-extended dataset as:
+- *ARAUS features* to the acoustic and psychoacoustic features of ARAUS original dataset, based on the ISO-12913.
+- *Freesound features* to the signal processing features generated with <a href="https://essentia.upf.edu/freesound_extractor.html">FreesoundExtractor()</a> from Essentia's library.
+- *CLAP features* to the sound representations generated with <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP</a> pre-trained model *630k-fusion-best.pt* .
+
+## Soundlights sensor
+Both <a href="#reference">reference</a> documents provided above are part of a research line with the purpose on finding which feature set and model delivers the best prediction accuracy
 
 ## Demo
 You can find two short demo videos with a simulation of real-time predictions of:
