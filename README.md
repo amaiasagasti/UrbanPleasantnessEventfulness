@@ -158,12 +158,12 @@ If you wish to integrate the predictions into your own code, you can find the mo
 ...
 
 
-### Contributors' Guide
+<!-- ### Contributors' Guide
 
 We welcome contributions to help achieve these milestones. Please check out our [contributing guide](CONTRIBUTING.md) for more details on how to get involved.
 
 
-<!-- CONTRIBUTING 
+CONTRIBUTING 
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
