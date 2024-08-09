@@ -68,10 +68,23 @@ Additionally, an example code of a simulation is included: a recorded audio file
 - Amaia Sagasti, Martín Rocamora, Frederic Font: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - DCASE Workshop 2024 <a href="link-to-paper-once-published">Paper link</a>
 - Amaia Sagasti Martínez - MASTER THESIS: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - Sound and Music Computing Master (Music Technology Group, Universitat Pompeu Fabra - Barcelona) <a href="link-to-MasterThesis-once-published">Master Thesis Report link</a>
 
+## Soundlights sensors
+Soundlights is a technological and social project that aims to develop and implement a network of intelligent microphone sensors to be deployed in the city of Barcelona. This sensors capture the audio in real-time and process it to extract acoustic perceptual qualities. Then, the acoustic environment information will be displayed on a digital sign. The main goals of Soundlights are:
+- To collect data from the urban soundscapes in the city of Barcelona to gain knowledge of the noise environment from a perceptual point of view
+- To implement a display that delivers messages in real-time to raise *in situ* awareness of to reduce noise levels
+
+Both <a href="#reference">reference</a> documents provided above are part of a research line for finding which feature set and model delivers the highest accuracy in the predictions of the perceptual qualities pleasantness and eventfulness, with special focus on real-time applications. For this purpose, <a href="#araus-extended-dataset">ARAUS-extended dataset</a> is developped, and three different feature sets are put under test.
+
+*CLAP features*, the sound representations explained in the following section, result as the most suitable for real-time monitoring techniques because they achieve strong accuracy in the predictions, they are the fastest to generate, and they are the most robust to changes in audio-calibration. Therefore, we use the *CLAP features* of the five cross-validation folds of ARAUS dataset to train two models for the prediction of pleasantness and eventfulness, respectively, and save them. 
+
+In addition to the pleasantness and eventfulness prediction models, this repository includes the development of urban sound source identification models too. In comparisson to the perceptual qualities, not as much effort and research was put into the study of this models. The audio recordings from <a href="https://github.com/jakobabesser/USM">USM dataset</a> and *CLAP features* were used directly to train one-vs-all models for predicting the following sound sources: airplane, alarm, birds, bus, car, cheering, church bell, dogs, drilling, glass break, gunshot, hammer, helicopter, jackhammer, lawn mower, motorcycle, music, rain, sawing, scream, siren, speech, thunderstorm, train, truck and wind.
+
+The final step of this research, as part of the Soundlights project, is to implement the trained models in a sensor that operates in real-time. This sensor will capture sound, process it by making the predictions with the trained models and output a message with information about the acoustic environment. In this code repository, you can find code for simulating the working of one of this sensors operating in real-time, using a WAV file as input.
+
 ## ARAUS-extended dataset
 ARAUS-extended dataset is a more comprehensive version of the <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a>. 
 
-ARAUS-extended is formed by the same 24400 augmented urban soundscape audios (organised in 5 train-validation folds and one testing fold) found in ARAUS original dataset. Additionally, it includes another testing fold created with 25 real urban soundscapes recordings downloaded from the <a href="#https://freesound.org/">Freesound sound library</a>. 
+ARAUS-extended is formed by the same 25400 augmented urban soundscape audios (organised in 5 train-validation folds and one testing fold) found in ARAUS original dataset. Additionally, it includes another testing fold created with 25 real urban soundscapes recordings downloaded from the <a href="#https://freesound.org/">Freesound sound library</a>. 
 
 While the original ARAUS dataset includes a set of acoustic and psychoacoustic features, ARAUS-extended contains these same features along with two additional feature sets: signal processing features and a set of CLAP embeddings. This repository contains the code necessary for reproducibility of the generation of ARAUS-extended dataset. 
 
@@ -80,15 +93,13 @@ In this README file, and in the two <a href="#reference">reference</a> documents
 - *Freesound features* to the signal processing features generated with <a href="https://essentia.upf.edu/freesound_extractor.html">FreesoundExtractor()</a> from Essentia's library.
 - *CLAP features* to the sound representations generated with <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP</a> pre-trained model *630k-fusion-best.pt* .
 
-## Soundlights sensor
-Both <a href="#reference">reference</a> documents provided above are part of a research line with the purpose on finding which feature set and model delivers the best prediction accuracy
 
 ## Demo
-You can find two short demo videos with a simulation of real-time predictions of:
+You can find two short demo videos created with the provided simulation code (see <a href="#usage">ARAUS dataset</a> section) of the simulations of real-time predictions of:
 - Pleasantness and eventfulness in <a href="link-to-demo-1">Demo 1</a>.
 - Sound sources present, pleasantness and eventfulness in <a href="link-to-Demo-2">Demo 2</a>.
 
-These demos simulate a sensor that captures audio in real-time and uses models trained with the 24400 augmented soundscapes of ARAUS or ARAUS-extended datasets, and LAION-AI's CLAP embeddings as input features. 
+These demos simulate a sensor that captures audio in real-time and uses models trained with the 25440 augmented soundscapes of ARAUS or ARAUS-extended datasets, and LAION-AI's CLAP embeddings as input features. 
 
 <!-- GETTING STARTED -->
 ## Getting Started
