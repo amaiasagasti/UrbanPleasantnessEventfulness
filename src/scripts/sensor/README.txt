@@ -1,0 +1,1 @@
+For sensor simulation, please run both scripts found in the current directory simultaneously in different terminals.
