@@ -93,9 +93,9 @@ ARAUS-extended contains the same 25440 augmented urban soundscape audios (organi
 
 While the original ARAUS dataset includes a set of acoustic and psychoacoustic features, ARAUS-extended contains these same features along with two additional feature sets: signal processing features (generated with <a href="https://essentia.upf.edu/freesound_extractor.html">FreesoundExtractor()</a> from Essentia's library) and a set of CLAP embeddings (generated with <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP</a> pre-trained model *630k-fusion-best.pt*). 
 
-Dataset: <a href="data/ARAUS_extended.csv">CSV version</a>, <a href="data/ARAUS_extended.json">JSON version</a>
+ARAUS-Extended Dataset: <a href="data/ARAUS_extended.csv">CSV version</a>, <a href="data/ARAUS_extended.json">JSON version</a>
 <p></p>
-<i>Fold-Fs</i>: <a href="data/fold_Fs.csv">CSV version, <a href="data/fold_Fs.json">JSON version</a>
+<i>ARAUS-Extended Fold-Fs</i>: <a href="data/fold_Fs.csv">CSV version, <a href="data/fold_Fs.json">JSON version</a>
 <p></p>
 This repository contains the code necessary for reproducibility of the generation of ARAUS-extended dataset:
 
@@ -130,18 +130,17 @@ There is also code allowing for reproducibility of model training:
 ## Simulation
 Future research directions could include evaluating the developed models in the context of a real-world acoustic sensor network and incorporating sound classification and source separation technologies to improve the models' accuracy and capabilities for meaningful soundscape characterisation and monitoring. 
 
-This work is still in progress in the framework of the *SOUNDLIGHTS* project. However, you can find code to simulate such functionalities:
+This work is still in progress in the framework of the *SOUNDLIGHTS* project. However, you can already find code to simulate such functionalities:
 
 To test the developed models for predicting the pleasantness (P) and eventfulness (E) values, two scripts have been implemented and are ready to run. These scripts simulate the functionality of an acoustic environment sensor by processing a WAV file of an urban soundscape recording. 
 
 1) The first <a href="src/scripts/sensor/sensor_simulation.py">script</a> constitutes the sensor capturing and processing: in "real time", the audio file is read continuously and, every few seconds, the predicted values of P and E are outputted in a text file. 
-2) The second <a href="src/scripts/sensor/sensor_read_and_plot.py">script</a>, src/scripts/sensor_read_and_plot.py, operates by reading the most recent line from the aforementioned text file in real-time and plotting the values on a simple interface.
+2) The second <a href="src/scripts/sensor/sensor_read_and_plot.py">script</a> operates by reading the most recent line from the aforementioned text file in real-time and plotting the values on a simple interface.
 
 *Note: Run both scripts simultaneously in different terminals.*
 
 <img src="data/images/simulation_capture.png" alt="Logo">
 
-### Demo
 In fact, a short demo video was created with the provided simulation code <a href="https://youtu.be/f1YHKgZXTTw">Demo 1</a>. 
 
 Additionally, here is a sneak-peak of other capabilities we are working on...<a href="https://youtu.be/fsis4OViLwQ">Demo 2</a>.
