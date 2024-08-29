@@ -3,7 +3,7 @@
 
 ---
 <!-- PROJECT LOGO -->
-<br />
+
 <div align="center">
   <a href="https://github.com/github_username/repo_name">
     <img src="data/images/Paper_banner.png" alt="Logo">
@@ -63,7 +63,7 @@ It is funded by <i>BIT Habitat (Ajuntament de Barcelona)</i> under the program <
 - Amaia Sagasti, Martín Rocamora, Frederic Font: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - DCASE Workshop 2024 <a href="link-to-paper-once-published">Paper link</a>
 - Amaia Sagasti Martínez - MASTER THESIS: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - Sound and Music Computing Master (Music Technology Group, Universitat Pompeu Fabra - Barcelona) <a href="link-to-MasterThesis-once-published">Master Thesis Report link</a>
 
-## Soundlights sensors
+<!-- ## Soundlights sensors
 Soundlights is a technological and social project that aims to develop and implement a network of intelligent microphone sensors to be deployed in the city of Barcelona. These sensors capture the audio in real-time and process it to extract two acoustic perceptual qualities, pleasatness and eventfulness. Then, the obtained acoustic environment information will be displayed on a digital display. The main goals of Soundlights are:
 - To collect data from the urban soundscapes in the city of Barcelona to gain knowledge of the noise environment from a perceptual point of view.
 - To implement a display that delivers messages in real-time to raise *in situ* and long-term awareness of noise levels.
@@ -74,7 +74,7 @@ Both <a href="#reference">reference</a> documents provided above are part of a r
 
 In addition to the pleasantness and eventfulness prediction models, this repository includes the development of urban sound source identification models too. In comparisson to the perceptual qualities, not as much effort and research was put into the study of this models. The audio recordings from <a href="https://github.com/jakobabesser/USM">USM dataset</a> and *CLAP features* were used to train one-vs-all models for predicting the following sound sources: airplane, alarm, birds, bus, car, cheering, church bell, dogs, drilling, glass break, gunshot, hammer, helicopter, jackhammer, lawn mower, motorcycle, music, rain, sawing, scream, siren, speech, thunderstorm, train, truck and wind.
 
-The final step of this research, as part of the Soundlights project, is to implement the trained models in a sensor that operates in real-time. This sensor will capture sound, process it by making the predictions with the trained models and output a message with information about the acoustic environment. In this code repository, you can find code for simulating the working of one of this sensors operating in real-time, using a WAV file as input.
+The final step of this research, as part of the Soundlights project, is to implement the trained models in a sensor that operates in real-time. This sensor will capture sound, process it by making the predictions with the trained models and output a message with information about the acoustic environment. In this code repository, you can find code for simulating the working of one of this sensors operating in real-time, using a WAV file as input. -->
 
 ## ARAUS-extended dataset
 ARAUS-extended dataset is a more comprehensive version of the <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a>. 
