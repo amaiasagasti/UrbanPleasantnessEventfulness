@@ -105,7 +105,7 @@ This repository contains the code necessary for reproducibility of the generatio
 Besides this code for re-generating ARAUS-extended dataset, in <a href="src/scripts/dataset/">the dataset scripts folder </a> you can find other codes for:
 - Checking Leq of the original augmented soundscapes from ARAUS dataset and the new set of audios belonging to *fold-Fs* <a href="src/scripts/dataset/dataset_Leq_comparison.ipynb">Script</a>
 - Analysing the answers of the listening test <a href="src/scripts/dataset/dataset_Analyse_results_listening_tests.ipynb">Script</a>
-- Generating all <a href="data/variations_fold0">variations of ARAUS testing fold</a> for testing models' robustness to changes in sensor calibrations <a href="src/scripts/dataset/dataset_Generate_all_variations_fold0.py">Script</a>
+- Generating all <a href="data/variations_fold0">variations </a> of ARAUS testing fold, *fold-0*, for testing models' robustness to changes in sensor calibrations <a href="src/scripts/dataset/dataset_Generate_all_variations_fold0.py">Script</a>
 
 
 <img src="data/images/dataset-schema.png" alt="Logo">
@@ -127,73 +127,27 @@ There is also code allowing for reproducibility of model training:
 - Finally, there is code to test the performance of the saved models on the controlled variations of *fold-0* <a href="src/scripts/model/models_evaluate.py">script</a>
 
 
-## Demo
-You can find two short demo videos created with the provided simulation code (see <a href="#usage">Usage</a> section) of the simulations of real-time predictions of:
-- Pleasantness and eventfulness in <a href="link-to-demo-1">Demo 1</a>.
-- Sound sources present, pleasantness and eventfulness in <a href="link-to-Demo-2">Demo 2</a>.
+## Simulation
+Future research directions could include evaluating the developed models in the context of a real-world acoustic sensor network and incorporating sound classification and source separation technologies to improve the models' accuracy and capabilities for meaningful soundscape characterisation and monitoring. 
 
-These demos simulate a sensor that captures audio in real-time and uses the models trained with the 25440 augmented soundscapes of ARAUS or ARAUS-extended datasets, and LAION-AI's CLAP embeddings as input features. 
+This work is still in progress in the framework of the *SOUNDLIGHTS* project. However, you can find code to simulate such functionalities:
 
+To test the developed models for predicting the pleasantness (P) and eventfulness (E) values, two scripts have been implemented and are ready to run. These scripts simulate the functionality of an acoustic environment sensor by processing a WAV file of an urban soundscape recording. 
 
+1) The first <a href="src/scripts/sensor/sensor_simulation.py">script</a> constitutes the sensor capturing and processing: in "real time", the audio file is read continuously and, every few seconds, the predicted values of P and E are outputted in a text file. 
+2) The second <a href="src/scripts/sensor/sensor_read_and_plot.py">script</a>, src/scripts/sensor_read_and_plot.py, operates by reading the most recent line from the aforementioned text file in real-time and plotting the values on a simple interface.
 
-
-
-<!-- USAGE EXAMPLES -->
-## Usage
-
-To test the developed models for predicting the pleasantness (P) and eventfulness (E) values of an urban soundscape, two scripts have been implemented and are ready to run. These scripts simulate the functionality of an acoustic environment sensor by processing a WAV file of an urban soundscape recording. The simulation operates in "real time," where the audio file is read continuously, and every X seconds, the scripts output the predicted values of P and E. This setup allows for the real-time analysis and evaluation of the acoustic environment based on the provided recordings.
-
-The first script is ```src/scripts/sensor_simulate.py```. To run this script, the function ```play_audio()``` is called:
-```
-play_audio(
-    path,
-    frequency,
-    duration,
-    maintain_time,
-)
-```
-The first input is the path to the audio file that will simulate a real-time recording. The second input specifies the frequency, in seconds, at which new predictions for pleasantness (P) and eventfulness (E) will be made. This also determines the duration of the audio slices that will be saved locally. The third parameter defines the duration, in seconds, of audio that will be considered for prediction calculations. This duration must be an integer multiple of the frequency, allowing an exact number of audio slices to be concatenated. Finally, the fourth input sets the duration, in seconds, for which the audio slices will be stored locally. This value should be as small as possible but must be greater than or equal to the "duration" parameter and also an integer multiple of the "frequency. 
-
-This function saves the predicted values of P and E in a text file, with each new pair of values written on a new line.
-
-The second script, src/scripts/sensor_read_and_plot.py, operates by reading the most recent line from the aforementioned text file in real-time and plotting the values on a simple interface.
+*Note: Run both scripts simultaneously in different terminals.*
 
 <img src="data/images/simulation_capture.png" alt="Logo">
 
-<p></p>
-See <a href="#demo">demos</a>.
-<p></p>
-If you wish to integrate the predictions into your own code, you can find the models for predicting pleasantness and eventfulness in the ´´´/models/trained´´´ directory. These models require LAION-AI's CLAP embeddings of the input audio.
+### Demo
+In fact, a short demo video was created with the provided simulation code <a href="https://youtu.be/f1YHKgZXTTw">Demo 1</a>. 
+
+Additionally, here is a sneak-peak of other capabilities we are working on...<a href="https://youtu.be/fsis4OViLwQ">Demo 2</a>.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-
-...
-
-
-<!-- ### Contributors' Guide
-
-We welcome contributions to help achieve these milestones. Please check out our [contributing guide](CONTRIBUTING.md) for more details on how to get involved.
-
-
-CONTRIBUTING 
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
-
 
 
 <!-- LICENSE -->
