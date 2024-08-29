@@ -37,7 +37,6 @@ sys.path.append(src_dir)
 
 # Imports from this project
 from CLAP.src.laion_clap import CLAP_Module
-from lib.dataset.auxiliary_sources import sources_USM
 
 
 matplotlib.use("Agg")  # Use the 'Agg' backend which does not require a GUI
@@ -49,14 +48,11 @@ def sensor_simulation(
     maintain_time: float,
     seconds_analysis: float,
     saving_file: str,
-    sources: list = None,
-    sources_models_dir: str = None,
     P_model_dir: str = None,
     E_model_dir: str = None,
 ):
     """
-    Simulates real-time audio recording and processing for predicting specified qualities such as sound sources,
-    pleasantness, and eventfulness.
+    Simulates real-time audio recording and processing for predicting specified qualities pleasantness and eventfulness.
 
     Parameters:
     ----------
@@ -78,13 +74,6 @@ def sensor_simulation(
         Path to the text file where the results of the predictions will be stored.
         A new line will be added for each new prediction.
 
-    sources : list, optional
-        List of sound sources to be predicted. Each string in the list corresponds to the model name (e.g., 'source.joblib').
-
-    sources_models_dir : str, optional
-        Path to the directory containing the models for sound sources. The names of the models in this folder
-        must match the names in the `sources` list (e.g., 'source.joblib').
-
     P_model_dir : str, optional
         Path to the model for predicting pleasantness.
 
@@ -99,31 +88,18 @@ def sensor_simulation(
     and eventfulness, saving these predictions to a specified text file.
 
     ValueError raises:
-    If none of the optional parameters (`P_model_dir`, `E_model_dir`, `sources` and `sources_models_dir`)
-    are provided or if `sources` is provided without `sources_models_dir` or vice versa.
+    If none of the optional parameters (`P_model_dir`, `E_model_dir`)
     If `maintain_time` or `seconds_analysis` are not multiples of `seconds_segment`.
     If `seconds_analysis` is not smaller than `maintain_time`.
     """
 
     # region CHECK INPUTS ########################
-    if (
-        P_model_dir is None
-        and E_model_dir is None
-        and (sources is None or sources_models_dir is None)
-    ):
+    if P_model_dir is None and E_model_dir is None:
         raise ValueError(
             "Cannot make any predictions. "
             "At least one of the following conditions must be met: "
             "1) P_model_dir is not None, "
             "2) E_model_dir is not None, "
-            "3) Both sources and sources_models_dir are not None."
-        )
-
-    if (sources is not None and sources_models_dir is None) or (
-        sources is None and sources_models_dir is not None
-    ):
-        raise ValueError(
-            "Both sources and sources_models_dir must be provided together."
         )
 
     # Check if maintain_time and seconds_analysis are multiples of seconds_segment
@@ -157,9 +133,6 @@ def sensor_simulation(
     with open(saving_file, "a") as file:
         # Write first line with headers
         first_line = []
-        if sources is not None:
-            for source in sources:
-                first_line.append(source)
         if P_model_dir is not None:
             first_line.append("P")
         if E_model_dir is not None:
@@ -171,19 +144,6 @@ def sensor_simulation(
         # endregion PREPARATION ######################
 
         # region MODEL LOADING #######################
-        # Load model for source predictions and store in the dictionary
-        if sources is not None:
-            models_sources = {}
-            for source in sources:
-                if " " in source:
-                    # Replace spaces with underscores
-                    source_path = source.replace(" ", "_")
-                else:
-                    source_path = source
-                model_path = os.path.join(sources_models_dir, f"{source_path}.joblib")
-                models_sources[source] = joblib.load(model_path)
-            print("------- sources models loaded -----------")
-
         # Load the trained P and E models
         if P_model_dir is not None:
             model_P = joblib.load(P_model_dir)
@@ -322,7 +282,7 @@ def sensor_simulation(
         # region JOIN SEGMENTS TO PROCESS##############
         # Function to join recent segments, it will be a thread that will be active all the time
         def join_and_save_audio(folder_path, output_wav_path):
-            nonlocal prev_time, seconds_segment, seconds_analysis, i, prev_i, model_CLAP, models_sources, file
+            nonlocal prev_time, seconds_segment, seconds_analysis, i, prev_i, model_CLAP, file
 
             while True:
                 with condition:
@@ -372,7 +332,6 @@ def sensor_simulation(
                     if len(metadata) == 0:
                         print("No audio segments found.")
                     else:
-                        # Get sources presence predictions
                         # start_time = time.time()
                         # Extract features
                         features = model_CLAP.get_audio_embedding_from_data(
@@ -380,14 +339,7 @@ def sensor_simulation(
                         )
                         # finish_time = time.time()
 
-                        # Calculate probabilities for each source model
                         predictions = []
-                        if sources is not None:
-                            for source in sources:
-                                prediction = models_sources[source].predict_proba(
-                                    features
-                                )[0][1]
-                                predictions.append(prediction)
 
                         # Calculate prediction values for each P/E model
                         if P_model_dir is not None:
