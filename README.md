@@ -6,13 +6,13 @@
 <br />
 <div align="center">
   <a href="https://github.com/github_username/repo_name">
-    <img src="data/images/logo.png" alt="Logo">
+    <img src="data/images/Paper_banner.png" alt="Logo">
   </a>
 
-<h3 align="center">SOUNDLIGHTS</h3>
+<h3 align="center">Abstract</h3>
 
   <p align="center">
-    Development of a network of sensors in Barcelona's metropolitan area to extract and display perceptual characteristics of the urban environment in real-time. These sensors aim to collect data, raise awareness and modify the behaviour of citizens towards a more respectful environment. This project is grounded on a research that develops AI models to predict the perceptual sound qualities of "pleasantness" and "eventfulness" in urban soundscapes with focus on prediction accuracy and suitability to real-time implementations. 
+    The acoustic environment induces emotions in human listeners. To describe such emotions, ISO-12913 defines pleasantness and eventfulness as orthogonal properties that characterise urban soundscapes. In this paper, we study different approaches for automatically estimating these two perceptual sound qualities. We emphasize the comparison of three sets of audio features: a first set from the acoustic and psychoacoustic domain, suggested in ISO-12913; a second set of features from the machine listening domain based on traditional signal processing algorithms; and a third set consisting of audio embeddings generated with a pre-trained audio-language deep-learning model. Each feature set is tested on its own and in combination with ground-truth labels about the sound sources present in the recordings to determine if this additional information improves the prediction accuracy. Our findings indicate that the deep-learning representation yields slightly better performance than the other feature sets when predicting pleasantness, but all of them yield similar performance when predicting eventfulness. Nevertheless, deep-learning embeddings present other advantages, such as faster calculation times and greater robustness against changes in sensor calibration, making them more effective for real-time acoustic monitoring. Furthermore, we observe a clear correlation between the sound sources that are present in the urban soundscape and its induced emotions, specially regarding the sensation of pleasantness. Models like the ones proposed in this paper allow for an assessment of the acoustic environment that goes beyond a characterisation solely based on sound pressure level measurements and could be integrated into current acoustic monitoring solutions to enhance the understanding from the perspective of the induced emotions.
   </p>
   
 </div>
@@ -45,19 +45,16 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-<p align="left">
-    This project is a colaboration between the following institutions:
-    <p>
-    <img src="data/images/MTG_logo.jpeg" alt="Logo" height=60>    
-    </p>
-    <p>
-    <img src="data/images/Bitlab_logo.png" alt="Logo" height=60>
-    </p>
-    Funded by:
-    <p>
-    <img src="data/images/Logo-Bithabitat.png" alt="Logo" height=60>
-    </p>
-  </p>
+
+This work was supported by the project ''Soundlights: Distributed Open Sensors Network and Citizen Science for the Collective Management of the City's Sound Environments'' (9382417), a collaboration between the <i>Music Technology Group (Universitat Pompeu Fabra)</i> and <i>Bitlab Cooperativa Cultural</i>.
+
+It is funded by <i>BIT Habitat (Ajuntament de Barcelona)</i> under the program <i>La Ciutat Proactiva</i>; and by the <i>IA y Música: Cátedra en Inteligencia Artificial y Música</i> (TSI-100929-2023-1) by the <i>Secretaría de Estado de Digitalización e Inteligencia Artificial</i> and <i>NextGenerationEU</i> under the program <i>Cátedras ENIA 2022</i>. 
+
+<p>
+  <img src="data/images/MTG_logo.jpeg" alt="Logo" height="60" style="float: left; margin-right: 10px;">
+  <img src="data/images/Bitlab_logo.png" alt="Logo" height="60" style="float: left; margin-right: 10px;">
+  <img src="data/images/Logo-Bithabitat.png" alt="Logo" height="60" style="float: left;">
+</p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
