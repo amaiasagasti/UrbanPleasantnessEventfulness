@@ -139,7 +139,7 @@ To test the developed models for predicting the pleasantness (P) and eventfulnes
 
 *Note: Run both scripts simultaneously in different terminals.*
 
-<img src="data/images/simulation_capture.png" alt="Logo">
+<img src="data/images/simulation_capture.png" alt="Logo" style="width: 70%; display: block; margin: 0 auto;">
 
 In fact, a short demo video was created with the provided simulation code <a href="https://youtu.be/f1YHKgZXTTw">Demo 1</a>. 
 
