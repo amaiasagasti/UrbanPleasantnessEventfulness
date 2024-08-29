@@ -63,6 +63,17 @@ It is funded by <i>BIT Habitat (Ajuntament de Barcelona)</i> under the program <
 - Amaia Sagasti, Martín Rocamora, Frederic Font: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - DCASE Workshop 2024 <a href="link-to-paper-once-published">Paper link</a>
 - Amaia Sagasti Martínez - MASTER THESIS: *Prediction of Pleasantness and Eventfulness Perceptual Sound Qualities in Urban Soundscapes* - Sound and Music Computing Master (Music Technology Group, Universitat Pompeu Fabra - Barcelona) <a href="link-to-MasterThesis-once-published">Master Thesis Report link</a>
 
+
+<!-- GETTING STARTED -->
+## Getting Started
+This section provides all the necessary information to set up the working environment. The followiing bullet-list details the set up process:
+- It is recommended to use ```Python==3.10.14``` to guarantee compatibility.
+- Install all the depencencies detailed in the ```requirements.txt``` file of this project. 
+- <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP model</a> is used, make sure you install its dependencies too.
+- For reproducibility of the dataset generation, <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a> download and installation will be necessary. Specifically, you will need the metadata file ```responses.csv``` and the folder with the augmented urban soundscapes WAVs, ```augmented_soundscapes```. Follow the steps specified in their Github page to download/generate the mentioned files. 
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- ## Soundlights sensors
 Soundlights is a technological and social project that aims to develop and implement a network of intelligent microphone sensors to be deployed in the city of Barcelona. These sensors capture the audio in real-time and process it to extract two acoustic perceptual qualities, pleasatness and eventfulness. Then, the obtained acoustic environment information will be displayed on a digital display. The main goals of Soundlights are:
 - To collect data from the urban soundscapes in the city of Barcelona to gain knowledge of the noise environment from a perceptual point of view.
@@ -79,14 +90,20 @@ The final step of this research, as part of the Soundlights project, is to imple
 ## ARAUS-extended dataset
 ARAUS-extended dataset is a more comprehensive version of the <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a>. 
 
-ARAUS-extended is formed by the same 25440 augmented urban soundscape audios (organised in 5 train-validation folds and one testing fold) found in ARAUS original dataset. Additionally, it includes another testing fold created with 25 real urban soundscapes recordings downloaded from the <a href="#https://freesound.org/">Freesound sound library</a>. 
+ARAUS-extended contains the same 25440 augmented urban soundscape audios (organised in 5 train-validation folds and one testing fold) found in ARAUS original dataset. Additionally, it includes another testing fold created with 25 real urban soundscapes recordings downloaded from the <a href="#https://freesound.org/">Freesound sound library</a>. We refer to this fold as <i>fold-Fs</i>.
 
-While the original ARAUS dataset includes a set of acoustic and psychoacoustic features, ARAUS-extended contains these same features along with two additional feature sets: signal processing features and a set of CLAP embeddings. This repository contains the code necessary for reproducibility of the generation of ARAUS-extended dataset. 
+While the original ARAUS dataset includes a set of acoustic and psychoacoustic features, ARAUS-extended contains these same features along with two additional feature sets: signal processing features (generated with <a href="https://essentia.upf.edu/freesound_extractor.html">FreesoundExtractor()</a> from Essentia's library) and a set of CLAP embeddings (generated with <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP</a> pre-trained model *630k-fusion-best.pt*). 
 
-In this README file, and in the two <a href="#reference">reference</a> documents included above, we are refering to the three mentioned feature sets of ARAUS-extended dataset as:
-- *ARAUS features* to the acoustic and psychoacoustic features of ARAUS original dataset, based on the ISO-12913.
-- *Freesound features* to the signal processing features generated with <a href="https://essentia.upf.edu/freesound_extractor.html">FreesoundExtractor()</a> from Essentia's library.
-- *CLAP features* to the sound representations generated with <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP</a> pre-trained model *630k-fusion-best.pt* .
+Dataset: <a href="data/ARAUS_extended.csv">CSV version</a>, <a href="data/ARAUS_extended.json">JSON version</a>
+<p></p>
+<i>Fold-Fs</i>: <a href="data/fold_Fs.csv">CSV version, <a href="data/fold_Fs.json">JSON version</a>
+<p></p>
+This repository contains the code necessary for reproducibility of the generation of ARAUS-extended dataset --> <a href="src/scripts/dataset/dataset_Generate_features.py">Script</a> .
+
+## Models predicting Pleasantness and Eventfulness
+
+
+## Others
 
 
 ## Demo
@@ -96,16 +113,7 @@ You can find two short demo videos created with the provided simulation code (se
 
 These demos simulate a sensor that captures audio in real-time and uses the models trained with the 25440 augmented soundscapes of ARAUS or ARAUS-extended datasets, and LAION-AI's CLAP embeddings as input features. 
 
-<!-- GETTING STARTED -->
-## Getting Started
-This section provides all the necessary information to set up the working environment. The followiing bullet-list details the set up process:
-- It is recommended to use ```Python==3.10.14``` to guarantee compatibility.
-- Install all the depencencies detailed in the ```requirements.txt``` file of this project. 
-- <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP model</a> is used, make sure you install its dependencies too.
-- For reproducibility, <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a> download and installation will be necessary. Specifically, you will need the metadata file ```responses.csv``` and the folder with the augmented urban soundscapes WAVs, ```augmented_soundscapes```. Follow the steps specified in their Github page to download/generate the mentioned file and folder. 
 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
