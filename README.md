@@ -106,6 +106,7 @@ Besides this code for re-generating ARAUS-extended dataset, in <a href="src/scri
 - Checking Leq of the original augmented soundscapes from ARAUS dataset and the new set of audios belonging to *fold-Fs* <a href="src/scripts/dataset/dataset_Leq_comparison.ipynb">Script</a>
 - Analysing the answers of the listening test <a href="src/scripts/dataset/dataset_Analyse_results_listening_tests.ipynb">Script</a>
 - Generating all <a href="data/variations_fold0">variations </a> of ARAUS testing fold, *fold-0*, for testing models' robustness to changes in sensor calibrations <a href="src/scripts/dataset/dataset_Generate_all_variations_fold0.py">Script</a>
+- Comparison of ARAUS original acoustic and psychoacoustic features to the ones generated for ARAUS-extended (with the code found in this repo). <a href="src/scripts/dataset/dataset_Check_ARAUS-extended.ipynb">Script</a>
 
 
 <img src="data/images/dataset-schema.png" alt="Logo">
