@@ -69,7 +69,7 @@ It is funded by <i>BIT Habitat (Ajuntament de Barcelona)</i> under the program <
 This section provides all the necessary information to set up the working environment. The followiing bullet-list details the set up process:
 - It is recommended to use ```Python==3.10.14``` to guarantee compatibility.
 - Install all the depencencies detailed in the ```requirements.txt``` file of this project. 
-- <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP model</a> is used, make sure you install its dependencies too.
+- <a href="https://github.com/LAION-AI/CLAP">LAION-AI's CLAP model</a> is used, make sure you install its dependencies too. Also, make sure to download LAION-AI's pre-trained model *630k-fusion-best.pt*.
 - For reproducibility of the dataset generation, <a href="https://github.com/ntudsp/araus-dataset-baseline-models">ARAUS dataset</a> download and installation will be necessary. Specifically, you will need the metadata file ```responses.csv``` and the folder with the augmented urban soundscapes WAVs, ```augmented_soundscapes```. Follow the steps specified in their Github page to download/generate the mentioned files. 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
