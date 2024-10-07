@@ -51,6 +51,7 @@ This work was supported by the project ''Soundlights: Distributed Open Sensors N
 It is funded by <i>BIT Habitat (Ajuntament de Barcelona)</i> under the program <i>La Ciutat Proactiva</i>; and by the <i>IA y Música: Cátedra en Inteligencia Artificial y Música</i> (TSI-100929-2023-1) by the <i>Secretaría de Estado de Digitalización e Inteligencia Artificial</i> and <i>NextGenerationEU</i> under the program <i>Cátedras ENIA 2022</i>. 
 
 <p>
+  <img src="data/images/Soundlights_logo.png" alt="Logo" height="80" style="float: left; margin-right: 10px;">
   <img src="data/images/MTG_logo.jpeg" alt="Logo" height="60" style="float: left; margin-right: 10px;">
   <img src="data/images/Bitlab_logo.png" alt="Logo" height="60" style="float: left; margin-right: 10px;">
   <img src="data/images/Logo-Bithabitat.png" alt="Logo" height="60" style="float: left;">
