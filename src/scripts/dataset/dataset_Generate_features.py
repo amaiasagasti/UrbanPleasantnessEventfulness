@@ -20,7 +20,7 @@ from lib.dataset.dataset_functions import (
 
 ############### Code to generate ARAUS extended dataset ##################################
 # Inputs
-audios_path = "data/soundscapes_augmented/ARAUS_fold0_01/"  # Run once for each folder
+audios_path = "data/soundscapes_augmented/"
 csv_path = "data/responses_adapted.csv"
 saving_path = (
     "data/ARAUS_extended/"  # Specify saving path for JSONS files (one per audio)
@@ -45,7 +45,7 @@ generate_features(
 # Code to generate features for new data (listenig tests audios) ########################
 # Inputs
 audios_path = "data/listening_test_audios/"
-csv_path = "data/main_files/answers_listening_tests.csv"
+csv_path = "data/responses_fold_Fs.csv"
 saving_path = "data/fold_Fs/"
 
 
@@ -66,4 +66,6 @@ generate_features(
 # NOTE:
 # Both these sections of code generate single JSONS for each analysed audio. To get general
 # JSON or CSV file, use import_jsons_to_json()  or import_jsons_to_dataframe() functions,
-# respectively, from lib/dataset/dataset_functions.py
+# respectively, from lib/dataset/dataset_functions.py, like:
+# from lib.dataset.dataset_functions import import_json_to_dataframe
+# import_json_to_dataframe("path/to/json",True,"path/to/new/csv")
