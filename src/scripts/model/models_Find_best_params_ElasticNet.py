@@ -54,7 +54,7 @@ df_clap, clap_features, df_foldFs = prepare_dataframes_models(
 
 
 input_dicts = [
-    # ARAUS
+    # region ARAUS
     {
         "maskers_active": False,
         "masker_gain": 1,
@@ -163,7 +163,9 @@ input_dicts = [
         "predict": "P",
         "name": saving_folder + "P_EN_ARAUS_M20_minMaxNorm.txt",
     },
-    {  # Freesound
+    # endregion
+    # region Freesound
+    {
         "maskers_active": False,
         "masker_gain": 1,
         "masker_transform": "None",
@@ -271,7 +273,9 @@ input_dicts = [
         "predict": "P",
         "name": saving_folder + "P_EN_Freesound_M20_minMaxNorm.txt",
     },
-    {  # CLAP
+    # endregion
+    # region CLAP
+    {
         "maskers_active": False,
         "masker_gain": 1,
         "masker_transform": "None",
@@ -379,6 +383,7 @@ input_dicts = [
         "predict": "P",
         "name": saving_folder + "P_EN_clap_M20_minMaxNorm.txt",
     },
+    # endregion
 ]
 
 
