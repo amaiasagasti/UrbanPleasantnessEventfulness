@@ -10,7 +10,7 @@ This script contains a set of functions to generate features, specifically:
 
 import numpy as np
 from scipy.signal import lfilter
-from scipy.signal.filter_design import bilinear
+from scipy.signal import bilinear
 from essentia.standard import FreesoundExtractor
 from numpy import pi, convolve
 from maad.spl import pressure2leq
