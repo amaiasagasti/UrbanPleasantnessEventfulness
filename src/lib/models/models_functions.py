@@ -35,6 +35,7 @@ from lib.dataset.features_groups import (
     clap_features,
 )
 
+
 def prepare_features_models(
     dataframe,
     features_evaluated,
@@ -110,30 +111,32 @@ def prepare_features_models(
     return dataframe, columns_to_mantain
 
 
-def prepare_dataframes_models(data_ARAUS_path, data_foldFs_path, saving_folder, feature_set:str):
-    """ Function that prepares the needed data for the training functions (run_variations_EN, 
-    run_variations_RFR, train_EN, train_RFR). 
+def prepare_dataframes_models(
+    data_ARAUS_path, data_foldFs_path, saving_folder, feature_set: str
+):
+    """Function that prepares the needed data for the training functions (run_variations_EN,
+    run_variations_RFR, train_EN, train_RFR).
     1) It extracts from the complete dataframe the metadata + the feature set desired
-    2) Prepare fold-Fs extracting the needed features 
+    2) Prepare fold-Fs extracting the needed features
     3) Create saving folder if neccessary
     """
 
     ############# PREPARE DATA #########################################################
     df = pd.read_csv(data_ARAUS_path)
 
-    if feature_set=="ARAUS":
+    if feature_set == "ARAUS":
         # ARAUS features dataframe
         df_ARAUS = df[general_info + ARAUS_features]
-    elif feature_set=="Freesound":
+    elif feature_set == "Freesound":
         # Freesound features dataframe
         df_Freesound = df[general_info + Freesound_features]
-    elif feature_set=="CLAP":
+    elif feature_set == "CLAP":
         # CLAP embeddings dataframe
         df_clap = df[general_info + ["CLAP"]]
         all_columns = general_info + clap_features
         full_list = []
         for index, row in df_clap.iterrows():
-            string_list = row["CLAP"].split("[")[2].split("]")[0].split(",")
+            string_list = row["CLAP"].split("[")[1].split("]")[0].split(",")
             clap_list = [float(item) for item in string_list]
             complete_new_row = list(row[general_info].values) + clap_list
             full_list.append(complete_new_row)
@@ -176,14 +179,14 @@ def prepare_dataframes_models(data_ARAUS_path, data_foldFs_path, saving_folder, 
     # Saving folder
     if not os.path.exists(saving_folder):
         os.makedirs(saving_folder)
-    
+
     # returns
-    if feature_set=="ARAUS":
-        return df_ARAUS, ARAUS_features, df_foldFs 
-    elif feature_set=="Freesound":
-        return df_Freesound, Freesound_features, df_foldFs 
-    elif feature_set=="CLAP":
-        return df_clap, clap_features, df_foldFs 
+    if feature_set == "ARAUS":
+        return df_ARAUS, ARAUS_features, df_foldFs
+    elif feature_set == "Freesound":
+        return df_Freesound, Freesound_features, df_foldFs
+    elif feature_set == "CLAP":
+        return df_clap, clap_features, df_foldFs
 
 
 def clip(x, x_min=-1, x_max=1):
@@ -265,12 +268,11 @@ def normalize_columns_log(data):
     return log_transformed_data
 
 
-def test_model(model_path:str, config_file_path:str, df:pd.DataFrame):
-
-    """ Function to test new data with already trained models. Specifically, 
-    in this project the input "df" consists on the Fold-0 variations in calibration, 
-    to test if the variations generate higher errors. Resulting MAE 
-    values are printed through terminal """
+def test_model(model_path: str, config_file_path: str, df: pd.DataFrame):
+    """Function to test new data with already trained models. Specifically,
+    in this project the input "df" consists on the Fold-0 variations in calibration,
+    to test if the variations generate higher errors. Resulting MAE
+    values are printed through terminal"""
 
     # Load the JSON data
     with open(config_file_path, "r") as file:
@@ -289,14 +291,14 @@ def test_model(model_path:str, config_file_path:str, df:pd.DataFrame):
 
     # Prepare data for inputting model
     if maskers_active:
-        """ features = features + [ # Already saved in "features" field
+        """features = features + [ # Already saved in "features" field
             "info.masker_bird",
             "info.masker_construction",
             "info.masker_silence",
             "info.masker_traffic",
             "info.masker_water",
             "info.masker_wind",
-        ] """
+        ]"""
         if masker_transform == "-1,1":
             df["info.masker_bird"] = (df["info.masker_bird"] * 2 - 1) * masker_gain
             df["info.masker_construction"] = (
@@ -349,7 +351,7 @@ def test_model(model_path:str, config_file_path:str, df:pd.DataFrame):
 
 
 def run_variations_EN(input_dict):
-    """ Function to run different parameters variations of Elastic Net model. Combinations of:
+    """Function to run different parameters variations of Elastic Net model. Combinations of:
     alpha = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     l1_ratio = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     """
@@ -626,7 +628,7 @@ def run_variations_EN(input_dict):
 
 
 def run_variations_RFR(input_dict):
-    """ Function to run different parameters variations of Random Forest Regressor model. Combinations of:
+    """Function to run different parameters variations of Random Forest Regressor model. Combinations of:
     n_estimators = [10, 20, 50, 100, 150, 180, 200, 250, 300, 350, 400, 500]
     """
     masker_transform = input_dict["masker_transform"]
@@ -849,7 +851,6 @@ def train_EN(input_dict):
     # Suppress ConvergenceWarning
     warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
-
     # Store input data in output dictionary
     output_dict = {
         "maskers_active": input_dict["maskers_active"],
@@ -1023,7 +1024,7 @@ def train_EN(input_dict):
 def train_RFR(input_dict):
     """Function to train Random Forest Regressor model with speficied parameters and input data"""
 
-    txt_name = input_dict["folder_path"] + input_dict["model_name"]+".txt"
+    txt_name = input_dict["folder_path"] + input_dict["model_name"] + ".txt"
     with open(txt_name, "a") as f:
         masker_transform = input_dict["masker_transform"]
         masker_gain = input_dict["masker_gain"]
@@ -1047,7 +1048,9 @@ def train_RFR(input_dict):
         pd.options.mode.chained_assignment = None  # Ignore warning, default='warn'
         # Prepare data fold 6
         if masker_transform == "-1,1":
-            df_f6["info.masker_bird"] = (df_f6["info.masker_bird"] * 2 - 1) * masker_gain
+            df_f6["info.masker_bird"] = (
+                df_f6["info.masker_bird"] * 2 - 1
+            ) * masker_gain
             df_f6["info.masker_construction"] = (
                 df_f6["info.masker_construction"] * 2 - 1
             ) * masker_gain
@@ -1057,8 +1060,12 @@ def train_RFR(input_dict):
             df_f6["info.masker_traffic"] = (
                 df_f6["info.masker_traffic"] * 2 - 1
             ) * masker_gain
-            df_f6["info.masker_water"] = (df_f6["info.masker_water"] * 2 - 1) * masker_gain
-            df_f6["info.masker_wind"] = (df_f6["info.masker_wind"] * 2 - 1) * masker_gain
+            df_f6["info.masker_water"] = (
+                df_f6["info.masker_water"] * 2 - 1
+            ) * masker_gain
+            df_f6["info.masker_wind"] = (
+                df_f6["info.masker_wind"] * 2 - 1
+            ) * masker_gain
         else:
             df_f6["info.masker_bird"] = df_f6["info.masker_bird"] * masker_gain
             df_f6["info.masker_construction"] = (
@@ -1247,5 +1254,7 @@ def train_RFR(input_dict):
             json.dump(output_dict, json_file, indent=4)
 
         # Save model to given path
-        model_path_name = input_dict["folder_path"] + input_dict["model_name"] + ".joblib"
+        model_path_name = (
+            input_dict["folder_path"] + input_dict["model_name"] + ".joblib"
+        )
         dump(model_chosen, model_path_name)
