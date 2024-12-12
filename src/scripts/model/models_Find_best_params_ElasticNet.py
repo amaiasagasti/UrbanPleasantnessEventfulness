@@ -750,4 +750,4 @@ if __name__ == "__main__":
 
 
 # Example of command line:
-# python src/scripts/model/models_Find_best_params_EN.py --data_path data/ARAUS_extended.csv --data_foldFs_path data/fold_Fs_norm.csv --saving_folder data/training_EN/
+# python src/scripts/model/models_Find_best_params_EN.py --data_path data/ARAUS_extended.csv --data_foldFs_path data/fold_Fs.csv --saving_folder data/training_EN/

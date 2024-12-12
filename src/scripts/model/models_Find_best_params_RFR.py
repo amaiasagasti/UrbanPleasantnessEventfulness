@@ -415,4 +415,4 @@ if __name__ == "__main__":
     main(data_path, data_foldFs_path, saving_folder)
 
 # Example of command line:
-# python src/scripts/model/models_Find_best_params_RFR.py --data_path data/ARAUS_extended.csv --data_foldFs_path data/fold_Fs_norm.csv --saving_folder data/training_RFR/
+# python src/scripts/model/models_Find_best_params_RFR.py --data_path data/ARAUS_extended.csv --data_foldFs_path data/fold_Fs.csv --saving_folder data/training_RFR/
