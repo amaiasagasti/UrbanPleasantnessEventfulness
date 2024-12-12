@@ -480,6 +480,7 @@ def run_variations_EN(input_dict):
 
                 # Fit model
                 model.fit(X_train, Y_train)
+                print(f"Trained with alpha={value} and l1ratio={l1_ratio}")
 
                 # Get MSEs
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
@@ -519,7 +520,9 @@ def run_variations_EN(input_dict):
                 prev_mean = current_mean
                 chosen = value
 
-        f.write(f"Best parameter: {chosen}, giving a mean of {prev_mean}")
+        f.write(
+            f"Best parameter: alpha={chosen}, l1ratio={l1_ratio}, giving a mean of {prev_mean}"
+        )
         f.write("\n")
 
         alpha = chosen
@@ -583,7 +586,7 @@ def run_variations_EN(input_dict):
 
                 # Fit model
                 model.fit(X_train, Y_train)
-                print(".")
+                print(f"Trained with alpha={alpha} and l1ratio={value}")
 
                 # Get MSEs
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
@@ -615,6 +618,7 @@ def run_variations_EN(input_dict):
                 "-----+--------+--------+--------+--------+--------+--------+--------+----------"
             )
             f.write("\n")
+            f.flush()
 
             current_mean = (
                 np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_foldFs)
@@ -623,7 +627,9 @@ def run_variations_EN(input_dict):
                 prev_mean = current_mean
                 chosen = value
 
-        f.write(f"Best parameter: {chosen}, giving a mean of {prev_mean}")
+        f.write(
+            f"Best parameters: alpha={alpha} and l1={chosen}, giving a mean of {prev_mean}"
+        )
         f.write("\n")
 
 
@@ -757,7 +763,7 @@ def run_variations_RFR(input_dict):
 
                 # Fit model
                 model.fit(X_train, Y_train)
-                print(".")
+                print(f"Trained with number of parameters={value}")
 
                 # Get MSEs
                 MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
@@ -778,8 +784,6 @@ def run_variations_RFR(input_dict):
                 MEs_val.append(ME_val)
                 MEs_test.append(ME_test)
                 MEs_foldFs.append(ME_foldFs)
-
-            f.write(f"Parameters {value}")
             f.write("\n")
             f.write(
                 f"Mean | {np.mean(MSEs_train):.4f} | {np.mean(MSEs_val):.4f} | {np.mean(MSEs_test):.4f} | {np.mean(MSEs_foldFs):.4f} | {np.mean(MEs_train):.4f} | {np.mean(MEs_val):.4f} | {np.mean(MEs_test):.4f} | {np.mean(MEs_foldFs):.4f} |"
@@ -789,6 +793,7 @@ def run_variations_RFR(input_dict):
                 "-----+--------+--------+--------+--------+--------+--------+--------+----------"
             )
             f.write("\n")
+            f.flush()
 
             current_mean = (
                 np.mean(MEs_val) + np.mean(MEs_test) + np.mean(MEs_foldFs)
@@ -797,7 +802,9 @@ def run_variations_RFR(input_dict):
                 prev_mean = current_mean
                 chosen = value
 
-        f.write(f"Best parameter: {chosen}, giving a mean of {prev_mean}")
+        f.write(
+            f"Best parameter: number of estimators = {chosen}, giving a mean of {prev_mean}"
+        )
         f.write("\n")
 
 
