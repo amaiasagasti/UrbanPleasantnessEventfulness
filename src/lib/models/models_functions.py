@@ -136,7 +136,7 @@ def prepare_dataframes_models(
         all_columns = general_info + clap_features
         full_list = []
         for index, row in df_clap.iterrows():
-            string_list = row["CLAP"].split("[")[1].split("]")[0].split(",")
+            string_list = row["CLAP"].split("[")[2].split("]")[0].split(",")
             clap_list = [float(item) for item in string_list]
             complete_new_row = list(row[general_info].values) + clap_list
             full_list.append(complete_new_row)
@@ -1119,6 +1119,7 @@ def train_RFR(input_dict):
 
         f.write(f"Number of estimators {n_estimators}")
         f.write("\n")
+        f.flush()
 
         # Auxiliary variables to save once best model is chosen
         prev_mean = 9999
@@ -1181,7 +1182,7 @@ def train_RFR(input_dict):
 
             # Fit model
             model.fit(X_train, Y_train)
-            print(".")
+            print("Model fit done")
 
             # Get MSEs
             MSE_train = np.mean((clip(model.predict(X_train)) - Y_train) ** 2)
@@ -1211,6 +1212,7 @@ def train_RFR(input_dict):
                 "-----+--------+--------+--------+--------+--------+--------+--------+----------"
             )
             f.write("\n")
+            f.flush()
 
             # Check if validation fold provide the best results
             current_mean = (ME_val + ME_test + ME_foldFs) / 3
@@ -1235,6 +1237,7 @@ def train_RFR(input_dict):
         f.write("\n")
         f.write(f"N_estimators {n_estimators}, best validation fold {val_fold_chosen}")
         f.write("\n")
+        f.flush()
 
         # Save data to given path
         if type(min_chosen) == np.ndarray:
